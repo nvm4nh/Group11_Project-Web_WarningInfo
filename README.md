@@ -49,10 +49,10 @@
 
 | STT | Thành viên | Vai trò chính | Trách nhiệm chi tiết |
 |:---:|:---|:---|:---|
-| 1 | **Thành viên 1 (TV1)** | Team Lead & Backend Core | Quản lý GitHub Project, duyệt PR; thiết kế lược đồ ERD CSDL; xây dựng module xác thực (Auth/JWT) và phân quyền người dùng. |
-| 2 | **Thành viên 2 (TV2)** | Backend API & Media/Geo | Xây dựng RESTful API cho nghiệp vụ báo cáo sự cố; tích hợp upload ảnh/video minh chứng; lưu trữ tọa độ GPS và viết API bộ lọc. |
-| 3 | **Thành viên 3 (TV3)** | Frontend Core & Flow | Thiết kế UI/UX trên Figma; xây dựng trang chủ, luồng gửi báo cáo, trang chi tiết sự cố và các tính năng tương tác cộng đồng (Upvote, Comment). |
-| 4 | **Thành viên 4 (TV4)** | Frontend Map, Admin & QA | Tích hợp bản đồ số trực quan điểm nóng; xây dựng giao diện Dashboard Admin duyệt bài; thực hiện kiểm thử (Testing) và deploy hệ thống. |
+| 1 | **Khiếu Hoàng Nam Anh** | Team Lead & Backend Core | Quản lý GitHub Project, duyệt PR; thiết kế lược đồ ERD CSDL; xây dựng module xác thực (Auth/JWT) và phân quyền người dùng. |
+| 2 | **Nguyễn Thế Luân** | Backend API & Media/Geo | Xây dựng RESTful API cho nghiệp vụ báo cáo sự cố; tích hợp upload ảnh/video minh chứng; lưu trữ tọa độ GPS và viết API bộ lọc. |
+| 3 | **Trần Yến Phượng** | Frontend Core & Flow | Thiết kế UI/UX trên Figma; xây dựng trang chủ, luồng gửi báo cáo, trang chi tiết sự cố và các tính năng tương tác cộng đồng (Upvote, Comment). |
+| 4 | **Lý Ngọc Nhi** | Frontend Map, Admin & QA | Tích hợp bản đồ số trực quan điểm nóng; xây dựng giao diện Dashboard Admin duyệt bài; thực hiện kiểm thử (Testing) và deploy hệ thống. |
 
 ---
 
