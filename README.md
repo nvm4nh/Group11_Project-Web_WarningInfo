@@ -47,7 +47,7 @@ Xây dựng một ứng dụng web hoàn chỉnh áp dụng các kiến thức c
 | **TV1** | **Khiếu Hoàng Nam Anh** | **Team Lead & System Architect** | Quản lý dự án trên GitHub/Teams, thiết kế CSDL (ERD), thiết lập kiến trúc **OOP + MVC** cho Backend cơ bản. Đảm nhiệm việc tạo Shared Host và **Deploy website**. |
 | **TV2** | **Trần Yến Phượng** | **Backend Developer (Core & Admin)** | Xử lý logic Backend cốt lõi: Xác thực người dùng (Auth/Login/Register), xây dựng các Controller/Model cho **Phần quản trị (Admin)** (Quản lý danh mục, user, v.v.). |
 | **TV3** | **Lê Tô Nguyệt Minh** | **Backend Developer (Features & WebService)** | Xây dựng logic cho các tính năng chính (Sản phẩm/Bài viết, Giỏ hàng/Bình luận). Tạo các **WebService trả về dữ liệu XML/JSON** để phục vụ cho các tính năng gọi bằng AJAX. |
-| **TV4** | **Lê Trọng ** | **Frontend Developer (UI/UX & Public)** | Sử dụng **Bootstrap** cắt HTML/CSS để xây dựng giao diện các trang Public (Trang chủ, Chi tiết, Đăng ký/Đăng nhập...). Đảm bảo giao diện Responsive chuẩn trên mọi thiết bị. |
+| **TV4** | **Lê Trọng Hiếu** | **Frontend Developer (UI/UX & Public)** | Sử dụng **Bootstrap** cắt HTML/CSS để xây dựng giao diện các trang Public (Trang chủ, Chi tiết, Đăng ký/Đăng nhập...). Đảm bảo giao diện Responsive chuẩn trên mọi thiết bị. |
 | **TV5** | **Nguyễn Thế Luân** | **Frontend Admin, AJAX & QA** | Thiết kế giao diện trang Quản trị (Admin). Chịu trách nhiệm viết script gọi **AJAX** (tương tác không tải lại trang) từ Frontend gọi xuống Backend. **Kiểm thử (Testing)** và tổng hợp viết Báo cáo. |
 
 ---
