@@ -1,0 +1,169 @@
+/* =========================================================
+   WarningInfo – Nền tảng: biến màu, ghi đè Bootstrap, chữ, tiện ích chung
+   ========================================================= */
+
+:root {
+  --wi-primary: #0f766e;
+  --wi-primary-rgb: 15, 118, 110;
+  --wi-primary-hover: #0d5f59;
+  --wi-primary-soft: #e6f4f2;
+  --wi-accent: #f59e0b;
+  --wi-dark: #0b2b26;
+  --wi-text: #1f2a37;
+  --wi-muted: #64748b;
+  --wi-border: #e5e7eb;
+  --wi-bg: #f6f8f7;
+  --wi-surface: #ffffff;
+
+  /* Mức độ nghiêm trọng */
+  --wi-critical: #dc2626;
+  --wi-high: #ea580c;
+  --wi-medium: #d97706;
+  --wi-low: #16a34a;
+
+  /* Trạng thái xử lý */
+  --wi-pending: #64748b;
+  --wi-verified: #0284c7;
+  --wi-processing: #7c3aed;
+  --wi-resolved: #16a34a;
+
+  --wi-radius: 14px;
+  --wi-radius-sm: 10px;
+  --wi-shadow-sm: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+  --wi-shadow: 0 8px 24px rgba(16, 24, 40, .08);
+  --wi-shadow-lg: 0 18px 40px rgba(16, 24, 40, .12);
+
+  /* Ghi đè biến Bootstrap */
+  --bs-primary: var(--wi-primary);
+  --bs-primary-rgb: var(--wi-primary-rgb);
+  --bs-link-color: var(--wi-primary);
+  --bs-link-color-rgb: var(--wi-primary-rgb);
+  --bs-link-hover-color: var(--wi-primary-hover);
+  --bs-body-font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bs-body-color: var(--wi-text);
+  --bs-body-bg: #fff;
+  --bs-border-color: var(--wi-border);
+  --bs-border-radius: 10px;
+  --bs-border-radius-lg: 14px;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--wi-primary);
+  --bs-btn-border-color: var(--wi-primary);
+  --bs-btn-hover-bg: var(--wi-primary-hover);
+  --bs-btn-hover-border-color: var(--wi-primary-hover);
+  --bs-btn-active-bg: var(--wi-primary-hover);
+  --bs-btn-active-border-color: var(--wi-primary-hover);
+  --bs-btn-disabled-bg: var(--wi-primary);
+  --bs-btn-disabled-border-color: var(--wi-primary);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--wi-primary);
+  --bs-btn-border-color: var(--wi-primary);
+  --bs-btn-hover-bg: var(--wi-primary);
+  --bs-btn-hover-border-color: var(--wi-primary);
+  --bs-btn-active-bg: var(--wi-primary);
+  --bs-btn-active-border-color: var(--wi-primary);
+}
+
+.btn-warning {
+  --bs-btn-bg: var(--wi-accent);
+  --bs-btn-border-color: var(--wi-accent);
+  --bs-btn-color: #1f1300;
+  --bs-btn-hover-bg: #e08e06;
+  --bs-btn-hover-border-color: #e08e06;
+}
+.text-primary { color: var(--wi-primary) !important; }
+.bg-primary { background-color: var(--wi-primary) !important; }
+.bg-primary-soft { background-color: var(--wi-primary-soft) !important; }
+
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+  border-color: #5eb5ad;
+  box-shadow: 0 0 0 .25rem rgba(var(--wi-primary-rgb), .15);
+}
+.form-check-input:checked { background-color: var(--wi-primary); border-color: var(--wi-primary); }
+.nav-pills { --bs-nav-pills-link-active-bg: var(--wi-primary); --bs-nav-link-color: #475569; --bs-nav-link-hover-color: var(--wi-primary); }
+.nav-pills .nav-link { white-space: nowrap; border-radius: 999px; font-weight: 500; font-size: .9rem; padding: .4rem .95rem; }
+.page-link { color: var(--wi-primary); }
+.active > .page-link, .page-link.active { background-color: var(--wi-primary); border-color: var(--wi-primary); }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--bs-body-font-family);
+  background-color: var(--wi-bg);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main { flex: 1 0 auto; }
+h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -.01em; color: #0f172a; }
+a { text-decoration: none; }
+img { max-width: 100%; }
+.section { padding: 72px 0; }
+.section-sm { padding: 48px 0; }
+
+.section-eyebrow {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--wi-primary);
+}
+.section-title { font-size: clamp(1.5rem, 2.4vw, 2rem); margin: .35rem 0 .5rem; }
+.section-desc { color: var(--wi-muted); max-width: 620px; }
+
+.card-surface {
+  background: var(--wi-surface);
+  border: 1px solid var(--wi-border);
+  border-radius: var(--wi-radius);
+  box-shadow: var(--wi-shadow-sm);
+}
+.text-muted-2 { color: var(--wi-muted) !important; }
+.small-xs { font-size: .78rem; }
+
+.icon-circle {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; flex-shrink: 0;
+}
+
+/* Avatar chữ cái đầu (không cần ảnh) */
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .9rem; color: #fff; flex-shrink: 0;
+  background: linear-gradient(135deg, #14b8a6, #0f766e);
+}
+.avatar-sm { width: 32px; height: 32px; font-size: .75rem; }
+.avatar-lg { width: 88px; height: 88px; font-size: 1.8rem; }
+.avatar.c2 { background: linear-gradient(135deg, #f59e0b, #ea580c); }
+.avatar.c3 { background: linear-gradient(135deg, #6366f1, #4338ca); }
+.avatar.c4 { background: linear-gradient(135deg, #ec4899, #be185d); }
+.breadcrumb { --bs-breadcrumb-divider-color: #94a3b8; font-size: .9rem; margin-bottom: 0; }
+.breadcrumb a { color: var(--wi-muted); }
+.breadcrumb a:hover { color: var(--wi-primary); }
+
+/* Nút lên đầu trang */
+.back-to-top {
+  position: fixed; right: 20px; bottom: 20px; z-index: 1030;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--wi-primary); color: #fff; border: 0;
+  box-shadow: var(--wi-shadow);
+  opacity: 0; visibility: hidden; transform: translateY(10px);
+  transition: all .25s ease;
+}
+.back-to-top.show { opacity: 1; visibility: visible; transform: none; }
+
+/* Hiệu ứng xuất hiện khi cuộn */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  * { animation: none !important; }
+}
+
+@media (max-width: 991.98px) {
+  .section { padding: 56px 0; }
+}
