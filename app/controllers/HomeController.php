@@ -1,10 +1,7 @@
-﻿<?php
+<?php
 class HomeController extends Controller {
+    // URL: /  – Trang chủ (giao diện tĩnh, dữ liệu sẽ lấy từ CSDL ở Milestone 3)
     public function index() {
-        $data = [
-            'title' => 'Trang chủ Hệ thống',
-            'description' => 'Khung MVC cơ bản đã thiết lập thành công!'
-        ];
-        $this->view('home/index', $data);
+        $this->view('home/index', ['title' => 'Trang chủ', 'active' => 'home']);
     }
 }
