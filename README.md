@@ -62,7 +62,7 @@ Dự án được chia thành 4 Milestones bám sát theo các chương trong m�
 - [ ] **[TV1]** Khởi tạo Repository trên GitHub, tạo nhánh `main` và `develop`, phân quyền và mời các thành viên. Set up môi trường code MVC ban đầu.
 - [ ] **[TV1, TV2]** Phân tích và thiết kế Sơ đồ Cơ sở dữ liệu (ERD) và các Bảng dữ liệu.
 - [ ] **[TV4]** Vẽ Wireframe / Thiết kế UI nháp cho các trang chính.
-- [ ] **[TV5]** Viết đặc tả yêu cầu, vẽ Sơ đồ Use Case và chuẩn bị cấu trúc file Báo cáo Word.
+- [ ] **[TV5]** Viết đặc tả yêu cầu, vẽ Sơ đồ Use Case và chuẩn bị cấu trúc file Báo cáo Word. Clip thiết kế giao diện Admin tham khảo tại đây: https://drive.google.com/file/d/1xkOCi13xWW56P_idabWyIajV05d14pU-/view
 
 ### 🎯 Milestone 2: Xây dựng Backend Core & Giao diện tĩnh (Tuần 3 – 5)
 > *Giai đoạn này phục vụ cho Chương 3 & 5 trong mẫu Báo cáo.*
