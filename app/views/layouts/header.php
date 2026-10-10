@@ -15,6 +15,8 @@
   <!-- CSS của dự án (tách theo trang) -->
   <link href="<?= asset('css/base.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/layout.css') ?>" rel="stylesheet">
+  <link href="<?= asset('css/components.css') ?>" rel="stylesheet">
+  <link href="<?= asset('css/home.css') ?>" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-wi sticky-top">
