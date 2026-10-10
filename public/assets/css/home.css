@@ -79,6 +79,25 @@
 .category-card .icon-circle { width: 52px; height: 52px; font-size: 1.45rem; border-radius: 14px; }
 .category-card h6 { margin: 0; font-size: 1rem; }
 .category-card .count { font-size: .82rem; color: var(--wi-muted); }
+.step-card { padding: 28px 24px; height: 100%; position: relative; }
+
+.step-card .step-no {
+  position: absolute; top: 18px; right: 22px; font-size: 3rem; font-weight: 800;
+  color: #eef2f1; line-height: 1;
+}
+.step-card .icon-circle { width: 56px; height: 56px; font-size: 1.5rem; background: var(--wi-primary-soft); color: var(--wi-primary); border-radius: 16px; }
+.step-card h5 { margin: 18px 0 8px; }
+
+.cta-band {
+  background: linear-gradient(120deg, #0f766e, #115e56 60%, #0b3f3a);
+  border-radius: 22px; color: #e6f4f2; padding: 44px; position: relative; overflow: hidden;
+}
+
+.cta-band::before {
+  content: ""; position: absolute; width: 340px; height: 340px; border-radius: 50%;
+  right: -80px; top: -120px; background: rgba(255, 255, 255, .07);
+}
+.cta-band h3 { color: #fff; }
 
 @media (max-width: 991.98px) {
   .hero { padding: 56px 0 104px; }
@@ -89,6 +108,7 @@
   .stat-card { padding: 16px; gap: 10px; flex-direction: column; align-items: flex-start; }
   .stat-card .num { font-size: 1.35rem; }
   .stat-card .icon-circle { width: 38px; height: 38px; font-size: 1.05rem; }
+  .cta-band { padding: 28px 22px; }
   .hero-search .divider { display: none; }
 }
 
