@@ -1,7 +1,25 @@
 <?php
 class HomeController extends Controller {
-    // URL: /  – Trang chủ (giao diện tĩnh, dữ liệu sẽ lấy từ CSDL ở Milestone 3)
+    private $reportModel;
+    private $categoryModel;
+
+    public function __construct() {
+        $this->reportModel   = $this->model('ReportModel');
+        $this->categoryModel = $this->model('CategoryModel');
+    }
+
     public function index() {
-        $this->view('home/index', ['title' => 'Trang chủ', 'active' => 'home']);
+        $priority = $_GET['severity'] ?? null;
+        $stats = $this->reportModel->getStats();
+        $latestReports = $this->reportModel->getLatest(6, $priority);
+        $categories = $this->categoryModel->getAll();
+
+        $this->view('home/index', [
+            'title'         => 'Trang chủ',
+            'active'        => 'home',
+            'stats'         => $stats,
+            'latestReports' => $latestReports,
+            'categories'    => $categories
+        ]);
     }
 }
