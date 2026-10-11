@@ -2,19 +2,41 @@
 class AdminController extends Controller {
     private $userModel;
     private $categoryModel;
+    private $reportModel;
 
     public function __construct() {
         requireAdmin();
         $this->userModel     = $this->model('UserModel');
         $this->categoryModel = $this->model('CategoryModel');
+        $this->reportModel   = $this->model('ReportModel');
     }
 
     public function index() {
+        $stats = $this->reportModel->getStats();
         $this->view('admin/dashboard', [
             'title'           => 'Bảng điều khiển',
             'totalUsers'      => count($this->userModel->getAll()),
             'totalCategories' => count($this->categoryModel->getAll()),
+            'totalReports'    => $stats['total_reports'],
+            'processing'      => $stats['processing'],
+            'resolved'        => $stats['resolved'],
         ]);
+    }
+
+    public function reports() {
+        $this->view('admin/reports/index', [
+            'title'   => 'Quản lý sự cố môi trường',
+            'reports' => $this->reportModel->getAll(),
+        ]);
+    }
+
+    public function updateReportStatus($id = null) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('admin/reports');
+        $status = $_POST['status'] ?? 'new';
+        $note   = trim($_POST['note'] ?? '');
+        $this->reportModel->updateStatus($id, $status, $_SESSION['user_id'] ?? 1, $note);
+        setFlash('success', 'Đã cập nhật trạng thái sự cố.');
+        redirect('admin/reports');
     }
 
     public function users() {

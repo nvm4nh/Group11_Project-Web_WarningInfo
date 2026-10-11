@@ -15,6 +15,8 @@
   <!-- CSS của dự án (tách theo trang) -->
   <link href="<?= asset('css/base.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/layout.css') ?>" rel="stylesheet">
+  <link href="<?= asset('css/components.css') ?>" rel="stylesheet">
+  <link href="<?= asset('css/home.css') ?>" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-wi sticky-top">
@@ -50,7 +52,23 @@
         </form>
         <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
           <a href="<?= url('report/create') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-megaphone me-1"></i> Gửi báo cáo</a>
-          <a href="<?= url('auth/login') ?>" class="btn btn-outline-primary">Đăng nhập</a>
+          <?php if (isLoggedIn()): ?>
+            <?php if (isAdmin()): ?>
+              <a href="<?= url('admin') ?>" class="btn btn-outline-secondary"><i class="bi bi-speedometer2 me-1"></i> Quản trị</a>
+            <?php endif; ?>
+            <div class="dropdown">
+              <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle me-1"></i> <?= e($_SESSION['full_name'] ?? 'Tài khoản') ?>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><span class="dropdown-item-text text-muted small"><?= e($_SESSION['email'] ?? '') ?> (<?= e($_SESSION['role'] ?? '') ?>)</span></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="<?= url('auth/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+              </ul>
+            </div>
+          <?php else: ?>
+            <a href="<?= url('auth/login') ?>" class="btn btn-outline-primary">Đăng nhập</a>
+          <?php endif; ?>
         </div>
       </div>
     </div>
