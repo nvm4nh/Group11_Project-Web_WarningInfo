@@ -8,9 +8,14 @@ CREATE DATABASE IF NOT EXISTS `warninginfo_db`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
+ALTER DATABASE `warninginfo_db`
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
 USE `warninginfo_db`;
 
 SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ------------------------------------------------------------
@@ -28,7 +33,7 @@ CREATE TABLE `users` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_users_role_status` (`role`, `account_status`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 2. Bảng danh mục sự cố môi trường (categories)
@@ -40,7 +45,7 @@ CREATE TABLE `categories` (
   `description` VARCHAR(500) NULL,
   `is_active` BOOLEAN NOT NULL DEFAULT TRUE,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 3. Bảng báo cáo sự cố (reports)
@@ -78,7 +83,7 @@ CREATE TABLE `reports` (
   INDEX `idx_reports_category_created` (`category_id`, `created_at`),
   INDEX `idx_reports_priority_status` (`priority`, `status`),
   INDEX `idx_reports_location` (`latitude`, `longitude`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 4. Bảng ảnh & video minh chứng sự cố (report_images)
@@ -99,7 +104,7 @@ CREATE TABLE `report_images` (
   CONSTRAINT `fk_report_images_uploader` FOREIGN KEY (`uploaded_by`)
     REFERENCES `users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   INDEX `idx_report_images_report` (`report_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 5. Bảng lịch sử thay đổi trạng thái (report_status_history)
@@ -118,7 +123,7 @@ CREATE TABLE `report_status_history` (
   CONSTRAINT `fk_status_history_user` FOREIGN KEY (`changed_by`)
     REFERENCES `users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   INDEX `idx_status_history_report_time` (`report_id`, `changed_at`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 6. Bảng phân công cán bộ xử lý (assignments)
@@ -140,7 +145,7 @@ CREATE TABLE `assignments` (
   CONSTRAINT `fk_assignments_assigner` FOREIGN KEY (`assigned_by`)
     REFERENCES `users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   INDEX `idx_assignments_officer_status` (`officer_id`, `assignment_status`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 7. Bảng thông báo người dùng & cán bộ (notifications)
@@ -161,7 +166,7 @@ CREATE TABLE `notifications` (
   CONSTRAINT `fk_notifications_report` FOREIGN KEY (`report_id`)
     REFERENCES `reports`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   INDEX `idx_notifications_user_read` (`user_id`, `is_read`, `created_at`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 8. Bảng bình luận & trao đổi thông tin (comments)
@@ -179,7 +184,7 @@ CREATE TABLE `comments` (
   CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`)
     REFERENCES `users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   INDEX `idx_comments_report_time` (`report_id`, `created_at`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 9. Bảng nhật ký thao tác quản trị (admin_logs)
@@ -198,7 +203,7 @@ CREATE TABLE `admin_logs` (
   CONSTRAINT `fk_admin_logs_admin` FOREIGN KEY (`admin_id`)
     REFERENCES `users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   INDEX `idx_admin_logs_admin_time` (`admin_id`, `created_at`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
 -- 10. Bảng lượt quan tâm / ủng hộ báo cáo (upvotes)
@@ -215,7 +220,7 @@ CREATE TABLE `upvotes` (
     REFERENCES `reports`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `uq_upvote_user_report` UNIQUE (`user_id`, `report_id`),
   INDEX `idx_upvotes_report` (`report_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
