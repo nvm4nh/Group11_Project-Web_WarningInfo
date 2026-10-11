@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c79b"/><stop offset="1" stop-color="#e9a774"/></linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  
+  <circle cx="620" cy="120" r="46" fill="#fde7c7" opacity=".7"/>
+  <g fill="#8b8f99" opacity=".85">
+    <circle cx="250" cy="150" r="48"/><circle cx="300" cy="120" r="58"/><circle cx="370" cy="110" r="46"/>
+    <circle cx="430" cy="125" r="40"/><circle cx="520" cy="180" r="44"/><circle cx="575" cy="160" r="54"/><circle cx="640" cy="175" r="40"/>
+  </g>
+  <g fill="#6b7280" opacity=".9"><circle cx="270" cy="210" r="34"/><circle cx="540" cy="235" r="30"/></g>
+  <rect x="0" y="380" width="800" height="120" fill="#5b4636"/>
+  <g fill="#3b3f4a">
+    <rect x="240" y="220" width="44" height="190"/><rect x="510" y="250" width="40" height="160"/>
+    <rect x="120" y="300" width="560" height="110"/>
+    <path d="M120 300l90-50v50l90-50v50l90-50v50l90-50v50z"/>
+  </g>
+  <g fill="#f3c26b" opacity=".9"><rect x="160" y="335" width="34" height="26" rx="3"/><rect x="220" y="335" width="34" height="26" rx="3"/><rect x="420" y="335" width="34" height="26" rx="3"/><rect x="480" y="335" width="34" height="26" rx="3"/><rect x="600" y="335" width="34" height="26" rx="3"/></g>
+
+</svg>
