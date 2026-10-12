@@ -26,7 +26,7 @@
               <form method="post" action="<?= url('admin/updateUser/' . $u->id) ?>" class="row g-2 align-items-center">
                 <div class="col-auto">
                   <select name="role" class="form-select form-select-sm">
-                    <?php foreach (['user','admin'] as $r): ?>
+                    <?php foreach (['user','officer','admin'] as $r): ?>
                       <option value="<?= $r ?>" <?= $u->role === $r ? 'selected' : '' ?>><?= $r ?></option>
                     <?php endforeach; ?>
                   </select>
