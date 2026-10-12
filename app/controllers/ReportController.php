@@ -146,4 +146,22 @@ class ReportController extends Controller {
         ]);
         exit;
     }
+
+    public function my_reports() {
+        requireLogin();
+        $userId = $_SESSION['user_id'];
+        $reports = $this->reportModel->getByUserId($userId);
+        $stats   = $this->reportModel->getUserStats($userId);
+
+        $this->view('reports/my_reports', [
+            'title'   => 'Báo cáo của tôi',
+            'active'  => 'report',
+            'reports' => $reports,
+            'stats'   => $stats,
+        ]);
+    }
+
+    public function myReports() {
+        $this->my_reports();
+    }
 }

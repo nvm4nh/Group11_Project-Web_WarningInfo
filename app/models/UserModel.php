@@ -47,6 +47,21 @@ class UserModel {
         return $this->db->execute();
     }
 
+    public function updateProfile($id, $fullName, $phone = '') {
+        $this->db->query('UPDATE users SET full_name = :full_name, phone = :phone WHERE id = :id');
+        $this->db->bind(':full_name', $fullName);
+        $this->db->bind(':phone',     $phone);
+        $this->db->bind(':id',        $id);
+        return $this->db->execute();
+    }
+
+    public function updatePassword($id, $hashedPassword) {
+        $this->db->query('UPDATE users SET password = :password WHERE id = :id');
+        $this->db->bind(':password', $hashedPassword);
+        $this->db->bind(':id',       $id);
+        return $this->db->execute();
+    }
+
     public function delete($id) {
         $this->db->query('DELETE FROM users WHERE id = :id');
         $this->db->bind(':id', $id);
