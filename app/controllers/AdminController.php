@@ -3,12 +3,14 @@ class AdminController extends Controller {
     private $userModel;
     private $categoryModel;
     private $reportModel;
+    private $notificationModel;
 
     public function __construct() {
         requireAdmin();
-        $this->userModel     = $this->model('UserModel');
-        $this->categoryModel = $this->model('CategoryModel');
-        $this->reportModel   = $this->model('ReportModel');
+        $this->userModel         = $this->model('UserModel');
+        $this->categoryModel     = $this->model('CategoryModel');
+        $this->reportModel       = $this->model('ReportModel');
+        $this->notificationModel = $this->model('NotificationModel');
     }
 
     public function index() {
@@ -32,10 +34,41 @@ class AdminController extends Controller {
 
     public function updateReportStatus($id = null) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('admin/reports');
+
         $status = $_POST['status'] ?? 'new';
         $note   = trim($_POST['note'] ?? '');
-        $this->reportModel->updateStatus($id, $status, $_SESSION['user_id'] ?? 1, $note);
-        setFlash('success', 'Đã cập nhật trạng thái sự cố.');
+
+        // Lấy report TRƯỚC khi update để biết user_id và status cũ
+        $report = $this->reportModel->getById($id);
+        if (!$report) {
+            setFlash('danger', 'Không tìm thấy sự cố.');
+            redirect('admin/reports');
+        }
+
+        $oldStatus = $report->status;
+        $ok = $this->reportModel->updateStatus($id, $status, $_SESSION['user_id'] ?? 1, $note);
+
+        if ($ok) {
+            // Tạo thông báo cho user gửi báo cáo (nếu có user_id và status thực sự đổi)
+            if (!empty($report->user_id) && $oldStatus !== $status) {
+                $label = NotificationModel::statusLabel($status);
+                $title = 'Cập nhật trạng thái: ' . $report->report_code;
+                $msg   = "Báo cáo \"{$report->title}\" đã chuyển sang trạng thái: {$label}.";
+                if ($note !== '') {
+                    $msg .= " Ghi chú: {$note}";
+                }
+                $this->notificationModel->create(
+                    $report->user_id,
+                    $title,
+                    $msg,
+                    (int)$id,
+                    'report_status'
+                );
+            }
+            setFlash('success', 'Đã cập nhật trạng thái sự cố.');
+        } else {
+            setFlash('danger', 'Có lỗi xảy ra khi cập nhật.');
+        }
         redirect('admin/reports');
     }
 
@@ -49,7 +82,7 @@ class AdminController extends Controller {
     public function updateUser($id = null) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('admin/users');
         $role = $_POST['role'] ?? 'user';
-        if (!in_array($role, ['user','admin'], true)) $role = 'user';
+        if (!in_array($role, ['user','officer','admin'], true)) $role = 'user';
         $this->userModel->updateRole($id, $role);
         setFlash('success', 'Cập nhật người dùng thành công');
         redirect('admin/users');
