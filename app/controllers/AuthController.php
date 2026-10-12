@@ -83,6 +83,70 @@ class AuthController extends Controller {
         ]);
     }
 
+    public function profile() {
+        requireLogin();
+        $user = $this->userModel->findById($_SESSION['user_id']);
+        if (!$user) {
+            setFlash('danger', 'Không tìm thấy thông tin tài khoản');
+            redirect('auth/login');
+        }
+
+        $profileErrors = [];
+        $passwordErrors = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+
+            if ($action === 'update_info') {
+                $fullName = trim($_POST['full_name'] ?? '');
+                $phone    = trim($_POST['phone'] ?? '');
+
+                if ($fullName === '') {
+                    $profileErrors['full_name'] = 'Vui lòng nhập họ và tên';
+                }
+
+                if (empty($profileErrors)) {
+                    $this->userModel->updateProfile($user->id, $fullName, $phone);
+                    $_SESSION['full_name'] = $fullName;
+                    setFlash('success', 'Cập nhật thông tin cá nhân thành công!');
+                    redirect('auth/profile');
+                }
+            } elseif ($action === 'change_password') {
+                $currentPassword = $_POST['current_password'] ?? '';
+                $newPassword     = $_POST['new_password'] ?? '';
+                $confirmPassword = $_POST['confirm_password'] ?? '';
+
+                if ($currentPassword === '') {
+                    $passwordErrors['current_password'] = 'Vui lòng nhập mật khẩu hiện tại';
+                } elseif (!password_verify($currentPassword, $user->password)) {
+                    $passwordErrors['current_password'] = 'Mật khẩu hiện tại không chính xác';
+                }
+
+                if (strlen($newPassword) < 6) {
+                    $passwordErrors['new_password'] = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+                }
+
+                if ($newPassword !== $confirmPassword) {
+                    $passwordErrors['confirm_password'] = 'Xác nhận mật khẩu mới không khớp';
+                }
+
+                if (empty($passwordErrors)) {
+                    $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+                    $this->userModel->updatePassword($user->id, $hashed);
+                    setFlash('success', 'Đổi mật khẩu thành công!');
+                    redirect('auth/profile');
+                }
+            }
+        }
+
+        $this->view('auth/profile', [
+            'title'          => 'Thông tin cá nhân',
+            'user'           => $user,
+            'profileErrors'  => $profileErrors,
+            'passwordErrors' => $passwordErrors,
+        ]);
+    }
+
     public function logout() {
         $_SESSION = [];
         session_destroy();

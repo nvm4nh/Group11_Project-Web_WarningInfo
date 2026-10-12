@@ -60,8 +60,11 @@
               <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle me-1"></i> <?= e($_SESSION['full_name'] ?? 'Tài khoản') ?>
               </button>
-              <ul class="dropdown-menu dropdown-menu-end">
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                 <li><span class="dropdown-item-text text-muted small"><?= e($_SESSION['email'] ?? '') ?> (<?= e($_SESSION['role'] ?? '') ?>)</span></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="<?= url('auth/profile') ?>"><i class="bi bi-person me-2 text-primary"></i>Thông tin cá nhân</a></li>
+                <li><a class="dropdown-item" href="<?= url('report/my_reports') ?>"><i class="bi bi-journal-text me-2 text-primary"></i>Báo cáo của tôi</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item text-danger" href="<?= url('auth/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
               </ul>

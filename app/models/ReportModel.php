@@ -203,4 +203,33 @@ class ReportModel {
             return ['action' => 'upvoted'];
         }
     }
+
+    public function getByUserId($userId) {
+        $this->db->query("SELECT r.*, c.name as category_name,
+                          (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
+                          (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count
+                          FROM reports r
+                          LEFT JOIN categories c ON r.category_id = c.id
+                          WHERE r.user_id = :user_id
+                          ORDER BY r.created_at DESC");
+        $this->db->bind(':user_id', $userId);
+        return $this->db->resultSet();
+    }
+
+    public function getUserStats($userId) {
+        $this->db->query("SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN status IN ('new', 'received', 'verifying', 'assigned', 'in_progress') THEN 1 ELSE 0 END) as processing,
+            SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved,
+            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+            FROM reports WHERE user_id = :user_id");
+        $this->db->bind(':user_id', $userId);
+        $res = $this->db->single();
+        return [
+            'total'      => (int)($res->total ?? 0),
+            'processing' => (int)($res->processing ?? 0),
+            'resolved'   => (int)($res->resolved ?? 0),
+            'rejected'   => (int)($res->rejected ?? 0),
+        ];
+    }
 }
