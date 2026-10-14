@@ -1,4 +1,5 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
+<link href="<?= asset('css/report-form.css') ?>" rel="stylesheet">
 
 <section class="section py-4 bg-light border-bottom">
   <div class="container" style="max-width: 800px;">
@@ -14,7 +15,7 @@
     <?php endif; ?>
 
     <div class="card border-0 shadow-sm p-4">
-      <form method="post" action="<?= url('report/store') ?>" novalidate>
+      <form method="post" action="<?= url('report/store') ?>" enctype="multipart/form-data" novalidate>
         <!-- Tiêu đề -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Tiêu đề sự cố <span class="text-danger">*</span></label>
@@ -88,6 +89,23 @@
           <?php endif; ?>
         </div>
 
+        <!-- Ảnh minh chứng (TV4): xem trước ảnh trước khi gửi. Phần lưu file do TV3 xử lý ở ReportController::store() -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label fw-semibold mb-0" for="reportImages">Ảnh minh chứng</label>
+            <small class="text-muted" id="imageCount">0/3 ảnh</small>
+          </div>
+          <div class="upload-zone <?= !empty($data['errors']['images']) ? 'is-invalid' : '' ?>" id="uploadZone">
+            <input type="file" name="images[]" id="reportImages" accept="image/jpeg,image/png,image/webp" multiple
+                   data-max-files="3" data-max-size="5" aria-describedby="uploadHelp">
+            <i class="bi bi-cloud-arrow-up"></i>
+            <p class="mb-1 fw-semibold">Kéo thả ảnh vào đây hoặc <span class="text-primary">chọn từ máy / chụp ảnh</span></p>
+            <small class="text-muted" id="uploadHelp">Tối đa 3 ảnh · JPG, PNG, WEBP · mỗi ảnh không quá 5MB</small>
+          </div>
+          <div class="text-danger small mt-1 <?= empty($data['errors']['images']) ? 'd-none' : '' ?>" id="uploadError"><?= e($data['errors']['images'] ?? '') ?></div>
+          <div class="preview-grid" id="previewGrid"></div>
+        </div>
+
         <!-- Thông tin liên hệ -->
         <h6 class="fw-bold mt-4 pt-3 border-top mb-3 text-secondary">Thông tin người báo cáo (bảo mật):</h6>
         <div class="row g-3 mb-4">
@@ -140,5 +158,7 @@ document.getElementById('btnGetLocation')?.addEventListener('click', function() 
   }
 });
 </script>
+
+<script src="<?= asset('js/report-form.js') ?>" defer></script>
 
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>
