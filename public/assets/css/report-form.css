@@ -1,6 +1,6 @@
 /* =========================================================
    WarningInfo – Form gửi báo cáo (TV4 – Milestone 2)
-   Khung chọn ảnh minh chứng + xem trước ảnh
+   Khung chọn ảnh minh chứng + xem trước ảnh + khung vị trí GPS
    ========================================================= */
 
 .upload-zone {
@@ -45,4 +45,32 @@
 @media (max-width: 575.98px) {
   .upload-zone { padding: 20px 12px; }
   .preview-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+}
+
+/* ---------- Khung vị trí + nút lấy toạ độ GPS ---------- */
+.location-box { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; background: #fbfdfc; }
+.gps-status { font-size: .82rem; }
+.gps-status.ok { color: #16a34a; }
+.gps-status.err { color: #dc2626; }
+.btn-gps { white-space: nowrap; }
+
+/* Thông báo lỗi luôn có sẵn trong HTML, chỉ hiện khi form đã kiểm tra */
+.needs-validation .client-feedback { display: none; }
+.was-validated .form-control:invalid ~ .client-feedback,
+.was-validated .form-select:invalid ~ .client-feedback { display: block; }
+/* Chỉ tô đỏ ô sai, không tô xanh các ô hợp lệ (đỡ rối mắt, nhất là ô không bắt buộc) */
+.needs-validation.was-validated .form-control:valid {
+  border-color: var(--bs-border-color); background-image: none; padding-right: .75rem;
+}
+.needs-validation.was-validated .form-select:valid:not([multiple]):not([size]) {
+  --bs-form-select-bg-icon: none; border-color: var(--bs-border-color); padding-right: 2.25rem;
+}
+.needs-validation.was-validated .form-control:valid:focus,
+.needs-validation.was-validated .form-select:valid:focus {
+  border-color: #5eb5ad; box-shadow: 0 0 0 .25rem rgba(var(--wi-primary-rgb), .15);
+}
+
+@media (max-width: 575.98px) {
+  .location-box { padding: 12px; }
+  .btn-gps { width: 100%; }
 }

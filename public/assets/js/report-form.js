@@ -1,6 +1,8 @@
 /* =========================================================
    WarningInfo – Form gửi báo cáo (TV4 – Milestone 2)
    1. Chọn ảnh minh chứng + xem trước ảnh trước khi gửi
+   2. Nút lấy toạ độ GPS tự động (navigator.geolocation)
+   3. Kiểm tra dữ liệu trước khi gửi (Bootstrap validation)
    Ràng buộc khớp phần upload của TV3: tối đa 3 ảnh, mỗi ảnh ≤ 5MB, JPG/PNG/WEBP
    ========================================================= */
 (function () {
@@ -103,5 +105,99 @@
     ['dragenter', 'dragover'].forEach((ev) => zone.addEventListener(ev, () => zone.classList.add('dragover')));
     ['dragleave', 'drop'].forEach((ev) => zone.addEventListener(ev, () => zone.classList.remove('dragover')));
     render();
+  }
+
+  /* ---------- 2. Lấy toạ độ GPS hiện tại ---------- */
+  const btnGps = $('#btnGetLocation');
+  const latInput = $('#latInput');
+  const lngInput = $('#lngInput');
+  const gpsStatus = $('#gpsStatus');
+  const mapLink = $('#mapPreview');
+
+  const setStatus = (msg, kind) => {
+    if (!gpsStatus) return;
+    gpsStatus.textContent = msg || '';
+    gpsStatus.className = 'gps-status ' + (kind || 'text-muted');
+  };
+  const updateMapLink = () => {
+    if (!mapLink || !latInput || !lngInput) return;
+    const lat = parseFloat(latInput.value);
+    const lng = parseFloat(lngInput.value);
+    const ok = !isNaN(lat) && !isNaN(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+    mapLink.classList.toggle('d-none', !ok);
+    if (ok) mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
+  };
+
+  if (btnGps && latInput && lngInput) {
+    const label = btnGps.innerHTML;
+    btnGps.addEventListener('click', () => {
+      if (!('geolocation' in navigator)) {
+        setStatus('Trình duyệt không hỗ trợ định vị, vui lòng nhập toạ độ bằng tay.', 'err');
+        return;
+      }
+      if (window.isSecureContext === false) {
+        setStatus('Trình duyệt chỉ cho lấy vị trí khi web chạy bằng HTTPS hoặc localhost.', 'err');
+        return;
+      }
+      btnGps.disabled = true;
+      btnGps.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang định vị...';
+      setStatus('Hãy bấm "Cho phép" nếu trình duyệt hỏi quyền truy cập vị trí.', 'text-muted');
+
+      navigator.geolocation.getCurrentPosition((pos) => {
+        latInput.value = pos.coords.latitude.toFixed(7);
+        lngInput.value = pos.coords.longitude.toFixed(7);
+        latInput.classList.remove('is-invalid');
+        lngInput.classList.remove('is-invalid');
+        btnGps.disabled = false;
+        btnGps.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Lấy lại vị trí';
+        setStatus(`Đã lấy toạ độ (sai số khoảng ${Math.round(pos.coords.accuracy)}m).`, 'ok');
+        updateMapLink();
+      }, (err) => {
+        const messages = {
+          1: 'Bạn đã chặn quyền vị trí. Hãy bật lại trong cài đặt trình duyệt hoặc nhập toạ độ bằng tay.',
+          2: 'Không xác định được vị trí lúc này. Thử lại ở nơi thoáng hoặc nhập toạ độ bằng tay.',
+          3: 'Hết thời gian chờ định vị. Vui lòng thử lại.',
+        };
+        btnGps.disabled = false;
+        btnGps.innerHTML = label;
+        setStatus(messages[err.code] || 'Không lấy được vị trí.', 'err');
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+    });
+    latInput.addEventListener('input', updateMapLink);
+    lngInput.addEventListener('input', updateMapLink);
+    updateMapLink();
+  }
+
+  /* ---------- 3. Kiểm tra dữ liệu trước khi gửi ---------- */
+  const form = $('#reportForm');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      // Toạ độ: nhập đủ cả 2 hoặc bỏ trống cả 2
+      if (latInput && lngInput) {
+        const hasLat = latInput.value.trim() !== '';
+        const hasLng = lngInput.value.trim() !== '';
+        const msg = hasLat !== hasLng ? 'Cần nhập đủ cả vĩ độ và kinh độ.' : '';
+        latInput.setCustomValidity(!hasLat && hasLng ? msg : '');
+        lngInput.setCustomValidity(hasLat && !hasLng ? msg : '');
+      }
+      // Bỏ thông báo lỗi cũ từ server, để kiểm tra lại trên trình duyệt
+      form.querySelectorAll('.is-invalid').forEach((el) => { if (el !== zone) el.classList.remove('is-invalid'); });
+      form.querySelectorAll('.invalid-feedback:not(.client-feedback)').forEach((el) => el.remove());
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+        form.classList.add('was-validated');
+        const first = form.querySelector(':invalid');
+        if (first) { first.scrollIntoView({ block: 'center' }); first.focus({ preventScroll: true }); }
+        toast('Vui lòng kiểm tra lại các ô được đánh dấu đỏ.', 'danger');
+        return;
+      }
+      // Chống bấm gửi nhiều lần
+      const submit = form.querySelector('[type="submit"]');
+      if (submit) {
+        submit.disabled = true;
+        submit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi...';
+      }
+    });
   }
 })();
