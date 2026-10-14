@@ -66,13 +66,13 @@
                  value="<?= e($data['old']['address'] ?? '') ?>">
           <div class="row g-2">
             <div class="col-6">
-              <label class="form-label small text-muted mb-1" for="latInput">Vĩ độ (Latitude)</label>
+              <label class="form-label small text-muted mb-1" for="latInput">Vĩ độ <span class="d-none d-sm-inline">(Latitude)</span></label>
               <input type="number" step="any" min="-90" max="90" name="latitude" id="latInput" class="form-control form-control-sm"
                      placeholder="VD: 10.7765" value="<?= e($data['old']['latitude'] ?? '') ?>">
               <div class="invalid-feedback client-feedback">Vĩ độ từ -90 đến 90, nhập đủ cả kinh độ.</div>
             </div>
             <div class="col-6">
-              <label class="form-label small text-muted mb-1" for="lngInput">Kinh độ (Longitude)</label>
+              <label class="form-label small text-muted mb-1" for="lngInput">Kinh độ <span class="d-none d-sm-inline">(Longitude)</span></label>
               <input type="number" step="any" min="-180" max="180" name="longitude" id="lngInput" class="form-control form-control-sm"
                      placeholder="VD: 106.7009" value="<?= e($data['old']['longitude'] ?? '') ?>">
               <div class="invalid-feedback client-feedback">Kinh độ từ -180 đến 180, nhập đủ cả vĩ độ.</div>
