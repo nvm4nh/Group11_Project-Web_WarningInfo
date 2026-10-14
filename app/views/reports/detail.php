@@ -1,4 +1,5 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
+<link href="<?= asset('css/report-detail.css') ?>" rel="stylesheet">
 
 <?php
 $r = $data['report'];
@@ -54,6 +55,50 @@ elseif ($r->status === 'rejected') { $stBadge = 'bg-dark'; $stText = 'Từ chố
             <p class="lead fs-6 text-secondary mb-4" style="white-space: pre-line;">
               <?= e($r->description) ?>
             </p>
+
+            <!-- Ảnh minh chứng (TV4). Dữ liệu $r->images do ReportModel::getById() nạp (phần của TV3):
+                 mỗi phần tử có file_path, mime_type, original_file_name -->
+            <?php
+              $media = [];
+              foreach (($r->images ?? []) as $img) {
+                $img  = (object)$img;
+                $path = trim((string)($img->file_path ?? ''));
+                if ($path === '') continue;
+                $src = preg_match('#^https?://#i', $path) ? $path : url(preg_replace('#^/?(public/)?#', '', $path));
+                $media[] = [
+                  'src'   => $src,
+                  'video' => strpos((string)($img->mime_type ?? ''), 'video/') === 0,
+                  'name'  => (string)($img->original_file_name ?? ''),
+                ];
+              }
+              $mediaCount = count($media);
+            ?>
+            <div class="mb-4">
+              <h6 class="fw-bold mb-2"><i class="bi bi-images me-2 text-primary"></i>Ảnh minh chứng<?= $mediaCount ? ' (' . $mediaCount . ')' : '' ?></h6>
+              <?php if ($mediaCount === 0): ?>
+                <div class="gallery-empty"><i class="bi bi-image me-1"></i>Người gửi chưa đính kèm ảnh minh chứng cho sự cố này.</div>
+              <?php else: ?>
+                <div class="report-gallery count-<?= min($mediaCount, 5) ?>" data-gallery>
+                  <?php foreach ($media as $i => $m): ?>
+                    <a href="<?= e($m['src']) ?>" class="gallery-item<?= $i > 4 ? ' d-none' : '' ?>" target="_blank" rel="noopener"
+                       data-type="<?= $m['video'] ? 'video' : 'image' ?>" data-name="<?= e($m['name']) ?>"
+                       aria-label="Phóng to <?= $m['video'] ? 'video' : 'ảnh' ?> minh chứng <?= $i + 1 ?>">
+                      <?php if ($m['video']): ?>
+                        <video src="<?= e($m['src']) ?>#t=0.1" muted playsinline preload="metadata"></video>
+                        <span class="play-icon"><i class="bi bi-play-fill"></i></span>
+                      <?php else: ?>
+                        <img src="<?= e($m['src']) ?>" alt="Ảnh minh chứng <?= $i + 1 ?>: <?= e($r->title) ?>" loading="lazy">
+                        <span class="zoom-hint"><i class="bi bi-arrows-fullscreen"></i></span>
+                      <?php endif; ?>
+                      <?php if ($i === 4 && $mediaCount > 5): ?>
+                        <span class="more">+<?= $mediaCount - 5 ?></span>
+                      <?php endif; ?>
+                    </a>
+                  <?php endforeach; ?>
+                </div>
+                <div class="form-text"><i class="bi bi-hand-index me-1"></i>Bấm vào ảnh để phóng to, dùng phím ← → hoặc vuốt để xem ảnh khác.</div>
+              <?php endif; ?>
+            </div>
 
             <div class="p-3 bg-light rounded-3 mb-4">
               <div class="row g-2 small">
@@ -164,4 +209,5 @@ document.getElementById('btnUpvote')?.addEventListener('click', function() {
 });
 </script>
 
+<script src="<?= asset('js/gallery.js') ?>" defer></script>
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>
