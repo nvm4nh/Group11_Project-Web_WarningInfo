@@ -76,8 +76,3 @@
   #alertList.list-view .alert-card { flex-direction: column; }
   #alertList.list-view .alert-card .thumb { width: 100%; aspect-ratio: 16 / 10; min-height: 0; }
 }
-
-/* ---------- Lớp tiện ích còn thiếu (Milestone 2 – TV4) ---------- */
-/* View đang dùng bg-orange cho mức độ "Cao" nhưng Bootstrap không có sẵn → badge bị trong suốt */
-.bg-orange { background-color: var(--wi-high, #ea580c) !important; color: #fff !important; }
-.x-small { font-size: .75rem; }
