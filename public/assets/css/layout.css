@@ -76,8 +76,17 @@
 @media (max-width: 991.98px) {
   .navbar-wi .navbar-collapse { padding: 12px 0 6px; }
   .nav-search { max-width: none; margin: 8px 0; }
+  /* Bảng trên tablet/điện thoại: giữ độ rộng tối thiểu và cho vuốt ngang,
+     tránh cột bị ép hẹp làm chữ xuống dòng từng từ */
+  .table-responsive > .table { min-width: 820px; }
+  .table-responsive > .table th { white-space: nowrap; }
+  .table-responsive > .table td,
+  .table-responsive > .table th { vertical-align: middle; }
+  .table-responsive > .table .form-select-sm { min-width: 140px; }
 }
 
 @media (max-width: 767.98px) {
   .topbar-alert .hide-sm { display: none; }
+  .table-responsive { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+  .table-responsive > .table { font-size: .875rem; }
 }

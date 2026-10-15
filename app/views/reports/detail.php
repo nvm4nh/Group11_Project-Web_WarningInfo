@@ -1,4 +1,5 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
+<link href="<?= asset('css/report-detail.css') ?>" rel="stylesheet">
 
 <?php
 $r = $data['report'];
@@ -8,12 +9,24 @@ if ($r->priority === 'critical') { $sevBadge = 'bg-danger text-white'; $sevText 
 elseif ($r->priority === 'high') { $sevBadge = 'bg-orange text-white'; $sevText = 'Cao'; }
 elseif ($r->priority === 'low')  { $sevBadge = 'bg-success text-white'; $sevText = 'Thấp'; }
 
-$stBadge = 'bg-secondary';
-$stText  = 'Mới tiếp nhận';
-if ($r->status === 'verifying')   { $stBadge = 'bg-info text-dark'; $stText = 'Đang xác minh'; }
-elseif ($r->status === 'in_progress' || $r->status === 'assigned') { $stBadge = 'bg-primary'; $stText = 'Đang xử lý'; }
-elseif ($r->status === 'resolved') { $stBadge = 'bg-success'; $stText = 'Đã giải quyết'; }
-elseif ($r->status === 'rejected') { $stBadge = 'bg-dark'; $stText = 'Từ chối'; }
+// Nhãn tiếng Việt cho mọi trạng thái trong CSDL (dùng cho badge đầu trang + dòng thời gian xử lý)
+$statusMap = [
+  'new'            => ['Mới tiếp nhận',        'bg-secondary'],
+  'received'       => ['Đã tiếp nhận',         'bg-secondary'],
+  'need_more_info' => ['Cần bổ sung thông tin', 'bg-warning text-dark'],
+  'verifying'      => ['Đang xác minh',        'bg-info text-dark'],
+  'verified'       => ['Đã xác minh',          'bg-info text-dark'],
+  'assigned'       => ['Đã phân công',         'bg-primary'],
+  'in_progress'    => ['Đang xử lý',           'bg-primary'],
+  'resolved'       => ['Đã giải quyết',        'bg-success'],
+  'closed'         => ['Đã đóng',              'bg-dark'],
+  'rejected'       => ['Từ chối',              'bg-dark'],
+];
+$statusLabel = function ($code) use ($statusMap) {
+  return $statusMap[$code][0] ?? ucfirst(str_replace('_', ' ', (string)$code));
+};
+$stText  = $statusLabel($r->status);
+$stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 ?>
 
 <section class="section py-4 bg-light border-bottom">
@@ -28,7 +41,7 @@ elseif ($r->status === 'rejected') { $stBadge = 'bg-dark'; $stText = 'Từ chố
           <span><i class="bi bi-tag me-1"></i><?= e($r->category_name ?? 'Môi trường') ?></span>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-2">
+      <div class="d-flex flex-wrap align-items-center gap-2">
         <span class="badge <?= $sevBadge ?> fs-6 px-3 py-2"><?= $sevText ?></span>
         <span class="badge <?= $stBadge ?> fs-6 px-3 py-2"><?= $stText ?></span>
       </div>
@@ -55,6 +68,50 @@ elseif ($r->status === 'rejected') { $stBadge = 'bg-dark'; $stText = 'Từ chố
               <?= e($r->description) ?>
             </p>
 
+            <!-- Ảnh minh chứng (TV4). Dữ liệu $r->images do ReportModel::getById() nạp (phần của TV3):
+                 mỗi phần tử có file_path, mime_type, original_file_name -->
+            <?php
+              $media = [];
+              foreach (($r->images ?? []) as $img) {
+                $img  = (object)$img;
+                $path = trim((string)($img->file_path ?? ''));
+                if ($path === '') continue;
+                $src = preg_match('#^https?://#i', $path) ? $path : url(preg_replace('#^/?(public/)?#', '', $path));
+                $media[] = [
+                  'src'   => $src,
+                  'video' => strpos((string)($img->mime_type ?? ''), 'video/') === 0,
+                  'name'  => (string)($img->original_file_name ?? ''),
+                ];
+              }
+              $mediaCount = count($media);
+            ?>
+            <div class="mb-4">
+              <h6 class="fw-bold mb-2"><i class="bi bi-images me-2 text-primary"></i>Ảnh minh chứng<?= $mediaCount ? ' (' . $mediaCount . ')' : '' ?></h6>
+              <?php if ($mediaCount === 0): ?>
+                <div class="gallery-empty"><i class="bi bi-image me-1"></i>Người gửi chưa đính kèm ảnh minh chứng cho sự cố này.</div>
+              <?php else: ?>
+                <div class="report-gallery count-<?= min($mediaCount, 5) ?>" data-gallery>
+                  <?php foreach ($media as $i => $m): ?>
+                    <a href="<?= e($m['src']) ?>" class="gallery-item<?= $i > 4 ? ' d-none' : '' ?>" target="_blank" rel="noopener"
+                       data-type="<?= $m['video'] ? 'video' : 'image' ?>" data-name="<?= e($m['name']) ?>"
+                       aria-label="Phóng to <?= $m['video'] ? 'video' : 'ảnh' ?> minh chứng <?= $i + 1 ?>">
+                      <?php if ($m['video']): ?>
+                        <video src="<?= e($m['src']) ?>#t=0.1" muted playsinline preload="metadata"></video>
+                        <span class="play-icon"><i class="bi bi-play-fill"></i></span>
+                      <?php else: ?>
+                        <img src="<?= e($m['src']) ?>" alt="Ảnh minh chứng <?= $i + 1 ?>: <?= e($r->title) ?>" loading="lazy">
+                        <span class="zoom-hint"><i class="bi bi-arrows-fullscreen"></i></span>
+                      <?php endif; ?>
+                      <?php if ($i === 4 && $mediaCount > 5): ?>
+                        <span class="more">+<?= $mediaCount - 5 ?></span>
+                      <?php endif; ?>
+                    </a>
+                  <?php endforeach; ?>
+                </div>
+                <div class="form-text"><i class="bi bi-hand-index me-1"></i>Bấm vào ảnh để phóng to, dùng phím ← → hoặc vuốt để xem ảnh khác.</div>
+              <?php endif; ?>
+            </div>
+
             <div class="p-3 bg-light rounded-3 mb-4">
               <div class="row g-2 small">
                 <div class="col-sm-6">
@@ -71,7 +128,7 @@ elseif ($r->status === 'rejected') { $stBadge = 'bg-dark'; $stText = 'Từ chố
             </div>
 
             <!-- Nút tương tác Upvote cộng đồng (Gọi AJAX) -->
-            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
               <button class="btn btn-outline-primary" id="btnUpvote" data-id="<?= $r->id ?>">
                 <i class="bi bi-hand-thumbs-up me-1"></i> Tôi cũng thấy sự cố này (<span id="upvoteCount"><?= (int)$r->upvote_count ?></span>)
               </button>
@@ -92,7 +149,7 @@ elseif ($r->status === 'rejected') { $stBadge = 'bg-dark'; $stText = 'Từ chố
               <div class="d-flex flex-column gap-3 mb-4">
                 <?php foreach ($r->comments as $cm): ?>
                   <div class="p-3 rounded-3 <?= $cm->is_internal ? 'bg-warning-subtle border-warning' : 'bg-light' ?>">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-1">
                       <span class="fw-bold small">
                         <?= e($cm->full_name ?: 'Ẩn danh') ?>
                         <?php if ($cm->role === 'admin' || $cm->role === 'officer'): ?>
@@ -133,7 +190,7 @@ elseif ($r->status === 'rejected') { $stBadge = 'bg-dark'; $stText = 'Từ chố
                   <li class="mb-3 position-relative">
                     <span class="position-absolute translate-middle-x rounded-circle bg-primary" 
                           style="left: -19px; top: 6px; width: 10px; height: 10px;"></span>
-                    <div class="fw-semibold small">Trạng thái: <?= e($h->new_status) ?></div>
+                    <div class="fw-semibold small"><?= e($statusLabel($h->new_status)) ?></div>
                     <div class="text-muted x-small"><?= date('H:i d/m/Y', strtotime($h->changed_at)) ?></div>
                     <?php if ($h->note): ?>
                       <div class="text-secondary small mt-1 bg-light p-2 rounded"><?= e($h->note) ?></div>
@@ -164,4 +221,5 @@ document.getElementById('btnUpvote')?.addEventListener('click', function() {
 });
 </script>
 
+<script src="<?= asset('js/gallery.js') ?>" defer></script>
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>
