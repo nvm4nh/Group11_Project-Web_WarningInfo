@@ -54,4 +54,9 @@ class Database {
     public function rowCount() {
         return $this->stmt->rowCount();
     }
-}
+
+    // ID tự tăng của bản ghi vừa INSERT (dùng sau execute())
+    public function lastInsertId() {
+        return $this->dbh->lastInsertId();
+    }
+}

@@ -40,6 +40,15 @@ class UserModel {
         return $this->db->resultSet();
     }
 
+    // Danh sách tài khoản có thể được phân công xử lý sự cố (officer + admin), đang hoạt động
+    public function getOfficers() {
+        $this->db->query("SELECT id, full_name, email, role
+                          FROM users
+                          WHERE role IN ('officer', 'admin') AND account_status = 'active'
+                          ORDER BY FIELD(role, 'officer', 'admin'), full_name ASC");
+        return $this->db->resultSet();
+    }
+
     public function updateRole($id, $role) {
         $this->db->query('UPDATE users SET role = :role WHERE id = :id');
         $this->db->bind(':role', $role);
@@ -67,4 +76,4 @@ class UserModel {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
-}
+}
