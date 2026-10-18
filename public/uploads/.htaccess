@@ -1,0 +1,21 @@
+# Thư mục chứa file người dùng tải lên — CHỈ phục vụ ảnh tĩnh, cấm thực thi mã
+Options -Indexes -ExecCGI
+
+# Tắt PHP trong thư mục này (mod_php của XAMPP)
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+# Chặn mọi file không phải ảnh
+<FilesMatch "(?i)\.(php\d?|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp|htm|html|shtml|svg|js)$">
+  Require all denied
+</FilesMatch>
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

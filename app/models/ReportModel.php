@@ -2,6 +2,11 @@
 class ReportModel {
     private $db;
 
+    // Giá trị hợp lệ — khớp ENUM trong database/database_init.sql
+    const STATUSES   = ['new', 'received', 'need_more_info', 'verifying', 'verified',
+                        'assigned', 'in_progress', 'resolved', 'closed', 'rejected'];
+    const PRIORITIES = ['low', 'medium', 'high', 'critical'];
+
     public function __construct() {
         $this->db = new Database();
     }
@@ -60,11 +65,15 @@ class ReportModel {
     public function getAll($filters = []) {
         $sql = "SELECT r.*, c.name as category_name,
                 (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
-                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count
+                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count,
+                (SELECT file_path FROM report_images img WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail
                 FROM reports r
                 LEFT JOIN categories c ON r.category_id = c.id
                 WHERE 1=1";
-        
+
+        if (!empty($filters['public_only'])) {
+            $sql .= " AND r.is_public = 1";
+        }
         if (!empty($filters['category_id'])) {
             $sql .= " AND r.category_id = :category_id";
         }
@@ -122,7 +131,53 @@ class ReportModel {
         $this->db->bind(':id', $id);
         $report->history = $this->db->resultSet();
 
+        // Lấy ảnh minh chứng (gallery của TV4 dùng $r->images)
+        $report->images = $this->getImages($id);
+
         return $report;
+    }
+
+    /** Danh sách ảnh của 1 báo cáo */
+    public function getImages($reportId) {
+        $this->db->query("SELECT id, file_path, mime_type, file_size_bytes, original_file_name
+                          FROM report_images
+                          WHERE report_id = :id AND is_public = 1
+                          ORDER BY id ASC");
+        $this->db->bind(':id', $reportId);
+        return $this->db->resultSet();
+    }
+
+    /** Ảnh của nhiều báo cáo cùng lúc (1 truy vấn), trả về mảng [report_id => [ảnh...]] */
+    public function getImagesForReports(array $reportIds) {
+        $ids = array_values(array_filter(array_map('intval', $reportIds)));
+        if (empty($ids)) return [];
+
+        $placeholders = [];
+        foreach ($ids as $i => $id) $placeholders[] = ':id' . $i;
+        $this->db->query("SELECT id, report_id, file_path, mime_type, original_file_name
+                          FROM report_images
+                          WHERE report_id IN (" . implode(',', $placeholders) . ")
+                          ORDER BY id ASC");
+        foreach ($ids as $i => $id) $this->db->bind(':id' . $i, $id);
+
+        $map = [];
+        foreach ($this->db->resultSet() as $img) {
+            $map[$img->report_id][] = $img;
+        }
+        return $map;
+    }
+
+    /** Lưu thông tin 1 ảnh minh chứng vào bảng report_images */
+    public function addImage($reportId, $filePath, $mimeType, $fileSize, $originalName = null, $uploadedBy = null) {
+        $this->db->query("INSERT INTO report_images (report_id, file_path, original_file_name, mime_type, file_size_bytes, uploaded_by)
+                          VALUES (:report_id, :file_path, :original_name, :mime_type, :file_size, :uploaded_by)");
+        $this->db->bind(':report_id',     (int)$reportId);
+        $this->db->bind(':file_path',     $filePath);
+        $this->db->bind(':original_name', $originalName !== null ? mb_substr($originalName, 0, 255) : null);
+        $this->db->bind(':mime_type',     $mimeType);
+        $this->db->bind(':file_size',     (int)$fileSize);
+        $this->db->bind(':uploaded_by',   $uploadedBy !== null ? (int)$uploadedBy : null);
+        return $this->db->execute();
     }
 
     public function create($data) {
@@ -146,8 +201,10 @@ class ReportModel {
         $this->db->bind(':c_email',       $data['contact_email'] ?? '');
         $this->db->bind(':c_phone',       $data['contact_phone'] ?? '');
 
+        // Trả về ID báo cáo vừa tạo (để gắn ảnh), false nếu lỗi.
+        // Lưu ý: KHÔNG gọi single() sau INSERT — single() chạy execute() lần 2 gây trùng report_code.
         if ($this->db->execute()) {
-            return $this->db->single() ?: true;
+            return (int)$this->db->lastInsertId();
         }
         return false;
     }
@@ -182,6 +239,41 @@ class ReportModel {
             $this->db->execute();
         }
         return $ok;
+    }
+
+    /**
+     * Phân công cán bộ xử lý sự cố.
+     * Các phân công cũ còn hiệu lực của báo cáo được chuyển sang 'cancelled' để mỗi sự cố chỉ có 1 người thụ lý.
+     * Trả về ID phân công mới, false nếu lỗi.
+     */
+    public function assignOfficer($reportId, $officerId, $assignedBy, $note = '') {
+        $this->db->query("UPDATE assignments SET assignment_status = 'cancelled'
+                          WHERE report_id = :rid AND assignment_status IN ('assigned', 'accepted', 'in_progress')");
+        $this->db->bind(':rid', (int)$reportId);
+        $this->db->execute();
+
+        $this->db->query("INSERT INTO assignments (report_id, officer_id, assigned_by, assignment_note)
+                          VALUES (:rid, :oid, :by, :note)");
+        $this->db->bind(':rid',  (int)$reportId);
+        $this->db->bind(':oid',  (int)$officerId);
+        $this->db->bind(':by',   $assignedBy !== null ? (int)$assignedBy : null);
+        $this->db->bind(':note', $note !== '' ? $note : null);
+        if (!$this->db->execute()) return false;
+        return (int)$this->db->lastInsertId();
+    }
+
+    /** Cán bộ đang thụ lý của từng báo cáo: [report_id => {officer_id, officer_name, assigned_at, assignment_note}] */
+    public function getActiveAssignments() {
+        $this->db->query("SELECT a.report_id, a.officer_id, u.full_name AS officer_name, a.assigned_at, a.assignment_note
+                          FROM assignments a
+                          JOIN users u ON u.id = a.officer_id
+                          WHERE a.assignment_status IN ('assigned', 'accepted', 'in_progress')
+                          ORDER BY a.assigned_at ASC, a.id ASC");
+        $map = [];
+        foreach ($this->db->resultSet() as $row) {
+            $map[$row->report_id] = $row; // bản ghi mới nhất ghi đè
+        }
+        return $map;
     }
 
     public function toggleUpvote($reportId, $userId) {
