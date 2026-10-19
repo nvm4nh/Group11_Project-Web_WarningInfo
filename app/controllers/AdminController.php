@@ -25,6 +25,64 @@ class AdminController extends Controller {
         ]);
     }
 
+        // 1. API lấy dữ liệu vẽ biểu đồ
+    public function api_statistics() {
+        header('Content-Type: application/json; charset=utf-8');
+        $db = new Database();
+
+        // Thống kê theo danh mục
+        $db->query("SELECT c.name, COUNT(r.id) as total 
+                    FROM categories c 
+                    LEFT JOIN reports r ON c.id = r.category_id 
+                    GROUP BY c.id");
+        $byCategory = $db->resultSet();
+
+        // Thống kê theo trạng thái
+        $db->query("SELECT status, COUNT(*) as total FROM reports GROUP BY status");
+        $byStatus = $db->resultSet();
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'categories' => $byCategory,
+                'statuses' => $byStatus
+            ]
+        ]);
+        exit;
+    }
+
+    // 2. API Xuất file CSV
+    public function export_csv() {
+        $reports = $this->reportModel->getAll();
+
+        // Header báo cho trình duyệt tải file
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="Danh_sach_su_co_' . date('Ymd_His') . '.csv"');
+
+        $output = fopen('php://output', 'w');
+        
+        // Bắt buộc phải có BOM UTF-8 thì Excel mới đọc được tiếng Việt
+        fputs($output, "\xEF\xBB\xBF"); 
+
+        // Tiêu đề cột
+        fputcsv($output, ['Mã BC', 'Tiêu đề', 'Danh mục', 'Mức độ', 'Trạng thái', 'Địa chỉ', 'Ngày gửi']);
+
+        // Dữ liệu
+        foreach ($reports as $r) {
+            fputcsv($output, [
+                $r->report_code,
+                $r->title,
+                $r->category_name ?? 'N/A',
+                $r->priority,
+                $r->status,
+                $r->address,
+                $r->created_at
+            ]);
+        }
+        fclose($output);
+        exit;
+    }
+
     public function reports() {
         $reports = $this->reportModel->getAll();
         $ids = array_map(function ($r) { return $r->id; }, $reports);
@@ -267,4 +325,4 @@ class AdminController extends Controller {
         }
         redirect('admin/categories');
     }
-}
+}

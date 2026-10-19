@@ -2,7 +2,13 @@
 
 <section class="section">
   <div class="container">
-    <h1 class="section-title mb-4">Bảng điều khiển Admin</h1>
+    <!-- Thêm nút xuất CSV -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="section-title mb-0">Bảng điều khiển Admin</h1>
+      <a href="<?= url('admin/export_csv') ?>" class="btn btn-success shadow-sm">
+        <i class="bi bi-file-earmark-excel"></i> Xuất báo cáo CSV
+      </a>
+    </div>
 
     <?php if ($f = getFlash()): ?>
       <div class="alert alert-<?= e($f['type']) ?>"><?= e($f['message']) ?></div>
@@ -46,7 +52,94 @@
         </div>
       </div>
     </div>
+
+    <!-- KHU VỰC BIỂU ĐỒ -->
+    <div class="row mt-4">
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title text-center mb-3">Sự cố theo Danh mục</h5>
+            <div style="position: relative; height: 300px; width: 100%;">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title text-center mb-3">Sự cố theo Trạng thái</h5>
+            <div style="position: relative; height: 300px; width: 100%;">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<?php require APPROOT . '/app/views/layouts/footer.php'; ?>
+<!-- Thư viện Chart.js và Script AJAX -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('<?= url('admin/api_statistics') ?>')
+      .then(response => response.json())
+      .then(res => {
+        if (res.status === 'success') {
+          // 1. Biểu đồ tròn (Danh mục)
+          new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut', // Dùng doughnut trông hiện đại hơn pie
+            data: {
+              labels: res.data.categories.map(item => item.name),
+              datasets: [{
+                data: res.data.categories.map(item => item.total),
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69']
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
+          });
+
+          // 2. Biểu đồ cột (Trạng thái)
+          new Chart(document.getElementById('statusChart'), {
+            type: 'bar',
+            data: {
+              labels: res.data.statuses.map(item => item.status),
+              datasets: [{
+                label: 'Số lượng',
+                data: res.data.statuses.map(item => item.total),
+                backgroundColor: '#4e73df',
+                borderRadius: 4
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            }
+          });
+        }
+      })
+      .catch(err => console.error('Lỗi API biểu đồ:', err));
+  });
+</script>
+
+<?php require APPROOT . '/app/views/layouts/footer.php'; ?>x
