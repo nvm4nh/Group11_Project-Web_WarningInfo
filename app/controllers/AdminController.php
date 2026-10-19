@@ -26,17 +26,33 @@ class AdminController extends Controller {
     }
 
     public function reports() {
+        $reports = $this->reportModel->getAll();
+        $ids = array_map(function ($r) { return $r->id; }, $reports);
+
+        $statuses = [];
+        foreach (ReportModel::STATUSES as $code) {
+            $statuses[$code] = NotificationModel::statusLabel($code);
+        }
+
         $this->view('admin/reports/index', [
-            'title'   => 'Quản lý sự cố môi trường',
-            'reports' => $this->reportModel->getAll(),
+            'title'       => 'Quản lý sự cố môi trường',
+            'reports'     => $reports,
+            'images'      => $this->reportModel->getImagesForReports($ids), // [report_id => ảnh[]] cho modal xem nhanh
+            'assignments' => $this->reportModel->getActiveAssignments(),    // [report_id => cán bộ đang thụ lý]
+            'officers'    => $this->userModel->getOfficers(),
+            'statuses'    => $statuses,
         ]);
     }
 
     public function updateReportStatus($id = null) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('admin/reports');
 
-        $status = $_POST['status'] ?? 'new';
+        $status = $_POST['status'] ?? '';
         $note   = trim($_POST['note'] ?? '');
+        if (!in_array($status, ReportModel::STATUSES, true)) {
+            setFlash('danger', 'Trạng thái không hợp lệ.');
+            redirect('admin/reports');
+        }
 
         // Lấy report TRƯỚC khi update để biết user_id và status cũ
         $report = $this->reportModel->getById($id);
@@ -69,6 +85,72 @@ class AdminController extends Controller {
         } else {
             setFlash('danger', 'Có lỗi xảy ra khi cập nhật.');
         }
+        redirect('admin/reports');
+    }
+
+    /**
+     * POST admin/assignOfficer/{reportId}
+     * Phân công cán bộ thụ lý -> ghi bảng assignments, chuyển trạng thái sang 'assigned'
+     * (ghi report_status_history) và gửi thông báo cho cán bộ + người gửi báo cáo.
+     */
+    public function assignOfficer($reportId = null) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$reportId) redirect('admin/reports');
+
+        $officerId = (int)($_POST['officer_id'] ?? 0);
+        $note      = trim($_POST['note'] ?? '');
+
+        $report = $this->reportModel->getById($reportId);
+        if (!$report) {
+            setFlash('danger', 'Không tìm thấy sự cố.');
+            redirect('admin/reports');
+        }
+        if (in_array($report->status, ['resolved', 'closed', 'rejected'], true)) {
+            setFlash('warning', 'Sự cố đã kết thúc xử lý, không thể phân công.');
+            redirect('admin/reports');
+        }
+
+        // Chỉ cho phép chọn tài khoản officer/admin đang hoạt động
+        $officer = null;
+        foreach ($this->userModel->getOfficers() as $o) {
+            if ((int)$o->id === $officerId) { $officer = $o; break; }
+        }
+        if (!$officer) {
+            setFlash('danger', 'Vui lòng chọn cán bộ hợp lệ.');
+            redirect('admin/reports');
+        }
+
+        $adminId = $_SESSION['user_id'] ?? null;
+        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note)) {
+            setFlash('danger', 'Có lỗi xảy ra khi phân công.');
+            redirect('admin/reports');
+        }
+
+        $historyNote = 'Phân công cho ' . $officer->full_name . ($note !== '' ? '. ' . $note : '');
+        $oldStatus = $report->status;
+        if ($oldStatus !== 'assigned') {
+            $this->reportModel->updateStatus($reportId, 'assigned', $adminId, $historyNote);
+        }
+
+        // Thông báo cho cán bộ được giao
+        $this->notificationModel->create(
+            $officerId,
+            'Bạn được phân công xử lý: ' . $report->report_code,
+            "Sự cố \"{$report->title}\" đã được giao cho bạn." . ($note !== '' ? " Ghi chú: {$note}" : ''),
+            (int)$reportId,
+            'assignment'
+        );
+        // Thông báo cho người gửi (nếu có tài khoản và trạng thái thực sự đổi)
+        if (!empty($report->user_id) && $oldStatus !== 'assigned') {
+            $this->notificationModel->create(
+                $report->user_id,
+                'Cập nhật trạng thái: ' . $report->report_code,
+                "Báo cáo \"{$report->title}\" đã được phân công cán bộ xử lý.",
+                (int)$reportId,
+                'report_status'
+            );
+        }
+
+        setFlash('success', 'Đã phân công ' . $officer->full_name . ' xử lý sự cố ' . $report->report_code . '.');
         redirect('admin/reports');
     }
 
@@ -185,4 +267,4 @@ class AdminController extends Controller {
         }
         redirect('admin/categories');
     }
-}
+}

@@ -1,4 +1,5 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
+<link href="<?= asset('css/report-form.css') ?>" rel="stylesheet">
 
 <section class="section py-4 bg-light border-bottom">
   <div class="container" style="max-width: 800px;">
@@ -14,16 +15,17 @@
     <?php endif; ?>
 
     <div class="card border-0 shadow-sm p-4">
-      <form method="post" action="<?= url('report/store') ?>" novalidate>
+      <form method="post" action="<?= url('report/store') ?>" enctype="multipart/form-data" class="needs-validation" id="reportForm" novalidate>
         <!-- Tiêu đề -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Tiêu đề sự cố <span class="text-danger">*</span></label>
-          <input type="text" name="title" class="form-control <?= !empty($data['errors']['title']) ? 'is-invalid' : '' ?>" 
-                 placeholder="VD: Cá chết nổi trắng kênh, khói đen mù mịt từ xưởng..." 
-                 value="<?= e($data['old']['title'] ?? '') ?>" required>
+          <input type="text" name="title" class="form-control <?= !empty($data['errors']['title']) ? 'is-invalid' : '' ?>"
+                 placeholder="VD: Cá chết nổi trắng kênh, khói đen mù mịt từ xưởng..."
+                 value="<?= e($data['old']['title'] ?? '') ?>" required minlength="5" maxlength="200">
           <?php if (!empty($data['errors']['title'])): ?>
             <div class="invalid-feedback"><?= e($data['errors']['title']) ?></div>
           <?php endif; ?>
+          <div class="invalid-feedback client-feedback">Vui lòng nhập tiêu đề (từ 5 đến 200 ký tự).</div>
         </div>
 
         <div class="row g-3 mb-3">
@@ -41,6 +43,7 @@
             <?php if (!empty($data['errors']['category_id'])): ?>
               <div class="invalid-feedback"><?= e($data['errors']['category_id']) ?></div>
             <?php endif; ?>
+            <div class="invalid-feedback client-feedback">Vui lòng chọn danh mục sự cố.</div>
           </div>
 
           <!-- Mức độ -->
@@ -55,26 +58,32 @@
           </div>
         </div>
 
-        <!-- Địa chỉ & Toạ độ -->
-        <div class="mb-3">
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <label class="form-label fw-semibold mb-0">Địa chỉ cụ thể / Hiện trường</label>
-            <button type="button" class="btn btn-outline-secondary btn-sm py-0" id="btnGetLocation">
-              <i class="bi bi-geo-alt me-1"></i> Lấy toạ độ tự động
-            </button>
-          </div>
-          <input type="text" name="address" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." 
+        <!-- Vị trí: địa chỉ + toạ độ GPS (TV4) -->
+        <div class="location-box mb-3">
+          <label class="form-label fw-semibold" for="addressInput"><i class="bi bi-geo-alt text-danger me-1"></i>Vị trí hiện trường</label>
+          <input type="text" name="address" id="addressInput" class="form-control mb-2" maxlength="500"
+                 placeholder="Số nhà, tên đường, phường/xã, tỉnh/thành phố..."
                  value="<?= e($data['old']['address'] ?? '') ?>">
-        </div>
-
-        <div class="row g-2 mb-3">
-          <div class="col-sm-6">
-            <input type="number" step="any" name="latitude" id="latInput" class="form-control form-control-sm text-muted" 
-                   placeholder="Vĩ độ (Latitude)" value="<?= e($data['old']['latitude'] ?? '') ?>">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1" for="latInput">Vĩ độ <span class="d-none d-sm-inline">(Latitude)</span></label>
+              <input type="number" step="any" min="-90" max="90" name="latitude" id="latInput" class="form-control form-control-sm"
+                     placeholder="VD: 10.7765" value="<?= e($data['old']['latitude'] ?? '') ?>">
+              <div class="invalid-feedback client-feedback">Vĩ độ từ -90 đến 90, nhập đủ cả kinh độ.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1" for="lngInput">Kinh độ <span class="d-none d-sm-inline">(Longitude)</span></label>
+              <input type="number" step="any" min="-180" max="180" name="longitude" id="lngInput" class="form-control form-control-sm"
+                     placeholder="VD: 106.7009" value="<?= e($data['old']['longitude'] ?? '') ?>">
+              <div class="invalid-feedback client-feedback">Kinh độ từ -180 đến 180, nhập đủ cả vĩ độ.</div>
+            </div>
           </div>
-          <div class="col-sm-6">
-            <input type="number" step="any" name="longitude" id="lngInput" class="form-control form-control-sm text-muted" 
-                   placeholder="Kinh độ (Longitude)" value="<?= e($data['old']['longitude'] ?? '') ?>">
+          <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+            <button type="button" class="btn btn-outline-primary btn-sm btn-gps" id="btnGetLocation">
+              <i class="bi bi-geo-alt-fill me-1"></i> Lấy tọa độ GPS tự động
+            </button>
+            <a href="#" id="mapPreview" class="small d-none" target="_blank" rel="noopener"><i class="bi bi-map me-1"></i>Xem trên Google Maps</a>
+            <span id="gpsStatus" class="gps-status text-muted" aria-live="polite"></span>
           </div>
         </div>
 
@@ -82,10 +91,28 @@
         <div class="mb-3">
           <label class="form-label fw-semibold">Mô tả chi tiết <span class="text-danger">*</span></label>
           <textarea name="description" rows="4" class="form-control <?= !empty($data['errors']['description']) ? 'is-invalid' : '' ?>"
-                    placeholder="Mô tả nguyên nhân, hiện trạng màu sắc, mùi hôi, thời gian bắt đầu xảy ra..." required><?= e($data['old']['description'] ?? '') ?></textarea>
+                    placeholder="Mô tả nguyên nhân, hiện trạng màu sắc, mùi hôi, thời gian bắt đầu xảy ra..." required minlength="10"><?= e($data['old']['description'] ?? '') ?></textarea>
           <?php if (!empty($data['errors']['description'])): ?>
             <div class="invalid-feedback"><?= e($data['errors']['description']) ?></div>
           <?php endif; ?>
+          <div class="invalid-feedback client-feedback">Vui lòng mô tả sự cố (ít nhất 10 ký tự).</div>
+        </div>
+
+        <!-- Ảnh minh chứng (TV4): xem trước ảnh trước khi gửi. Phần lưu file do TV3 xử lý ở ReportController::store() -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label fw-semibold mb-0" for="reportImages">Ảnh minh chứng</label>
+            <small class="text-muted" id="imageCount">0/3 ảnh</small>
+          </div>
+          <div class="upload-zone <?= !empty($data['errors']['images']) ? 'is-invalid' : '' ?>" id="uploadZone">
+            <input type="file" name="images[]" id="reportImages" accept="image/jpeg,image/png,image/webp" multiple
+                   data-max-files="3" data-max-size="5" aria-describedby="uploadHelp">
+            <i class="bi bi-cloud-arrow-up"></i>
+            <p class="mb-1 fw-semibold">Kéo thả ảnh vào đây hoặc <span class="text-primary">chọn từ máy / chụp ảnh</span></p>
+            <small class="text-muted" id="uploadHelp">Tối đa 3 ảnh · JPG, PNG, WEBP · mỗi ảnh không quá 5MB</small>
+          </div>
+          <div class="text-danger small mt-1 <?= empty($data['errors']['images']) ? 'd-none' : '' ?>" id="uploadError"><?= e($data['errors']['images'] ?? '') ?></div>
+          <div class="preview-grid" id="previewGrid"></div>
         </div>
 
         <!-- Thông tin liên hệ -->
@@ -117,28 +144,6 @@
   </div>
 </section>
 
-<script>
-document.getElementById('btnGetLocation')?.addEventListener('click', function() {
-  if (navigator.geolocation) {
-    this.disabled = true;
-    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang định vị...';
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        document.getElementById('latInput').value = pos.coords.latitude.toFixed(7);
-        document.getElementById('lngInput').value = pos.coords.longitude.toFixed(7);
-        this.disabled = false;
-        this.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i> Đã lấy toạ độ';
-      },
-      err => {
-        alert('Không thể lấy toạ độ: ' + err.message);
-        this.disabled = false;
-        this.innerHTML = '<i class="bi bi-geo-alt me-1"></i> Lấy toạ độ tự động';
-      }
-    );
-  } else {
-    alert('Trình duyệt không hỗ trợ Geolocation.');
-  }
-});
-</script>
+<script src="<?= asset('js/report-form.js') ?>" defer></script>
 
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>
