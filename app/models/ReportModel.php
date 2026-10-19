@@ -241,23 +241,21 @@ class ReportModel {
         return $ok;
     }
 
-    /**
-     * Phân công cán bộ xử lý sự cố.
-     * Các phân công cũ còn hiệu lực của báo cáo được chuyển sang 'cancelled' để mỗi sự cố chỉ có 1 người thụ lý.
-     * Trả về ID phân công mới, false nếu lỗi.
-     */
-    public function assignOfficer($reportId, $officerId, $assignedBy, $note = '') {
+        public function assignOfficer($reportId, $officerId, $assignedBy, $note = '', $deadline = null) {
+        // Hủy các phân công cũ
         $this->db->query("UPDATE assignments SET assignment_status = 'cancelled'
                           WHERE report_id = :rid AND assignment_status IN ('assigned', 'accepted', 'in_progress')");
         $this->db->bind(':rid', (int)$reportId);
         $this->db->execute();
 
-        $this->db->query("INSERT INTO assignments (report_id, officer_id, assigned_by, assignment_note)
-                          VALUES (:rid, :oid, :by, :note)");
+        // Thêm phân công mới (có deadline)
+        $this->db->query("INSERT INTO assignments (report_id, officer_id, assigned_by, assignment_note, deadline)
+                          VALUES (:rid, :oid, :by, :note, :deadline)");
         $this->db->bind(':rid',  (int)$reportId);
         $this->db->bind(':oid',  (int)$officerId);
         $this->db->bind(':by',   $assignedBy !== null ? (int)$assignedBy : null);
         $this->db->bind(':note', $note !== '' ? $note : null);
+        $this->db->bind(':deadline', $deadline); // Thêm dòng này
         if (!$this->db->execute()) return false;
         return (int)$this->db->lastInsertId();
     }

@@ -25,61 +25,33 @@ class AdminController extends Controller {
         ]);
     }
 
-        // 1. API lấy dữ liệu vẽ biểu đồ
     public function api_statistics() {
         header('Content-Type: application/json; charset=utf-8');
         $db = new Database();
 
-        // Thống kê theo danh mục
-        $db->query("SELECT c.name, COUNT(r.id) as total 
-                    FROM categories c 
-                    LEFT JOIN reports r ON c.id = r.category_id 
-                    GROUP BY c.id");
+        // 1. Thống kê theo danh mục
+        $db->query("SELECT c.name, COUNT(r.id) as total FROM categories c LEFT JOIN reports r ON c.id = r.category_id GROUP BY c.id");
         $byCategory = $db->resultSet();
 
-        // Thống kê theo trạng thái
+        // 2. Thống kê theo trạng thái
         $db->query("SELECT status, COUNT(*) as total FROM reports GROUP BY status");
         $byStatus = $db->resultSet();
+
+        // 3. Thống kê xu hướng theo tháng
+        $db->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total 
+                    FROM reports 
+                    GROUP BY month 
+                    ORDER BY month ASC");
+        $byMonth = $db->resultSet();
 
         echo json_encode([
             'status' => 'success',
             'data' => [
                 'categories' => $byCategory,
-                'statuses' => $byStatus
+                'statuses' => $byStatus,
+                'months' => $byMonth
             ]
         ]);
-        exit;
-    }
-
-    // 2. API Xuất file CSV
-    public function export_csv() {
-        $reports = $this->reportModel->getAll();
-
-        // Header báo cho trình duyệt tải file
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="Danh_sach_su_co_' . date('Ymd_His') . '.csv"');
-
-        $output = fopen('php://output', 'w');
-        
-        // Bắt buộc phải có BOM UTF-8 thì Excel mới đọc được tiếng Việt
-        fputs($output, "\xEF\xBB\xBF"); 
-
-        // Tiêu đề cột
-        fputcsv($output, ['Mã BC', 'Tiêu đề', 'Danh mục', 'Mức độ', 'Trạng thái', 'Địa chỉ', 'Ngày gửi']);
-
-        // Dữ liệu
-        foreach ($reports as $r) {
-            fputcsv($output, [
-                $r->report_code,
-                $r->title,
-                $r->category_name ?? 'N/A',
-                $r->priority,
-                $r->status,
-                $r->address,
-                $r->created_at
-            ]);
-        }
-        fclose($output);
         exit;
     }
 
@@ -95,8 +67,8 @@ class AdminController extends Controller {
         $this->view('admin/reports/index', [
             'title'       => 'Quản lý sự cố môi trường',
             'reports'     => $reports,
-            'images'      => $this->reportModel->getImagesForReports($ids), // [report_id => ảnh[]] cho modal xem nhanh
-            'assignments' => $this->reportModel->getActiveAssignments(),    // [report_id => cán bộ đang thụ lý]
+            'images'      => $this->reportModel->getImagesForReports($ids), 
+            'assignments' => $this->reportModel->getActiveAssignments(),    
             'officers'    => $this->userModel->getOfficers(),
             'statuses'    => $statuses,
         ]);
@@ -112,7 +84,6 @@ class AdminController extends Controller {
             redirect('admin/reports');
         }
 
-        // Lấy report TRƯỚC khi update để biết user_id và status cũ
         $report = $this->reportModel->getById($id);
         if (!$report) {
             setFlash('danger', 'Không tìm thấy sự cố.');
@@ -123,7 +94,6 @@ class AdminController extends Controller {
         $ok = $this->reportModel->updateStatus($id, $status, $_SESSION['user_id'] ?? 1, $note);
 
         if ($ok) {
-            // Tạo thông báo cho user gửi báo cáo (nếu có user_id và status thực sự đổi)
             if (!empty($report->user_id) && $oldStatus !== $status) {
                 $label = NotificationModel::statusLabel($status);
                 $title = 'Cập nhật trạng thái: ' . $report->report_code;
@@ -146,16 +116,14 @@ class AdminController extends Controller {
         redirect('admin/reports');
     }
 
-    /**
-     * POST admin/assignOfficer/{reportId}
-     * Phân công cán bộ thụ lý -> ghi bảng assignments, chuyển trạng thái sang 'assigned'
-     * (ghi report_status_history) và gửi thông báo cho cán bộ + người gửi báo cáo.
-     */
     public function assignOfficer($reportId = null) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$reportId) redirect('admin/reports');
 
         $officerId = (int)($_POST['officer_id'] ?? 0);
         $note      = trim($_POST['note'] ?? '');
+        
+        // ĐÃ THÊM: Lấy deadline từ form
+        $deadline  = !empty($_POST['deadline']) ? $_POST['deadline'] : null; 
 
         $report = $this->reportModel->getById($reportId);
         if (!$report) {
@@ -167,7 +135,6 @@ class AdminController extends Controller {
             redirect('admin/reports');
         }
 
-        // Chỉ cho phép chọn tài khoản officer/admin đang hoạt động
         $officer = null;
         foreach ($this->userModel->getOfficers() as $o) {
             if ((int)$o->id === $officerId) { $officer = $o; break; }
@@ -178,7 +145,9 @@ class AdminController extends Controller {
         }
 
         $adminId = $_SESSION['user_id'] ?? null;
-        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note)) {
+        
+        // ĐÃ SỬA: Truyền thêm $deadline vào Model
+        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note, $deadline)) {
             setFlash('danger', 'Có lỗi xảy ra khi phân công.');
             redirect('admin/reports');
         }
@@ -189,7 +158,6 @@ class AdminController extends Controller {
             $this->reportModel->updateStatus($reportId, 'assigned', $adminId, $historyNote);
         }
 
-        // Thông báo cho cán bộ được giao
         $this->notificationModel->create(
             $officerId,
             'Bạn được phân công xử lý: ' . $report->report_code,
@@ -197,7 +165,7 @@ class AdminController extends Controller {
             (int)$reportId,
             'assignment'
         );
-        // Thông báo cho người gửi (nếu có tài khoản và trạng thái thực sự đổi)
+        
         if (!empty($report->user_id) && $oldStatus !== 'assigned') {
             $this->notificationModel->create(
                 $report->user_id,

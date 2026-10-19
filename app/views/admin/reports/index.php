@@ -197,11 +197,17 @@ $statuses    = $data['statuses'] ?? [];
               <?php endforeach; ?>
             </select>
           </div>
-          <div>
+          <div class="mb-3">
             <label for="assignNote" class="form-label fw-semibold">Ghi chú giao việc</label>
-            <textarea name="note" id="assignNote" rows="3" class="form-control" maxlength="1000"
+            <textarea name="note" id="assignNote" rows="2" class="form-control" maxlength="1000"
                       placeholder="Ví dụ: Kiểm tra hiện trường trong 24h, phối hợp UBND phường..."></textarea>
           </div>
+          <!-- THÊM Ô NHẬP HẠN CHÓT Ở ĐÂY -->
+          <div class="mb-3">
+            <label for="assignDeadline" class="form-label fw-semibold">Hạn chót xử lý</label>
+            <input type="datetime-local" name="deadline" id="assignDeadline" class="form-control">
+          </div>
+          
           <div class="form-text mt-2">Trạng thái sự cố sẽ tự chuyển sang <strong>Đã phân công</strong>; cán bộ và người gửi nhận được thông báo.</div>
         <?php endif; ?>
       </div>

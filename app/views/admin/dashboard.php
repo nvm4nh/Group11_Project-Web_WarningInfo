@@ -2,7 +2,7 @@
 
 <section class="section">
   <div class="container">
-    <!-- Thêm nút xuất CSV -->
+    <!-- Nút xuất CSV -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="section-title mb-0">Bảng điều khiển Admin</h1>
       <a href="<?= url('admin/export_csv') ?>" class="btn btn-success shadow-sm">
@@ -14,6 +14,7 @@
       <div class="alert alert-<?= e($f['type']) ?>"><?= e($f['message']) ?></div>
     <?php endif; ?>
 
+    <!-- 4 THẺ THỐNG KÊ TỔNG QUAN -->
     <div class="row g-3">
       <div class="col-sm-6 col-lg-3">
         <div class="card shadow-sm border-0 border-start border-4 border-danger">
@@ -55,6 +56,7 @@
 
     <!-- KHU VỰC BIỂU ĐỒ -->
     <div class="row mt-4">
+      <!-- Biểu đồ tròn: Danh mục -->
       <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
           <div class="card-body">
@@ -65,12 +67,25 @@
           </div>
         </div>
       </div>
+      <!-- Biểu đồ cột: Trạng thái -->
       <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
           <div class="card-body">
             <h5 class="card-title text-center mb-3">Sự cố theo Trạng thái</h5>
             <div style="position: relative; height: 300px; width: 100%;">
               <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Biểu đồ đường: Xu hướng theo tháng -->
+      <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-center mb-3">Xu hướng sự cố theo Tháng</h5>
+            <div style="position: relative; height: 300px; width: 100%;">
+              <canvas id="monthChart"></canvas>
             </div>
           </div>
         </div>
@@ -89,7 +104,7 @@
         if (res.status === 'success') {
           // 1. Biểu đồ tròn (Danh mục)
           new Chart(document.getElementById('categoryChart'), {
-            type: 'doughnut', // Dùng doughnut trông hiện đại hơn pie
+            type: 'doughnut',
             data: {
               labels: res.data.categories.map(item => item.name),
               datasets: [{
@@ -99,11 +114,7 @@
             },
             options: {
               maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'bottom'
-                }
-              }
+              plugins: { legend: { position: 'bottom' } }
             }
           });
 
@@ -121,19 +132,29 @@
             },
             options: {
               maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    stepSize: 1
-                  }
-                }
-              },
-              plugins: {
-                legend: {
-                  display: false
-                }
-              }
+              scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+              plugins: { legend: { display: false } }
+            }
+          });
+
+          // 3. Biểu đồ đường (Xu hướng theo tháng)
+          new Chart(document.getElementById('monthChart'), {
+            type: 'line',
+            data: {
+              labels: res.data.months.map(item => item.month),
+              datasets: [{
+                label: 'Số lượng sự cố',
+                data: res.data.months.map(item => item.total),
+                borderColor: '#e74a3b',
+                backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
             }
           });
         }
@@ -142,4 +163,4 @@
   });
 </script>
 
-<?php require APPROOT . '/app/views/layouts/footer.php'; ?>x
+<?php require APPROOT . '/app/views/layouts/footer.php'; ?>
