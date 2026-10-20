@@ -17,6 +17,10 @@
   <link href="<?= asset('css/layout.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/components.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/home.css') ?>" rel="stylesheet">
+  <?php if (!empty($data['use_map'])): /* Bản đồ Leaflet.js – TV1 (Milestone 3) */ ?>
+  <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+  <link href="<?= asset('css/map.css') ?>" rel="stylesheet">
+  <?php endif; ?>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-wi sticky-top">
@@ -32,6 +36,7 @@
         <ul class="navbar-nav me-auto ms-lg-3">
           <li class="nav-item"><a class="nav-link<?= ($data['active'] ?? '') === 'home' ? ' active' : '' ?>" href="<?= url('') ?>">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link<?= ($data['active'] ?? '') === 'report' ? ' active' : '' ?>" href="<?= url('report') ?>">Cảnh báo</a></li>
+          <li class="nav-item"><a class="nav-link<?= ($data['active'] ?? '') === 'map' ? ' active' : '' ?>" href="<?= url('report/map') ?>">Bản đồ</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Danh mục</a>
             <ul class="dropdown-menu">
