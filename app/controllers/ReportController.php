@@ -45,8 +45,9 @@ class ReportController extends Controller {
 
         $this->view('reports/detail', [
             'title'  => $report->title,
-            'active' => 'report',
-            'report' => $report
+            'active'  => 'report',
+            'report'  => $report,
+            'use_map' => $report->latitude !== null && $report->longitude !== null,
         ]);
     }
 
@@ -297,6 +298,124 @@ class ReportController extends Controller {
             'filters' => array_filter($filters, function ($v, $k) { return $k !== 'public_only' && $v !== null && $v !== ''; }, ARRAY_FILTER_USE_BOTH),
             'data'    => $data,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
+    /* =========================================================
+       BẢN ĐỒ SỐ LEAFLET (TV1 – Milestone 3, Issue #3)
+       ========================================================= */
+    const MAP_RADIUS_OPTIONS = [2, 5, 10];   // km – lựa chọn "Sự cố gần tôi"
+    const MAP_RADIUS_MAX     = 20;
+    const PRIORITY_LABELS = [
+        'critical' => 'Nghiêm trọng',
+        'high'     => 'Cao',
+        'medium'   => 'Trung bình',
+        'low'      => 'Thấp',
+    ];
+
+    /** Trang bản đồ toàn màn hình: GET /report/map */
+    public function map() {
+        $this->view('reports/map', [
+            'title'         => 'Bản đồ sự cố môi trường',
+            'active'        => 'map',
+            'use_map'       => true,
+            'categories'    => $this->categoryModel->getAll(),
+            'radiusOptions' => self::MAP_RADIUS_OPTIONS,
+        ]);
+    }
+
+    /**
+     * WEBSERVICE GEOJSON (RFC 7946) cho Leaflet
+     * GET /report/api_geojson?category_id=1,2&priority=high&state=active|resolved|all
+     *                        &lat=10.77&lng=106.70&radius=5
+     * - Toạ độ GeoJSON theo thứ tự [kinh độ, vĩ độ].
+     * - Không trả thông tin liên hệ của người gửi.
+     */
+    public function api_geojson() {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            $this->jsonError(405, 'Chỉ hỗ trợ phương thức GET');
+        }
+
+        // category_id chấp nhận: 3 | 1,2,3 | category_id[]=1&category_id[]=2
+        $rawCats = $_GET['category_id'] ?? [];
+        $catList = is_array($rawCats) ? $rawCats : explode(',', (string)$rawCats);
+        $priority = (string)($_GET['priority'] ?? '');
+        $state    = (string)($_GET['state'] ?? 'all');
+
+        $filters = [
+            'category_ids' => array_values(array_filter(array_map('intval', $catList))),
+            'priority'     => in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null,
+            'state'        => in_array($state, ReportModel::MAP_STATES, true) ? $state : 'all',
+        ];
+
+        // Lọc "Sự cố gần tôi": cần đủ lat + lng hợp lệ
+        $hasLat = isset($_GET['lat']) && $_GET['lat'] !== '';
+        $hasLng = isset($_GET['lng']) && $_GET['lng'] !== '';
+        if ($hasLat || $hasLng) {
+            $lat = filter_var($_GET['lat'] ?? null, FILTER_VALIDATE_FLOAT);
+            $lng = filter_var($_GET['lng'] ?? null, FILTER_VALIDATE_FLOAT);
+            if ($lat === false || $lng === false || abs($lat) > 90 || abs($lng) > 180) {
+                $this->jsonError(422, 'Toạ độ không hợp lệ (lat ∈ [-90, 90], lng ∈ [-180, 180]).');
+            }
+            $radius = filter_var($_GET['radius'] ?? 5, FILTER_VALIDATE_FLOAT);
+            $filters['lat']       = $lat;
+            $filters['lng']       = $lng;
+            $filters['radius_km'] = min(max($radius ?: 5, 0.5), self::MAP_RADIUS_MAX);
+        }
+
+        require_once APPROOT . '/app/models/NotificationModel.php';   // dùng statusLabel()
+        $features = [];
+        foreach ($this->reportModel->getMapPoints($filters) as $r) {
+            $features[] = [
+                'type'     => 'Feature',
+                'id'       => (int)$r->id,
+                'geometry' => [
+                    'type'        => 'Point',
+                    'coordinates' => [(float)$r->longitude, (float)$r->latitude],
+                ],
+                'properties' => [
+                    'id'             => (int)$r->id,
+                    'report_code'    => $r->report_code,
+                    'title'          => $r->title,
+                    'address'        => $r->address,
+                    'category_id'    => (int)$r->category_id,
+                    'category_name'  => $r->category_name,
+                    'priority'       => $r->priority,
+                    'priority_label' => self::PRIORITY_LABELS[$r->priority] ?? $r->priority,
+                    'status'         => $r->status,
+                    'status_label'   => NotificationModel::statusLabel($r->status),
+                    'level'          => ReportModel::mapLevel($r->priority, $r->status),
+                    'upvote_count'   => (int)$r->upvote_count,
+                    'thumbnail_url'  => $r->thumbnail ? url($r->thumbnail) : null,
+                    'detail_url'     => url('report/detail/' . $r->id),
+                    'distance_km'    => $r->distance_km !== null ? round((float)$r->distance_km, 2) : null,
+                    'incident_time'  => $r->incident_time,
+                ],
+            ];
+        }
+
+        $meta = array_filter([
+            'category_ids' => $filters['category_ids'] ?: null,
+            'priority'     => $filters['priority'],
+            'state'        => $filters['state'],
+            'center'       => isset($filters['lat']) ? [$filters['lng'], $filters['lat']] : null,
+            'radius_km'    => $filters['radius_km'] ?? null,
+        ], function ($v) { return $v !== null; });
+
+        echo json_encode([
+            'type'     => 'FeatureCollection',
+            'count'    => count($features),
+            'filters'  => $meta,
+            'features' => $features,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
+    private function jsonError($code, $message) {
+        http_response_code($code);
+        echo json_encode(['status' => 'error', 'message' => $message], JSON_UNESCAPED_UNICODE);
         exit;
     }
 

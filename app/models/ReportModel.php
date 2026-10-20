@@ -296,6 +296,106 @@ class ReportModel {
         }
     }
 
+    /* =========================================================
+       BẢN ĐỒ SỐ LEAFLET (TV1 – Milestone 3)
+       ========================================================= */
+    const MAP_STATES     = ['active', 'resolved', 'all'];
+    const RESOLVED_STATUSES = ['resolved', 'closed'];
+    const EARTH_RADIUS_KM   = 6371;
+
+    /**
+     * Sự cố công khai CÓ toạ độ GPS để ghim lên bản đồ (bỏ qua báo cáo bị từ chối).
+     * $filters: category_ids (int[]), priority, state (active|resolved|all),
+     *           lat, lng, radius_km (lọc "Sự cố gần tôi" theo công thức Haversine).
+     * Khi có lọc bán kính, mỗi bản ghi kèm distance_km và kết quả sắp xếp gần → xa.
+     */
+    public function getMapPoints(array $filters = []) {
+        $near = isset($filters['lat'], $filters['lng'], $filters['radius_km']);
+
+        $distanceSql = $near
+            ? self::EARTH_RADIUS_KM . " * 2 * ASIN(SQRT(
+                    POWER(SIN(RADIANS(r.latitude - :lat) / 2), 2) +
+                    COS(RADIANS(:lat2)) * COS(RADIANS(r.latitude)) *
+                    POWER(SIN(RADIANS(r.longitude - :lng) / 2), 2)))"
+            : "NULL";
+
+        $sql = "SELECT r.id, r.report_code, r.title, r.address, r.latitude, r.longitude,
+                       r.priority, r.status, r.category_id, r.incident_time, r.created_at,
+                       c.name AS category_name,
+                       (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) AS upvote_count,
+                       (SELECT file_path FROM report_images img
+                         WHERE img.report_id = r.id AND img.is_public = 1
+                         ORDER BY img.id ASC LIMIT 1) AS thumbnail,
+                       $distanceSql AS distance_km
+                FROM reports r
+                LEFT JOIN categories c ON r.category_id = c.id
+                WHERE r.is_public = 1
+                  AND r.status <> 'rejected'
+                  AND r.latitude IS NOT NULL AND r.longitude IS NOT NULL";
+
+        $params = [];
+
+        $categoryIds = array_values(array_filter(array_map('intval', $filters['category_ids'] ?? [])));
+        if ($categoryIds) {
+            $ph = [];
+            foreach ($categoryIds as $i => $cid) {
+                $ph[] = ':cat' . $i;
+                $params[':cat' . $i] = $cid;
+            }
+            $sql .= " AND r.category_id IN (" . implode(',', $ph) . ")";
+        }
+
+        if (!empty($filters['priority']) && in_array($filters['priority'], self::PRIORITIES, true)) {
+            $sql .= " AND r.priority = :priority";
+            $params[':priority'] = $filters['priority'];
+        }
+
+        $state = $filters['state'] ?? 'all';
+        if ($state === 'resolved') {
+            $sql .= " AND r.status IN ('resolved', 'closed')";
+        } elseif ($state === 'active') {
+            $sql .= " AND r.status NOT IN ('resolved', 'closed')";
+        }
+
+        if ($near) {
+            // Khung chữ nhật bao quanh vòng tròn: lọc thô để tận dụng chỉ mục idx_reports_location
+            $lat = (float)$filters['lat'];
+            $lng = (float)$filters['lng'];
+            $dLat = rad2deg($filters['radius_km'] / self::EARTH_RADIUS_KM);
+            $dLng = $dLat / max(cos(deg2rad($lat)), 0.01);
+            $sql .= " AND r.latitude BETWEEN :minLat AND :maxLat
+                      AND r.longitude BETWEEN :minLng AND :maxLng
+                      HAVING distance_km <= :radius
+                      ORDER BY distance_km ASC";
+            $params += [
+                ':lat' => $lat, ':lat2' => $lat, ':lng' => $lng,
+                ':minLat' => $lat - $dLat, ':maxLat' => $lat + $dLat,
+                ':minLng' => $lng - $dLng, ':maxLng' => $lng + $dLng,
+                ':radius' => (float)$filters['radius_km'],
+            ];
+        } else {
+            $sql .= " ORDER BY r.created_at DESC";
+        }
+
+        $sql .= " LIMIT :limit";
+
+        $this->db->query($sql);
+        foreach ($params as $k => $v) {
+            $this->db->bind($k, $v, is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $this->db->bind(':limit', (int)($filters['limit'] ?? 500), PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Nhóm màu Marker trên bản đồ:
+     *  resolved = Xanh (đã giải quyết), urgent = Đỏ (nghiêm trọng/cao), medium = Vàng (trung bình/thấp)
+     */
+    public static function mapLevel($priority, $status) {
+        if (in_array($status, self::RESOLVED_STATUSES, true)) return 'resolved';
+        return in_array($priority, ['critical', 'high'], true) ? 'urgent' : 'medium';
+    }
+
     public function getByUserId($userId) {
         $this->db->query("SELECT r.*, c.name as category_name,
                           (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
