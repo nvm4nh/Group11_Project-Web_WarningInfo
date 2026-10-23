@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
   <title><?= e($data['title'] ?? 'Trang chủ') ?> | WarningInfo</title>
   <meta name="description" content="WarningInfo – Hệ thống báo cáo và cảnh báo vấn đề môi trường từ cộng đồng.">
   <link rel="icon" href="<?= asset('img/logo.svg') ?>" type="image/svg+xml">

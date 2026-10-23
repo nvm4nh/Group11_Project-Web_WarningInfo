@@ -209,7 +209,7 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 <script>
 document.getElementById('btnUpvote')?.addEventListener('click', function() {
   const reportId = this.dataset.id;
-  fetch('<?= url("report/upvote/") ?>' + reportId, { method: 'POST' })
+  fetch('<?= url("report/upvote/") ?>' + reportId, { method: 'POST', headers: { 'X-CSRF-Token': '<?= e(csrf_token()) ?>' } })
     .then(res => res.json())
     .then(data => {
       if (data.status === 'success') {
