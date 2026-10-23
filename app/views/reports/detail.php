@@ -166,6 +166,7 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 
             <!-- Form bình luận -->
             <form method="post" action="<?= url('report/comment/' . $r->id) ?>">
+              <?= csrf_field() ?>
               <div class="mb-3">
                 <textarea name="content" class="form-control" rows="3" placeholder="Nhập ý kiến xác nhận hoặc bổ sung thông tin hiện trường..." required></textarea>
               </div>

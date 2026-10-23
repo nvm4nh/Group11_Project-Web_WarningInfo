@@ -13,6 +13,7 @@
     <?php endif; ?>
 
     <form method="post" action="<?= url('auth/login') ?>" novalidate>
+      <?= csrf_field() ?>
       <div class="mb-3">
         <label class="form-label">Email</label>
         <input type="email" name="email" class="form-control <?= !empty($data['errors']['email']) ? 'is-invalid' : '' ?>"

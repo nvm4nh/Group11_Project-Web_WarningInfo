@@ -67,7 +67,12 @@
                 <li><a class="dropdown-item" href="<?= url('auth/profile') ?>"><i class="bi bi-person me-2 text-primary"></i>Thông tin cá nhân</a></li>
                 <li><a class="dropdown-item" href="<?= url('report/my_reports') ?>"><i class="bi bi-journal-text me-2 text-primary"></i>Báo cáo của tôi</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="<?= url('auth/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                <li>
+                  <form method="post" action="<?= url('auth/logout') ?>" class="m-0">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</button>
+                  </form>
+                </li>
               </ul>
             </div>
           <?php else: ?>
