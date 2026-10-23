@@ -77,6 +77,9 @@
         <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
           <a href="<?= url('report/create') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-megaphone me-1"></i> Gửi báo cáo</a>
           <?php if (isLoggedIn()): ?>
+            <?php if (($_SESSION['role'] ?? '') === 'officer'): ?>
+              <a href="<?= url('officer') ?>" class="btn btn-outline-secondary<?= ($data['active'] ?? '') === 'officer' ? ' active' : '' ?>" title="Bàn làm việc cán bộ"><i class="bi bi-briefcase"></i><span class="nav-btn-text"> Bàn làm việc</span></a>
+            <?php endif; ?>
             <?php if (isAdmin()): ?>
               <a href="<?= url('admin') ?>" class="btn btn-outline-secondary" title="Quản trị"><i class="bi bi-speedometer2"></i><span class="nav-btn-text"> Quản trị</span></a>
             <?php endif; ?>

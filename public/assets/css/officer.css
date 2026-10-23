@@ -1,0 +1,74 @@
+/* =========================================================
+   WarningInfo – Bàn làm việc cán bộ (TV4 – Milestone 3)
+   ========================================================= */
+
+/* ---------- Ô thống kê ---------- */
+.officer-stat {
+  display: flex; align-items: center; gap: 14px; height: 100%;
+  padding: 16px 18px; border-radius: var(--wi-radius, 14px);
+  background: #fff; box-shadow: 0 1px 3px rgba(15, 23, 42, .06); border: 1px solid var(--wi-border, #e5e7eb);
+}
+.officer-stat > i {
+  flex-shrink: 0; width: 46px; height: 46px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.35rem;
+}
+.officer-stat b { display: block; font-size: 1.6rem; line-height: 1.1; color: var(--wi-text, #1f2a37); }
+.officer-stat span { font-size: .85rem; color: #64748b; }
+.stat-waiting > i { background: #fef3c7; color: #b45309; }
+.stat-doing   > i { background: #e0f2fe; color: #0369a1; }
+.stat-urgent  > i { background: #fee2e2; color: #b91c1c; }
+.stat-done    > i { background: #dcfce7; color: #15803d; }
+
+/* ---------- Thẻ nhiệm vụ ---------- */
+.task-card {
+  position: relative; display: flex; gap: 16px; align-items: stretch;
+  padding: 16px; border-radius: var(--wi-radius, 14px); background: #fff;
+  border: 1px solid var(--wi-border, #e5e7eb); border-left: 5px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.task-card:hover { box-shadow: 0 8px 22px rgba(15, 23, 42, .08); transform: translateY(-1px); }
+.task-card.prio-critical { border-left-color: var(--wi-critical, #dc2626); }
+.task-card.prio-high     { border-left-color: var(--wi-high, #ea580c); }
+.task-card.prio-medium   { border-left-color: var(--wi-medium, #d97706); }
+.task-card.prio-low      { border-left-color: var(--wi-low, #16a34a); }
+
+.task-thumb {
+  flex-shrink: 0; width: 112px; height: 96px; border-radius: 10px; overflow: hidden;
+  background: #f1f5f9; color: #94a3b8; font-size: 1.6rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.task-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.task-body { flex: 1; min-width: 0; }
+.task-title { font-size: 1.05rem; font-weight: 700; margin: 4px 0 6px; line-height: 1.35; }
+.task-title a { color: var(--wi-text, #1f2a37); text-decoration: none; }
+.task-title a:hover { color: var(--wi-primary, #0f766e); }
+.task-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .82rem; color: #64748b; }
+.task-meta i { margin-right: 4px; }
+.task-note {
+  margin: 10px 0 0; padding: 8px 12px; border-radius: 8px;
+  background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: .85rem;
+  word-break: break-word;
+}
+.task-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 10px; flex-shrink: 0; }
+.task-go { white-space: nowrap; pointer-events: none; } /* cả thẻ là link (stretched-link) */
+
+@media (max-width: 767.98px) {
+  .task-card { flex-wrap: wrap; gap: 12px; padding: 14px; }
+  .task-thumb { width: 72px; height: 72px; }
+  .task-body { flex-basis: calc(100% - 84px); }
+  .task-side { flex-direction: row; align-items: center; width: 100%; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+}
+
+/* ---------- Trang xử lý sự cố ---------- */
+.officer-dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: .9rem; }
+.officer-dl dt { font-weight: 500; color: #64748b; }
+.officer-dl dd { margin: 0; text-align: right; }
+.officer-timeline { position: relative; margin-left: 6px; padding-left: 18px; border-left: 2px solid var(--wi-primary, #0f766e); }
+.officer-timeline li { position: relative; padding-bottom: 14px; }
+.officer-timeline li:last-child { padding-bottom: 0; }
+.officer-timeline li::before {
+  content: ""; position: absolute; left: -24px; top: 5px;
+  width: 10px; height: 10px; border-radius: 50%; background: var(--wi-primary, #0f766e);
+}
+.officer-note-internal { background: #fffbeb; border: 1px solid #fde68a; }

@@ -29,7 +29,9 @@ class AuthController extends Controller {
                     $_SESSION['email']     = $user->email;
                     $_SESSION['role']      = $user->role;
                     setFlash('success', 'Đăng nhập thành công!');
-                    redirect($user->role === 'admin' ? 'admin' : '');
+                    // Admin vào trang quản trị, cán bộ vào bàn làm việc, người dân về trang chủ
+                    $home = ['admin' => 'admin', 'officer' => 'officer'];
+                    redirect($home[$user->role] ?? '');
                 } else {
                     $errors['general'] = 'Email hoặc mật khẩu không đúng';
                 }
