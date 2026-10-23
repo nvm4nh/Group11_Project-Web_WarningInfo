@@ -66,6 +66,7 @@
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="<?= url('auth/profile') ?>"><i class="bi bi-person me-2 text-primary"></i>Thông tin cá nhân</a></li>
                 <li><a class="dropdown-item" href="<?= url('report/my_reports') ?>"><i class="bi bi-journal-text me-2 text-primary"></i>Báo cáo của tôi</a></li>
+                <li><a class="dropdown-item" href="<?= url('notification') ?>"><i class="bi bi-bell me-2 text-primary"></i>Thông báo</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <form method="post" action="<?= url('auth/logout') ?>" class="m-0">

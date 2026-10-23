@@ -88,6 +88,11 @@
     }
   }
 
+  // Toast thông báo do máy chủ gửi (flash) tự ẩn sau 4 giây
+  if (window.bootstrap) {
+    $$('.toast.show[data-flash]').forEach((el) => setTimeout(() => bootstrap.Toast.getOrCreateInstance(el).hide(), 4000));
+  }
+
   /* ---------- Tiện ích: Toast thông báo ----------
      Dùng chung: window.WI.toast('Nội dung', 'success' | 'danger' | 'warning') */
   function showToast(message, type = 'success') {

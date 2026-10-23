@@ -33,3 +33,16 @@ function redirect($path) {
     header('Location: ' . url($path));
     exit;
 }
+
+/* ---------- Thời gian tương đối (Milestone 3 – hộp thông báo) ---------- */
+
+// timeAgo(90) => "1 phút trước". Nhận số giây đã trôi qua (tính sẵn trong SQL) và ngày gốc để hiện khi đã lâu.
+function timeAgo($seconds, $datetime = null) {
+    $s = max(0, (int)$seconds);
+    if ($s < 60)        return 'Vừa xong';
+    if ($s < 3600)      return floor($s / 60) . ' phút trước';
+    if ($s < 86400)     return floor($s / 3600) . ' giờ trước';
+    if ($s < 172800)    return 'Hôm qua';
+    if ($s < 7 * 86400) return floor($s / 86400) . ' ngày trước';
+    return $datetime ? date('d/m/Y', strtotime($datetime)) : floor($s / 86400) . ' ngày trước';
+}
