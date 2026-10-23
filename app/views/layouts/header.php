@@ -26,6 +26,29 @@
         <img src="<?= asset('img/logo.svg') ?>" alt="WarningInfo logo">
         <span>Warning<em>Info</em></span>
       </a>
+      <?php if (isLoggedIn()): ?>
+        <!-- Chuông thông báo (Milestone 3): số chưa đọc + 6 thông báo mới nhất, nạp bằng AJAX – notifications.js -->
+        <div class="dropdown notif-dropdown ms-auto me-1 order-lg-last ms-lg-2 me-lg-0">
+          <a href="<?= url('notification') ?>" class="notif-bell" id="notifBell" role="button"
+             data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Thông báo"
+             data-endpoint="<?= url('notification/latest') ?>" data-read-all="<?= url('notification/readAll') ?>">
+            <i class="bi bi-bell"></i>
+            <span class="notif-badge d-none" id="notifBadge"></span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end notif-menu p-0 shadow">
+            <div class="notif-menu-head">
+              <strong>Thông báo</strong>
+              <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none d-none" id="notifReadAll">
+                <i class="bi bi-check2-all me-1"></i>Đánh dấu đã đọc hết
+              </button>
+            </div>
+            <div class="notif-menu-list" id="notifList">
+              <div class="notif-menu-empty"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải...</div>
+            </div>
+            <a class="notif-menu-foot" href="<?= url('notification') ?>">Xem tất cả thông báo</a>
+          </div>
+        </div>
+      <?php endif; ?>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Mở menu">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -55,18 +78,18 @@
           <a href="<?= url('report/create') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-megaphone me-1"></i> Gửi báo cáo</a>
           <?php if (isLoggedIn()): ?>
             <?php if (isAdmin()): ?>
-              <a href="<?= url('admin') ?>" class="btn btn-outline-secondary"><i class="bi bi-speedometer2 me-1"></i> Quản trị</a>
+              <a href="<?= url('admin') ?>" class="btn btn-outline-secondary" title="Quản trị"><i class="bi bi-speedometer2"></i><span class="nav-btn-text"> Quản trị</span></a>
             <?php endif; ?>
             <div class="dropdown">
               <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-circle me-1"></i> <?= e($_SESSION['full_name'] ?? 'Tài khoản') ?>
+                <i class="bi bi-person-circle"></i><span class="nav-btn-text nav-user-name"> <?= e($_SESSION['full_name'] ?? 'Tài khoản') ?></span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                 <li><span class="dropdown-item-text text-muted small"><?= e($_SESSION['email'] ?? '') ?> (<?= e($_SESSION['role'] ?? '') ?>)</span></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="<?= url('auth/profile') ?>"><i class="bi bi-person me-2 text-primary"></i>Thông tin cá nhân</a></li>
                 <li><a class="dropdown-item" href="<?= url('report/my_reports') ?>"><i class="bi bi-journal-text me-2 text-primary"></i>Báo cáo của tôi</a></li>
-                <li><a class="dropdown-item" href="<?= url('notification') ?>"><i class="bi bi-bell me-2 text-primary"></i>Thông báo</a></li>
+                <li><a class="dropdown-item" href="<?= url('notification') ?>"><i class="bi bi-bell me-2 text-primary"></i>Thông báo <span class="badge rounded-pill bg-danger ms-1 d-none" data-notif-count></span></a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <form method="post" action="<?= url('auth/logout') ?>" class="m-0">

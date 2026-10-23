@@ -4,6 +4,7 @@
  *
  *   GET  notification              – danh sách thông báo (?filter=unread để lọc chưa đọc)
  *   GET  notification/open/{id}    – đánh dấu đã đọc rồi mở trang liên quan (chi tiết sự cố)
+ *   GET  notification/latest       – JSON: số chưa đọc + 6 thông báo mới nhất (chuông trên thanh menu)
  *   POST notification/read/{id}    – đánh dấu 1 thông báo đã đọc
  *   POST notification/readAll      – đánh dấu tất cả đã đọc
  *
@@ -45,6 +46,28 @@ class NotificationController extends Controller {
             $this->notificationModel->markAsRead($n->id, $_SESSION['user_id']);
         }
         redirect($this->targetPath($n));
+    }
+
+    /** GET notification/latest – JSON cho chuông thông báo trên thanh menu (gọi bằng AJAX) */
+    public function latest() {
+        $userId = $_SESSION['user_id'];
+        $items = [];
+        foreach ($this->notificationModel->getByUser($userId, 6) as $n) {
+            $items[] = [
+                'id'      => (int)$n->id,
+                'title'   => $n->title,
+                'message' => $n->message,
+                'type'    => $n->notification_type,
+                'is_read' => (bool)$n->is_read,
+                'time'    => timeAgo($n->age_seconds, $n->created_at),
+                'url'     => url('notification/open/' . (int)$n->id),
+            ];
+        }
+        $this->json([
+            'status' => 'success',
+            'unread' => $this->notificationModel->countUnread($userId),
+            'items'  => $items,
+        ]);
     }
 
     public function read($id = null) {
