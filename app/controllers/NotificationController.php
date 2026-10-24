@@ -84,9 +84,13 @@ class NotificationController extends Controller {
 
     /* ---------- Hàm phụ ---------- */
 
-    /** Trang cần mở khi bấm vào thông báo */
+    /** Trang cần mở khi bấm vào thông báo: việc được giao → bàn làm việc cán bộ, còn lại → chi tiết sự cố */
     protected function targetPath($n) {
-        return $n->report_id ? 'report/detail/' . (int)$n->report_id : 'notification';
+        if (!$n->report_id) return 'notification';
+        if ($n->notification_type === 'assignment' && isOfficer()) {
+            return 'officer/report/' . (int)$n->report_id;
+        }
+        return 'report/detail/' . (int)$n->report_id;
     }
 
     /** Trả JSON cho AJAX, còn form thường thì quay lại hộp thông báo */

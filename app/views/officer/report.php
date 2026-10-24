@@ -74,6 +74,35 @@ $hasGps = $r->latitude !== null && $r->longitude !== null && $r->latitude !== ''
             <?php if (!empty($a->assignment_note)): ?>
               <div class="task-note mt-3 mb-0"><i class="bi bi-chat-left-quote me-1"></i><?= e($a->assignment_note) ?></div>
             <?php endif; ?>
+
+            <!-- Thao tác của cán bộ -->
+            <div class="officer-actions mt-3 pt-3 border-top">
+              <?php if ($a->assignment_status === 'assigned'): ?>
+                <p class="small text-muted mb-2">Bấm nhận việc để báo cho quản trị viên và người gửi biết sự cố đang được xử lý.</p>
+                <form method="post" action="<?= url('officer/accept/' . (int)$r->id) ?>" class="m-0">
+                  <?= csrf_field() ?>
+                  <button type="submit" class="btn btn-primary w-100"><i class="bi bi-hand-thumbs-up me-1"></i> Nhận việc &amp; bắt đầu xử lý</button>
+                </form>
+              <?php elseif ($a->assignment_status === 'completed'): ?>
+                <div class="alert alert-success small mb-0">
+                  <i class="bi bi-check-circle-fill me-1"></i> Bạn đã hoàn thành nhiệm vụ này. Có thể thêm ghi chú nội bộ ở phần trao đổi nếu cần.
+                </div>
+              <?php else: ?>
+                <form method="post" action="<?= url('officer/update/' . (int)$r->id) ?>" class="m-0" id="officerUpdateForm" novalidate>
+                  <?= csrf_field() ?>
+                  <label class="form-label fw-semibold small" for="officerStatus">Cập nhật tiến độ</label>
+                  <select name="status" id="officerStatus" class="form-select mb-2">
+                    <option value="in_progress" <?= $r->status === 'in_progress' ? 'selected' : '' ?>>Đang xử lý</option>
+                    <option value="need_more_info" <?= $r->status === 'need_more_info' ? 'selected' : '' ?>>Cần người dân bổ sung thông tin</option>
+                    <option value="resolved">Đã khắc phục xong</option>
+                  </select>
+                  <textarea name="note" id="officerNote" rows="3" class="form-control mb-1" maxlength="1000"
+                            placeholder="Ghi chú tiến độ (không bắt buộc)"></textarea>
+                  <div class="form-text mb-2" id="officerNoteHelp">Người gửi báo cáo sẽ nhận được thông báo kèm ghi chú này.</div>
+                  <button type="submit" class="btn btn-primary w-100"><i class="bi bi-send-check me-1"></i> Cập nhật</button>
+                </form>
+              <?php endif; ?>
+            </div>
           </div>
         </div>
 
@@ -192,6 +221,17 @@ $hasGps = $r->latitude !== null && $r->longitude !== null && $r->latitude !== ''
                 <?php endforeach; ?>
               </div>
             <?php endif; ?>
+
+            <form method="post" action="<?= url('officer/note/' . (int)$r->id) ?>" class="mt-3" id="ghi-chu">
+              <?= csrf_field() ?>
+              <label class="form-label fw-semibold small" for="officerInternalNote"><i class="bi bi-lock me-1"></i>Ghi chú nội bộ</label>
+              <textarea name="content" id="officerInternalNote" rows="2" class="form-control mb-2" maxlength="2000" required
+                        placeholder="Ví dụ: đã liên hệ UBND phường, hẹn kiểm tra lại lúc 9h sáng mai..."></textarea>
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <small class="text-muted">Chỉ cán bộ và quản trị viên thấy ghi chú này.</small>
+                <button type="submit" class="btn btn-outline-primary btn-sm px-3">Lưu ghi chú</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -200,4 +240,5 @@ $hasGps = $r->latitude !== null && $r->longitude !== null && $r->latitude !== ''
 </section>
 
 <script src="<?= asset('js/gallery.js') ?>" defer></script>
+<script src="<?= asset('js/officer.js') ?>" defer></script>
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>

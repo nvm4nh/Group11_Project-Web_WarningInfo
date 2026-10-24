@@ -10,6 +10,7 @@ $total  = (int)($data['totalCount'] ?? 0);
 $typeStyle = [
   'report_status' => ['bi-arrow-repeat',  'notif-ic-status',  'Cập nhật trạng thái'],
   'assignment'    => ['bi-person-check',  'notif-ic-assign',  'Phân công xử lý'],
+  'officer_update'=> ['bi-clipboard-check','notif-ic-assign', 'Cán bộ cập nhật'],
   'general'       => ['bi-bell',          'notif-ic-general', 'Thông báo chung'],
 ];
 ?>

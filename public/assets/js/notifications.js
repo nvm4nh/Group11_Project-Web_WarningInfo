@@ -20,6 +20,7 @@
   const ICONS = {
     report_status: ['bi-arrow-repeat', 'notif-ic-status'],
     assignment: ['bi-person-check', 'notif-ic-assign'],
+    officer_update: ['bi-clipboard-check', 'notif-ic-assign'],
     general: ['bi-bell', 'notif-ic-general'],
   };
   const jsonHeaders = { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
