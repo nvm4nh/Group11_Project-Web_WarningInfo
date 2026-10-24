@@ -5,5 +5,9 @@
 <?php if (isLoggedIn()): ?>
   <script src="<?= asset('js/notifications.js') ?>"></script>
 <?php endif; ?>
+  <?php if (!empty($data['use_map'])): /* Bản đồ Leaflet.js – TV1 (Milestone 3) */ ?>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="<?= asset('js/wi-map.js') ?>"></script>
+  <?php endif; ?>
 </body>
 </html>

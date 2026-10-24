@@ -187,6 +187,31 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 
       <!-- Cột phụ: Lịch sử tiến trình xử lý (Workflow) -->
       <div class="col-lg-4">
+        <?php if (!empty($data['use_map'])): /* Bản đồ vị trí hiện trường – TV1 (Milestone 3) */ ?>
+          <?php
+            $mapPoint = [
+              'lat'         => (float)$r->latitude,
+              'lng'         => (float)$r->longitude,
+              'title'       => $r->title,
+              'category_id' => (int)$r->category_id,
+              'level'       => ReportModel::mapLevel($r->priority, $r->status),
+            ];
+          ?>
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+              <h6 class="fw-bold mb-0"><i class="bi bi-geo-alt me-2 text-primary"></i>Vị trí hiện trường</h6>
+            </div>
+            <div class="card-body p-2">
+              <div class="wi-map is-mini" data-wi-map data-no-scroll-zoom
+                   data-point="<?= e(json_encode($mapPoint, JSON_UNESCAPED_UNICODE)) ?>"
+                   role="region" aria-label="Bản đồ vị trí sự cố"></div>
+              <div class="d-flex gap-2 p-2 pb-1">
+                <a href="<?= url('report/map?focus=' . (int)$r->id) ?>" class="btn btn-outline-primary btn-sm flex-fill"><i class="bi bi-map me-1"></i>Xem bản đồ lớn</a>
+                <a href="https://www.openstreetmap.org/directions?route=%3B<?= (float)$r->latitude ?>%2C<?= (float)$r->longitude ?>" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm flex-fill"><i class="bi bi-sign-turn-right me-1"></i>Chỉ đường</a>
+              </div>
+            </div>
+          </div>
+        <?php endif; ?>
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white py-3 border-bottom">
             <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Tiến trình xử lý</h6>
