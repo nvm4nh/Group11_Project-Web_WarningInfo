@@ -43,7 +43,7 @@ class ReportModel {
     public function getLatest($limit = 6, $priority = null) {
         $sql = "SELECT r.*, c.name as category_name,
                 (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
-                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count,
+                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count,
                 (SELECT file_path FROM report_images img WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail
                 FROM reports r
                 LEFT JOIN categories c ON r.category_id = c.id
@@ -65,7 +65,7 @@ class ReportModel {
     public function getAll($filters = []) {
         $sql = "SELECT r.*, c.name as category_name,
                 (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
-                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count,
+                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count,
                 (SELECT file_path FROM report_images img WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail
                 FROM reports r
                 LEFT JOIN categories c ON r.category_id = c.id
@@ -399,7 +399,7 @@ class ReportModel {
     public function getByUserId($userId) {
         $this->db->query("SELECT r.*, c.name as category_name,
                           (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
-                          (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count
+                          (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count
                           FROM reports r
                           LEFT JOIN categories c ON r.category_id = c.id
                           WHERE r.user_id = :user_id

@@ -89,6 +89,7 @@ $statuses    = $data['statuses'] ?? [];
             <td><span class="badge <?= $pBadge ?>"><?= e($pText) ?></span></td>
             <td>
               <form method="post" action="<?= url('admin/updateReportStatus/' . $r->id) ?>" class="d-flex flex-column gap-1">
+                <?= csrf_field() ?>
                 <div class="d-flex gap-1">
                   <select name="status" class="form-select form-select-sm" aria-label="Trạng thái của <?= e($r->report_code) ?>">
                     <?php foreach ($statuses as $code => $label): ?>
@@ -174,6 +175,7 @@ $statuses    = $data['statuses'] ?? [];
 <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignTitle" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="" class="modal-content" id="assignForm">
+      <?= csrf_field() ?>
       <div class="modal-header">
         <h5 class="modal-title fw-bold" id="assignTitle">Phân công cán bộ xử lý</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
