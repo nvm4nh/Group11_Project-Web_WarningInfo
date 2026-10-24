@@ -77,6 +77,7 @@
           </div>
           <div class="card-body p-4">
             <form action="<?= url('auth/profile') ?>" method="POST">
+              <?= csrf_field() ?>
               <input type="hidden" name="action" value="update_info">
 
               <div class="mb-3">
@@ -116,6 +117,7 @@
           </div>
           <div class="card-body p-4">
             <form action="<?= url('auth/profile') ?>" method="POST">
+              <?= csrf_field() ?>
               <input type="hidden" name="action" value="change_password">
 
               <div class="mb-3">

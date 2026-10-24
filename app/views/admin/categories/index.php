@@ -29,6 +29,7 @@
               <a href="<?= url('admin/editCategory/' . $c->id) ?>" class="btn btn-sm btn-outline-primary">Sửa</a>
               <form method="post" action="<?= url('admin/deleteCategory/' . $c->id) ?>"
                     class="d-inline" onsubmit="return confirm('Xoá danh mục này?');">
+                <?= csrf_field() ?>
                 <button class="btn btn-sm btn-danger">Xoá</button>
               </form>
             </td>

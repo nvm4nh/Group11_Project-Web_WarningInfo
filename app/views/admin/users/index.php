@@ -24,6 +24,7 @@
             <td><?= e($u->email) ?></td>
             <td colspan="2">
               <form method="post" action="<?= url('admin/updateUser/' . $u->id) ?>" class="row g-2 align-items-center">
+                <?= csrf_field() ?>
                 <div class="col-auto">
                   <select name="role" class="form-select form-select-sm">
                     <?php foreach (['user','officer','admin'] as $r): ?>
@@ -39,6 +40,7 @@
             <td>
               <form method="post" action="<?= url('admin/deleteUser/' . $u->id) ?>"
                     onsubmit="return confirm('Xoá người dùng này?');">
+                <?= csrf_field() ?>
                 <button class="btn btn-sm btn-danger">Xoá</button>
               </form>
             </td>

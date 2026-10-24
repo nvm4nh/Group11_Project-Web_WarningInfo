@@ -15,7 +15,9 @@ class App {
         $this->controller = new $this->controller;
 
         if(isset($url[1])) {
-            if(method_exists($this->controller, $url[1])) {
+            // Chỉ gọi action public: URL trùng tên hàm private/protected (vd report/collectUploads) hoặc hàm đặc biệt __xxx
+            // thì bỏ qua, tránh lỗi Fatal error làm lộ đường dẫn file trên máy chủ
+            if(method_exists($this->controller, $url[1]) && is_callable([$this->controller, $url[1]]) && strpos($url[1], '__') !== 0) {
                 $this->method = $url[1];
                 unset($url[1]);
             }

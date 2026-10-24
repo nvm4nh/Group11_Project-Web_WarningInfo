@@ -16,6 +16,7 @@
 
     <div class="card border-0 shadow-sm p-4">
       <form method="post" action="<?= url('report/store') ?>" enctype="multipart/form-data" class="needs-validation" id="reportForm" novalidate>
+        <?= csrf_field() ?>
         <!-- Tiêu đề -->
         <div class="mb-3">
           <label class="form-label fw-semibold">Tiêu đề sự cố <span class="text-danger">*</span></label>

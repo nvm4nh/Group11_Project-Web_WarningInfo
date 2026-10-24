@@ -62,6 +62,37 @@
     counters.forEach((el) => { el.textContent = fmt(parseInt(el.dataset.count, 10) || 0); });
   }
 
+  /* ---------- 5. CSRF token (Milestone 3) ----------
+     Token nằm ở <meta name="csrf-token"> trong header.
+     - Form POST nào quên <?= csrf_field() ?> sẽ được tự gắn thêm ô ẩn (lớp dự phòng)
+     - AJAX bằng jQuery tự gửi header X-CSRF-Token; fetch() thì dùng WI.csrfHeaders() */
+  const csrfMeta = $('meta[name="csrf-token"]');
+  const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+  const csrfHeaders = (extra = {}) => Object.assign({ 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }, extra);
+
+  if (csrfToken) {
+    const attachToken = (form) => {
+      if ((form.getAttribute('method') || '').toLowerCase() !== 'post') return;
+      if (form.querySelector('input[name="csrf_token"]')) return;
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'csrf_token';
+      input.value = csrfToken;
+      form.appendChild(input);
+    };
+    $$('form').forEach(attachToken);
+    // Form được tạo động sau khi trang tải: gắn token ngay lúc bấm gửi
+    document.addEventListener('submit', (e) => attachToken(e.target), true);
+    if (window.jQuery) {
+      window.jQuery.ajaxSetup({ headers: { 'X-CSRF-Token': csrfToken } });
+    }
+  }
+
+  // Toast thông báo do máy chủ gửi (flash) tự ẩn sau 4 giây
+  if (window.bootstrap) {
+    $$('.toast.show[data-flash]').forEach((el) => setTimeout(() => bootstrap.Toast.getOrCreateInstance(el).hide(), 4000));
+  }
+
   /* ---------- Tiện ích: Toast thông báo ----------
      Dùng chung: window.WI.toast('Nội dung', 'success' | 'danger' | 'warning') */
   function showToast(message, type = 'success') {
@@ -87,5 +118,10 @@
     }
   }
 
-  window.WI = Object.assign(window.WI || {}, { toast: showToast, validators: (window.WI && window.WI.validators) || [] });
+  window.WI = Object.assign(window.WI || {}, {
+    toast: showToast,
+    validators: (window.WI && window.WI.validators) || [],
+    csrfToken: csrfToken,
+    csrfHeaders: csrfHeaders,
+  });
 })();
