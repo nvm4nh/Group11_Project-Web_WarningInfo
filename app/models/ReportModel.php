@@ -43,7 +43,7 @@ class ReportModel {
     public function getLatest($limit = 6, $priority = null) {
         $sql = "SELECT r.*, c.name as category_name,
                 (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
-                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count,
+                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count,
                 (SELECT file_path FROM report_images img WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail
                 FROM reports r
                 LEFT JOIN categories c ON r.category_id = c.id
@@ -62,11 +62,15 @@ class ReportModel {
         return $this->db->resultSet();
     }
 
+
+    
     public function getAll($filters = []) {
         $sql = "SELECT r.*, c.name as category_name,
                 (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
-                (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count,
-                (SELECT file_path FROM report_images img WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail
+                (SELECT COUNT(*) FROM comments cm
+            WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count,    
+                (SELECT file_path FROM report_images img
+                WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail
                 FROM reports r
                 LEFT JOIN categories c ON r.category_id = c.id
                 WHERE 1=1";
@@ -74,35 +78,107 @@ class ReportModel {
         if (!empty($filters['public_only'])) {
             $sql .= " AND r.is_public = 1";
         }
-        if (!empty($filters['category_id'])) {
-            $sql .= " AND r.category_id = :category_id";
+
+        // Lọc một hoặc nhiều danh mục
+        $categoryIds = $filters['category_ids'] ?? null;
+
+        if ($categoryIds === null && !empty($filters['category_id'])) {
+            $categoryIds = [(int)$filters['category_id']];
         }
-        if (!empty($filters['priority'])) {
+
+        if (!empty($categoryIds)) {
+            $categoryIds = array_values(array_unique(array_map('intval', (array)$categoryIds)));
+            $categoryIds = array_filter($categoryIds, fn($id) => $id > 0);
+
+            if (!empty($categoryIds)) {
+                $placeholders = [];
+
+                foreach ($categoryIds as $i => $id) {
+                    $placeholder = ':category_' . $i;
+                    $placeholders[] = $placeholder;
+                }
+
+                $sql .= " AND r.category_id IN (" . implode(',', $placeholders) . ")";
+            }
+        }
+
+        $priority = $filters['priority'] ?? $filters['severity'] ?? '';
+        if ($priority !== '' && in_array($priority, self::PRIORITIES, true)) {
             $sql .= " AND r.priority = :priority";
         }
-        if (!empty($filters['status'])) {
+
+        if (!empty($filters['status'])
+            && in_array($filters['status'], self::STATUSES, true)) {
             $sql .= " AND r.status = :status";
         }
-        if (!empty($filters['keyword'])) {
-            $sql .= " AND (r.title LIKE :kw OR r.description LIKE :kw OR r.address LIKE :kw)";
+
+        $keyword = trim((string)($filters['keyword'] ?? ''));
+        if ($keyword !== '') {
+            $sql .= " AND (r.title LIKE :kw_title
+            OR r.description LIKE :kw_description
+            OR r.address LIKE :kw_address)";
         }
+
+        if (!empty($filters['from_date'])) {
+            $sql .= " AND r.created_at >= :from_date";
+        }
+
+        if (!empty($filters['to_date'])) {
+            $sql .= " AND r.created_at < DATE_ADD(:to_date, INTERVAL 1 DAY)";
+        }
+
         $sql .= " ORDER BY r.created_at DESC";
 
+        $usePagination = isset($filters['page']) || isset($filters['limit']);
+
+        if ($usePagination) {
+            $page = max(1, (int)($filters['page'] ?? 1));
+            $limit = max(1, min(100, (int)($filters['limit'] ?? 10)));
+            $offset = ($page - 1) * $limit;
+            $sql .= " LIMIT :limit OFFSET :offset";
+        }
+
         $this->db->query($sql);
-        if (!empty($filters['category_id'])) {
-            $this->db->bind(':category_id', (int)$filters['category_id']);
+
+        // Bind danh mục
+        if (!empty($categoryIds)) {
+            foreach ($categoryIds as $i => $id) {
+                $this->db->bind(':category_' . $i, $id, PDO::PARAM_INT);
+            }
         }
-        if (!empty($filters['priority'])) {
-            $this->db->bind(':priority', $filters['priority']);
+
+        if ($priority !== '' && in_array($priority, self::PRIORITIES, true)) {
+            $this->db->bind(':priority', $priority);
         }
-        if (!empty($filters['status'])) {
+
+        if (!empty($filters['status'])
+            && in_array($filters['status'], self::STATUSES, true)) {
             $this->db->bind(':status', $filters['status']);
         }
-        if (!empty($filters['keyword'])) {
-            $this->db->bind(':kw', '%' . $filters['keyword'] . '%');
+
+        if ($keyword !== '') {
+            $kw = '%' . $keyword . '%';
+            $this->db->bind(':kw_title', $kw);
+            $this->db->bind(':kw_description', $kw);
+            $this->db->bind(':kw_address', $kw);
         }
+
+        if (!empty($filters['from_date'])) {
+            $this->db->bind(':from_date', $filters['from_date']);
+        }
+
+        if (!empty($filters['to_date'])) {
+            $this->db->bind(':to_date', $filters['to_date']);
+        }
+
+        if ($usePagination) {
+            $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+            $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+        }
+
         return $this->db->resultSet();
     }
+
 
     public function getById($id) {
         $this->db->query("SELECT r.*, c.name as category_name, u.full_name as author_name,
@@ -296,110 +372,10 @@ class ReportModel {
         }
     }
 
-    /* =========================================================
-       BẢN ĐỒ SỐ LEAFLET (TV1 – Milestone 3)
-       ========================================================= */
-    const MAP_STATES     = ['active', 'resolved', 'all'];
-    const RESOLVED_STATUSES = ['resolved', 'closed'];
-    const EARTH_RADIUS_KM   = 6371;
-
-    /**
-     * Sự cố công khai CÓ toạ độ GPS để ghim lên bản đồ (bỏ qua báo cáo bị từ chối).
-     * $filters: category_ids (int[]), priority, state (active|resolved|all),
-     *           lat, lng, radius_km (lọc "Sự cố gần tôi" theo công thức Haversine).
-     * Khi có lọc bán kính, mỗi bản ghi kèm distance_km và kết quả sắp xếp gần → xa.
-     */
-    public function getMapPoints(array $filters = []) {
-        $near = isset($filters['lat'], $filters['lng'], $filters['radius_km']);
-
-        $distanceSql = $near
-            ? self::EARTH_RADIUS_KM . " * 2 * ASIN(SQRT(
-                    POWER(SIN(RADIANS(r.latitude - :lat) / 2), 2) +
-                    COS(RADIANS(:lat2)) * COS(RADIANS(r.latitude)) *
-                    POWER(SIN(RADIANS(r.longitude - :lng) / 2), 2)))"
-            : "NULL";
-
-        $sql = "SELECT r.id, r.report_code, r.title, r.address, r.latitude, r.longitude,
-                       r.priority, r.status, r.category_id, r.incident_time, r.created_at,
-                       c.name AS category_name,
-                       (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) AS upvote_count,
-                       (SELECT file_path FROM report_images img
-                         WHERE img.report_id = r.id AND img.is_public = 1
-                         ORDER BY img.id ASC LIMIT 1) AS thumbnail,
-                       $distanceSql AS distance_km
-                FROM reports r
-                LEFT JOIN categories c ON r.category_id = c.id
-                WHERE r.is_public = 1
-                  AND r.status <> 'rejected'
-                  AND r.latitude IS NOT NULL AND r.longitude IS NOT NULL";
-
-        $params = [];
-
-        $categoryIds = array_values(array_filter(array_map('intval', $filters['category_ids'] ?? [])));
-        if ($categoryIds) {
-            $ph = [];
-            foreach ($categoryIds as $i => $cid) {
-                $ph[] = ':cat' . $i;
-                $params[':cat' . $i] = $cid;
-            }
-            $sql .= " AND r.category_id IN (" . implode(',', $ph) . ")";
-        }
-
-        if (!empty($filters['priority']) && in_array($filters['priority'], self::PRIORITIES, true)) {
-            $sql .= " AND r.priority = :priority";
-            $params[':priority'] = $filters['priority'];
-        }
-
-        $state = $filters['state'] ?? 'all';
-        if ($state === 'resolved') {
-            $sql .= " AND r.status IN ('resolved', 'closed')";
-        } elseif ($state === 'active') {
-            $sql .= " AND r.status NOT IN ('resolved', 'closed')";
-        }
-
-        if ($near) {
-            // Khung chữ nhật bao quanh vòng tròn: lọc thô để tận dụng chỉ mục idx_reports_location
-            $lat = (float)$filters['lat'];
-            $lng = (float)$filters['lng'];
-            $dLat = rad2deg($filters['radius_km'] / self::EARTH_RADIUS_KM);
-            $dLng = $dLat / max(cos(deg2rad($lat)), 0.01);
-            $sql .= " AND r.latitude BETWEEN :minLat AND :maxLat
-                      AND r.longitude BETWEEN :minLng AND :maxLng
-                      HAVING distance_km <= :radius
-                      ORDER BY distance_km ASC";
-            $params += [
-                ':lat' => $lat, ':lat2' => $lat, ':lng' => $lng,
-                ':minLat' => $lat - $dLat, ':maxLat' => $lat + $dLat,
-                ':minLng' => $lng - $dLng, ':maxLng' => $lng + $dLng,
-                ':radius' => (float)$filters['radius_km'],
-            ];
-        } else {
-            $sql .= " ORDER BY r.created_at DESC";
-        }
-
-        $sql .= " LIMIT :limit";
-
-        $this->db->query($sql);
-        foreach ($params as $k => $v) {
-            $this->db->bind($k, $v, is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-        $this->db->bind(':limit', (int)($filters['limit'] ?? 500), PDO::PARAM_INT);
-        return $this->db->resultSet();
-    }
-
-    /**
-     * Nhóm màu Marker trên bản đồ:
-     *  resolved = Xanh (đã giải quyết), urgent = Đỏ (nghiêm trọng/cao), medium = Vàng (trung bình/thấp)
-     */
-    public static function mapLevel($priority, $status) {
-        if (in_array($status, self::RESOLVED_STATUSES, true)) return 'resolved';
-        return in_array($priority, ['critical', 'high'], true) ? 'urgent' : 'medium';
-    }
-
     public function getByUserId($userId) {
         $this->db->query("SELECT r.*, c.name as category_name,
                           (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
-                          (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count
+                          (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id) as comment_count
                           FROM reports r
                           LEFT JOIN categories c ON r.category_id = c.id
                           WHERE r.user_id = :user_id

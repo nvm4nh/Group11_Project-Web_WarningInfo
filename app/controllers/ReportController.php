@@ -45,9 +45,8 @@ class ReportController extends Controller {
 
         $this->view('reports/detail', [
             'title'  => $report->title,
-            'active'  => 'report',
-            'report'  => $report,
-            'use_map' => $report->latitude !== null && $report->longitude !== null,
+            'active' => 'report',
+            'report' => $report
         ]);
     }
 
@@ -248,176 +247,142 @@ class ReportController extends Controller {
        GET /report/api_list?category_id=&priority=&status=&q=
        Chỉ trả báo cáo công khai; KHÔNG trả thông tin liên hệ (email/SĐT) của người gửi.
        ========================================================= */
+
     public function api_list() {
         header('Content-Type: application/json; charset=utf-8');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             http_response_code(405);
-            echo json_encode(['status' => 'error', 'message' => 'Chỉ hỗ trợ phương thức GET'], JSON_UNESCAPED_UNICODE);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Chỉ hỗ trợ phương thức GET'
+            ], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
-        $priority = $_GET['priority'] ?? '';
-        $status   = $_GET['status'] ?? '';
+        $priority = $_GET['severity'] ?? $_GET['priority'] ?? '';
+        $status = $_GET['status'] ?? '';
+        $categoryInput = trim((string)($_GET['category_id'] ?? ''));
+        $categoryIds = [];
+
+        if ($categoryInput !== '') {
+            foreach (explode(',', $categoryInput) as $id) {
+                $id = trim($id);
+
+                if ($id === '' || !ctype_digit($id) || (int)$id < 1) {
+                    http_response_code(400);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'category_id không hợp lệ'
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+
+                $categoryIds[] = (int)$id;
+            }
+
+            $categoryIds = array_values(array_unique($categoryIds));
+        }
+        $keyword = trim((string)($_GET['keyword'] ?? $_GET['q'] ?? ''));
+        $fromDate = trim((string)($_GET['from_date'] ?? ''));
+        $toDate = trim((string)($_GET['to_date'] ?? ''));
+
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $limit = max(1, min(100, (int)($_GET['limit'] ?? 10)));
+
+        $validDate = static function ($date) {
+            $d = DateTime::createFromFormat('!Y-m-d', $date);
+            return $d && $d->format('Y-m-d') === $date;
+        };
+
+        if (($fromDate !== '' && !$validDate($fromDate))
+            || ($toDate !== '' && !$validDate($toDate))
+            || ($fromDate !== '' && $toDate !== '' && $fromDate > $toDate)) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Ngày không hợp lệ. Dùng định dạng YYYY-MM-DD.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if ($priority !== '' && !in_array($priority, ReportModel::PRIORITIES, true)) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'severity không hợp lệ'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if ($status !== '' && !in_array($status, ReportModel::STATUSES, true)) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'status không hợp lệ'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
         $filters = [
             'public_only' => true,
-            'category_id' => (int)($_GET['category_id'] ?? 0) ?: null,
-            'priority'    => in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null,
-            'status'      => in_array($status, ReportModel::STATUSES, true) ? $status : null,
-            'keyword'     => trim((string)($_GET['q'] ?? '')),
+            'category_ids' => $categoryIds ?: null,
+            'priority' => $priority !== '' ? $priority : null,
+            'status' => $status !== '' ? $status : null,
+            'keyword' => $keyword,
+            'from_date' => $fromDate !== '' ? $fromDate : null,
+            'to_date' => $toDate !== '' ? $toDate : null,
+            'page' => $page,
+            'limit' => $limit
         ];
 
-        require_once APPROOT . '/app/models/NotificationModel.php';   // dùng statusLabel()
+        require_once APPROOT . '/app/models/NotificationModel.php';
+
+        $reports = $this->reportModel->getAll($filters);
         $data = [];
-        foreach ($this->reportModel->getAll($filters) as $r) {
+
+        foreach ($reports as $r) {
             $data[] = [
-                'id'            => (int)$r->id,
-                'report_code'   => $r->report_code,
-                'title'         => $r->title,
-                'description'   => $r->description,
-                'category_id'   => (int)$r->category_id,
+                'id' => (int)$r->id,
+                'report_code' => $r->report_code,
+                'title' => $r->title,
+                'description' => $r->description,
+                'category_id' => (int)$r->category_id,
                 'category_name' => $r->category_name,
-                'priority'      => $r->priority,
-                'status'        => $r->status,
-                'status_label'  => NotificationModel::statusLabel($r->status),
-                'address'       => $r->address,
-                'latitude'      => $r->latitude !== null ? (float)$r->latitude : null,
-                'longitude'     => $r->longitude !== null ? (float)$r->longitude : null,
-                'upvote_count'  => (int)$r->upvote_count,
+                'priority' => $r->priority,
+                'severity' => $r->priority,
+                'status' => $r->status,
+                'status_label' => NotificationModel::statusLabel($r->status),
+                'address' => $r->address,
+                'latitude' => $r->latitude !== null ? (float)$r->latitude : null,
+                'longitude' => $r->longitude !== null ? (float)$r->longitude : null,
+                'upvote_count' => (int)$r->upvote_count,
                 'comment_count' => (int)$r->comment_count,
                 'thumbnail_url' => $r->thumbnail ? url($r->thumbnail) : null,
-                'detail_url'    => url('report/detail/' . $r->id),
+                'detail_url' => url('report/detail/' . $r->id),
                 'incident_time' => $r->incident_time,
-                'created_at'    => $r->created_at,
+                'created_at' => $r->created_at
             ];
         }
 
         echo json_encode([
-            'status'  => 'success',
-            'count'   => count($data),
-            'filters' => array_filter($filters, function ($v, $k) { return $k !== 'public_only' && $v !== null && $v !== ''; }, ARRAY_FILTER_USE_BOTH),
-            'data'    => $data,
+            'success' => true,
+            'count' => count($data),
+            'page' => $page,
+            'limit' => $limit,
+            'filters' => [
+                'category_id' => $categoryIds ?: null,
+                'severity' => $priority ?: null,
+                'status' => $status ?: null,
+                'keyword' => $keyword ?: null,
+                'from_date' => $fromDate ?: null,
+                'to_date' => $toDate ?: null
+            ],
+            'data' => $data
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
 
-    /* =========================================================
-       BẢN ĐỒ SỐ LEAFLET (TV1 – Milestone 3, Issue #3)
-       ========================================================= */
-    const MAP_RADIUS_OPTIONS = [2, 5, 10];   // km – lựa chọn "Sự cố gần tôi"
-    const MAP_RADIUS_MAX     = 20;
-    const PRIORITY_LABELS = [
-        'critical' => 'Nghiêm trọng',
-        'high'     => 'Cao',
-        'medium'   => 'Trung bình',
-        'low'      => 'Thấp',
-    ];
-
-    /** Trang bản đồ toàn màn hình: GET /report/map */
-    public function map() {
-        $this->view('reports/map', [
-            'title'         => 'Bản đồ sự cố môi trường',
-            'active'        => 'map',
-            'use_map'       => true,
-            'categories'    => $this->categoryModel->getAll(),
-            'radiusOptions' => self::MAP_RADIUS_OPTIONS,
-        ]);
-    }
-
-    /**
-     * WEBSERVICE GEOJSON (RFC 7946) cho Leaflet
-     * GET /report/api_geojson?category_id=1,2&priority=high&state=active|resolved|all
-     *                        &lat=10.77&lng=106.70&radius=5
-     * - Toạ độ GeoJSON theo thứ tự [kinh độ, vĩ độ].
-     * - Không trả thông tin liên hệ của người gửi.
-     */
-    public function api_geojson() {
-        header('Content-Type: application/json; charset=utf-8');
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            $this->jsonError(405, 'Chỉ hỗ trợ phương thức GET');
-        }
-
-        // category_id chấp nhận: 3 | 1,2,3 | category_id[]=1&category_id[]=2
-        $rawCats = $_GET['category_id'] ?? [];
-        $catList = is_array($rawCats) ? $rawCats : explode(',', (string)$rawCats);
-        $priority = (string)($_GET['priority'] ?? '');
-        $state    = (string)($_GET['state'] ?? 'all');
-
-        $filters = [
-            'category_ids' => array_values(array_filter(array_map('intval', $catList))),
-            'priority'     => in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null,
-            'state'        => in_array($state, ReportModel::MAP_STATES, true) ? $state : 'all',
-        ];
-
-        // Lọc "Sự cố gần tôi": cần đủ lat + lng hợp lệ
-        $hasLat = isset($_GET['lat']) && $_GET['lat'] !== '';
-        $hasLng = isset($_GET['lng']) && $_GET['lng'] !== '';
-        if ($hasLat || $hasLng) {
-            $lat = filter_var($_GET['lat'] ?? null, FILTER_VALIDATE_FLOAT);
-            $lng = filter_var($_GET['lng'] ?? null, FILTER_VALIDATE_FLOAT);
-            if ($lat === false || $lng === false || abs($lat) > 90 || abs($lng) > 180) {
-                $this->jsonError(422, 'Toạ độ không hợp lệ (lat ∈ [-90, 90], lng ∈ [-180, 180]).');
-            }
-            $radius = filter_var($_GET['radius'] ?? 5, FILTER_VALIDATE_FLOAT);
-            $filters['lat']       = $lat;
-            $filters['lng']       = $lng;
-            $filters['radius_km'] = min(max($radius ?: 5, 0.5), self::MAP_RADIUS_MAX);
-        }
-
-        require_once APPROOT . '/app/models/NotificationModel.php';   // dùng statusLabel()
-        $features = [];
-        foreach ($this->reportModel->getMapPoints($filters) as $r) {
-            $features[] = [
-                'type'     => 'Feature',
-                'id'       => (int)$r->id,
-                'geometry' => [
-                    'type'        => 'Point',
-                    'coordinates' => [(float)$r->longitude, (float)$r->latitude],
-                ],
-                'properties' => [
-                    'id'             => (int)$r->id,
-                    'report_code'    => $r->report_code,
-                    'title'          => $r->title,
-                    'address'        => $r->address,
-                    'category_id'    => (int)$r->category_id,
-                    'category_name'  => $r->category_name,
-                    'priority'       => $r->priority,
-                    'priority_label' => self::PRIORITY_LABELS[$r->priority] ?? $r->priority,
-                    'status'         => $r->status,
-                    'status_label'   => NotificationModel::statusLabel($r->status),
-                    'level'          => ReportModel::mapLevel($r->priority, $r->status),
-                    'upvote_count'   => (int)$r->upvote_count,
-                    'thumbnail_url'  => $r->thumbnail ? url($r->thumbnail) : null,
-                    'detail_url'     => url('report/detail/' . $r->id),
-                    'distance_km'    => $r->distance_km !== null ? round((float)$r->distance_km, 2) : null,
-                    'incident_time'  => $r->incident_time,
-                ],
-            ];
-        }
-
-        $meta = array_filter([
-            'category_ids' => $filters['category_ids'] ?: null,
-            'priority'     => $filters['priority'],
-            'state'        => $filters['state'],
-            'center'       => isset($filters['lat']) ? [$filters['lng'], $filters['lat']] : null,
-            'radius_km'    => $filters['radius_km'] ?? null,
-        ], function ($v) { return $v !== null; });
-
-        echo json_encode([
-            'type'     => 'FeatureCollection',
-            'count'    => count($features),
-            'filters'  => $meta,
-            'features' => $features,
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
-    }
-
-    private function jsonError($code, $message) {
-        http_response_code($code);
-        echo json_encode(['status' => 'error', 'message' => $message], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
 
     public function comment($id = null) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('report');
@@ -430,6 +395,161 @@ class ReportController extends Controller {
         }
         redirect('report/detail/' . $id);
     }
+    
+    public function api_comments($id = null) {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            http_response_code(405);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Chỉ hỗ trợ phương thức GET'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $id = (int)$id;
+
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID báo cáo không hợp lệ'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $report = $this->reportModel->getById($id);
+
+        if (!$report) {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không tìm thấy báo cáo'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $comments = [];
+
+        foreach (($report->comments ?? []) as $comment) {
+            // Không trả bình luận nội bộ ra API công khai.
+            if (!empty($comment->is_internal)) {
+                continue;
+            }
+
+            $comments[] = [
+                'id' => (int)$comment->id,
+                'report_id' => (int)$comment->report_id,
+                'user_id' => $comment->user_id !== null
+                    ? (int)$comment->user_id : null,
+                'content' => $comment->content,
+                'created_at' => $comment->created_at,
+                'user_name' => $comment->full_name ?? 'Người dùng'
+            ];
+        }
+
+        echo json_encode([
+            'success' => true,
+            'report_id' => $id,
+            'count' => count($comments),
+            'data' => $comments
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
+    
+    public function api_add_comment() {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Chỉ hỗ trợ phương thức POST'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Hỗ trợ cả form-data và JSON.
+        $input = $_POST;
+
+        $rawInput = file_get_contents('php://input');
+        $jsonInput = json_decode($rawInput, true);
+
+        if (is_array($jsonInput)) {
+            $input = array_merge($input, $jsonInput);
+        }
+
+        $reportId = (int)($input['report_id'] ?? 0);
+        $content = trim((string)($input['content'] ?? ''));
+
+        if ($reportId <= 0) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID báo cáo không hợp lệ'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if ($content === '') {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Nội dung bình luận không được để trống'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if (mb_strlen($content, 'UTF-8') > 2000) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Bình luận không được vượt quá 2000 ký tự'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $report = $this->reportModel->getById($reportId);
+
+        if (!$report) {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không tìm thấy báo cáo'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'] ?? null;
+
+        $saved = $this->reportModel->addComment(
+            $reportId,
+            $userId,
+            $content,
+            0
+        );
+
+        if (!$saved) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không thể lưu bình luận'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        http_response_code(201);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Đã thêm bình luận thành công',
+            'report_id' => $reportId,
+            'content' => $content
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
 
     public function upvote($id = null) {
         header('Content-Type: application/json');
@@ -452,6 +572,144 @@ class ReportController extends Controller {
         ]);
         exit;
     }
+    
+    public function api_upvote() {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Chỉ hỗ trợ phương thức POST'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        
+        if (!isLoggedIn()) {
+            
+
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Vui lòng đăng nhập để bình chọn'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+
+        $input = $_POST;
+        $jsonInput = json_decode(file_get_contents('php://input'), true);
+
+        if (is_array($jsonInput)) {
+            $input = array_merge($input, $jsonInput);
+        }
+
+        $reportId = (int)($input['report_id'] ?? 0);
+
+        if ($reportId <= 0) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Mã báo cáo không hợp lệ'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $report = $this->reportModel->getById($reportId);
+
+        if (!$report) {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không tìm thấy báo cáo'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $result = $this->reportModel->toggleUpvote(
+            $reportId,
+            $_SESSION['user_id']
+        );
+
+        $updatedReport = $this->reportModel->getById($reportId);
+        $newUpvotes = (int)($updatedReport->upvote_count ?? 0);
+
+        echo json_encode([
+            'success' => true,
+            'action' => $result['action'],
+            'new_upvotes' => $newUpvotes
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    
+    public function api_xml_feed() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            http_response_code(405);
+            header('Content-Type: application/xml; charset=utf-8');
+            echo '<?xml version="1.0" encoding="UTF-8"?>';
+            echo '<error>Method Not Allowed</error>';
+            exit;
+        }
+
+        header('Content-Type: application/xml; charset=utf-8');
+
+        // Lấy danh sách báo cáo
+        $reports = $this->reportModel->getAll([
+            'public_only' => true
+        ]);
+
+        // Tạo XML
+        $xml = new SimpleXMLElement(
+            '<?xml version="1.0" encoding="UTF-8"?><alerts></alerts>'
+        );
+
+        foreach ($reports as $report) {
+            $priority = strtolower($report->priority ?? '');
+
+            // Chỉ lấy cảnh báo mức độ cao hoặc khẩn cấp
+            if (!in_array($priority, ['high', 'critical'], true)) {
+                continue;
+            }
+
+            $item = $xml->addChild('alert');
+
+            $item->addChild('id', (string) $report->id);
+            $item->addChild(
+                'title',
+                htmlspecialchars(
+                    (string) ($report->title ?? ''),
+                    ENT_XML1,
+                    'UTF-8'
+                )
+            );
+            $item->addChild(
+                'priority',
+                htmlspecialchars($priority, ENT_XML1, 'UTF-8')
+            );
+            $item->addChild(
+                'status',
+                htmlspecialchars(
+                    (string) ($report->status ?? ''),
+                    ENT_XML1,
+                    'UTF-8'
+                )
+            );
+            $item->addChild(
+                'created_at',
+                htmlspecialchars(
+                    (string) ($report->created_at ?? ''),
+                    ENT_XML1,
+                    'UTF-8'
+                )
+            );
+        }
+
+        echo $xml->asXML();
+        exit;
+    }
+
+
 
     public function my_reports() {
         requireLogin();
