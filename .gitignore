@@ -10,10 +10,3 @@ public/uploads/reports/*
 
 # Tài liệu cá nhân
 HANDOVER.md
-
-# Ảnh người dùng upload (chỉ giữ lại .gitkeep để có sẵn thư mục)
-public/uploads/reports/*
-!public/uploads/reports/.gitkeep
-
-# Tài liệu cá nhân
-HANDOVER.md
