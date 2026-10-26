@@ -249,57 +249,116 @@ class ReportController extends Controller {
        Chỉ trả báo cáo công khai; KHÔNG trả thông tin liên hệ (email/SĐT) của người gửi.
        ========================================================= */
     public function api_list() {
-        header('Content-Type: application/json; charset=utf-8');
+    header('Content-Type: application/json; charset=utf-8');
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            http_response_code(405);
-            echo json_encode(['status' => 'error', 'message' => 'Chỉ hỗ trợ phương thức GET'], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
-        $priority = $_GET['priority'] ?? '';
-        $status   = $_GET['status'] ?? '';
-        $filters = [
-            'public_only' => true,
-            'category_id' => (int)($_GET['category_id'] ?? 0) ?: null,
-            'priority'    => in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null,
-            'status'      => in_array($status, ReportModel::STATUSES, true) ? $status : null,
-            'keyword'     => trim((string)($_GET['q'] ?? '')),
-        ];
-
-        require_once APPROOT . '/app/models/NotificationModel.php';   // dùng statusLabel()
-        $data = [];
-        foreach ($this->reportModel->getAll($filters) as $r) {
-            $data[] = [
-                'id'            => (int)$r->id,
-                'report_code'   => $r->report_code,
-                'title'         => $r->title,
-                'description'   => $r->description,
-                'category_id'   => (int)$r->category_id,
-                'category_name' => $r->category_name,
-                'priority'      => $r->priority,
-                'status'        => $r->status,
-                'status_label'  => NotificationModel::statusLabel($r->status),
-                'address'       => $r->address,
-                'latitude'      => $r->latitude !== null ? (float)$r->latitude : null,
-                'longitude'     => $r->longitude !== null ? (float)$r->longitude : null,
-                'upvote_count'  => (int)$r->upvote_count,
-                'comment_count' => (int)$r->comment_count,
-                'thumbnail_url' => $r->thumbnail ? url($r->thumbnail) : null,
-                'detail_url'    => url('report/detail/' . $r->id),
-                'incident_time' => $r->incident_time,
-                'created_at'    => $r->created_at,
-            ];
-        }
-
-        echo json_encode([
-            'status'  => 'success',
-            'count'   => count($data),
-            'filters' => array_filter($filters, function ($v, $k) { return $k !== 'public_only' && $v !== null && $v !== ''; }, ARRAY_FILTER_USE_BOTH),
-            'data'    => $data,
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        $this->jsonError(405, 'Only GET is supported');
     }
+
+    $priority = trim((string)($_GET['priority'] ?? ''));
+    $status = trim((string)($_GET['status'] ?? ''));
+    $keyword = trim((string)($_GET['keyword'] ?? $_GET['q'] ?? ''));
+    $fromDate = trim((string)($_GET['from_date'] ?? ''));
+    $toDate = trim((string)($_GET['to_date'] ?? ''));
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $limit = min(100, max(1, (int)($_GET['limit'] ?? 10)));
+
+    foreach (['from_date' => $fromDate, 'to_date' => $toDate] as $name => $date) {
+        if ($date !== '') {
+            $parsed = DateTime::createFromFormat('!Y-m-d', $date);
+            if (!$parsed || $parsed->format('Y-m-d') !== $date) {
+                $this->jsonError(422, "$name must use YYYY-MM-DD");
+            }
+        }
+    }
+
+    if ($fromDate !== '' && $toDate !== '' && $fromDate > $toDate) {
+        $this->jsonError(422, 'from_date must not be after to_date');
+    }
+
+    if ($priority !== '' && !in_array($priority, ReportModel::PRIORITIES, true)) {
+        $this->jsonError(422, 'Invalid priority');
+    }
+
+    if ($status !== '' && !in_array($status, ReportModel::STATUSES, true)) {
+        $this->jsonError(422, 'Invalid status');
+    }
+
+    $rawCats = $_GET['category_id'] ?? [];
+    $rawCats = is_array($rawCats) ? $rawCats : explode(',', (string)$rawCats);
+    $categoryIds = array_values(array_unique(array_filter(array_map('intval', $rawCats), function ($id) {
+        return $id > 0;
+    })));
+
+    $filters = [
+        'public_only' => true,
+        'priority' => $priority !== '' ? $priority : null,
+        'status' => $status !== '' ? $status : null,
+        'keyword' => $keyword,
+    ];
+
+    require_once APPROOT . '/app/models/NotificationModel.php';
+
+    $reports = $this->reportModel->getAll($filters);
+
+    $reports = array_values(array_filter($reports, function ($r) use ($categoryIds, $fromDate, $toDate) {
+        if ($categoryIds && !in_array((int)$r->category_id, $categoryIds, true)) {
+            return false;
+        }
+
+        $date = substr((string)($r->incident_time ?? $r->created_at ?? ''), 0, 10);
+
+        if ($fromDate !== '' && ($date === '' || $date < $fromDate)) {
+            return false;
+        }
+
+        if ($toDate !== '' && ($date === '' || $date > $toDate)) {
+            return false;
+        }
+
+        return true;
+    }));
+
+    $total = count($reports);
+    $totalPages = (int)ceil($total / $limit);
+    $reports = array_slice($reports, ($page - 1) * $limit, $limit);
+
+    $data = [];
+    foreach ($reports as $r) {
+        $data[] = [
+            'id' => (int)$r->id,
+            'report_code' => $r->report_code,
+            'title' => $r->title,
+            'description' => $r->description,
+            'category_id' => (int)$r->category_id,
+            'category_name' => $r->category_name,
+            'priority' => $r->priority,
+            'status' => $r->status,
+            'status_label' => NotificationModel::statusLabel($r->status),
+            'address' => $r->address,
+            'latitude' => $r->latitude !== null ? (float)$r->latitude : null,
+            'longitude' => $r->longitude !== null ? (float)$r->longitude : null,
+            'upvote_count' => (int)$r->upvote_count,
+            'comment_count' => (int)$r->comment_count,
+            'thumbnail_url' => $r->thumbnail ? url($r->thumbnail) : null,
+            'detail_url' => url('report/detail/' . $r->id),
+            'incident_time' => $r->incident_time,
+            'created_at' => $r->created_at,
+        ];
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'data' => $data,
+        'pagination' => [
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'total_pages' => $totalPages,
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 
     /* =========================================================
        BẢN ĐỒ SỐ LEAFLET (TV1 – Milestone 3, Issue #3)
