@@ -388,4 +388,74 @@ class ReportModel {
             'rejected'   => (int)($res->rejected ?? 0),
         ];
     }
+
+    /* =========================================================
+       BỔ SUNG DÀNH CHO ADMIN DASHBOARD (TV2)
+       ========================================================= */
+
+    // 1. Thống kê theo danh mục (cho biểu đồ Chart.js)
+    public function getStatsByCategory() {
+        $this->db->query("SELECT c.name, COUNT(r.id) as total 
+                          FROM categories c 
+                          LEFT JOIN reports r ON c.id = r.category_id 
+                          GROUP BY c.id");
+        return $this->db->resultSet();
+    }
+
+    // 2. Thống kê theo trạng thái (cho biểu đồ Chart.js)
+    public function getStatsByStatus() {
+        $this->db->query("SELECT status, COUNT(*) as total FROM reports GROUP BY status");
+        return $this->db->resultSet();
+    }
+
+    // 3. Thống kê xu hướng theo tháng (cho biểu đồ Chart.js)
+    public function getStatsByMonth() {
+        $this->db->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total 
+                          FROM reports 
+                          GROUP BY month 
+                          ORDER BY month ASC");
+        return $this->db->resultSet();
+    }
+
+    // 4. Hủy phân công cũ (khi Admin chọn cán bộ khác)
+    public function cancelAssignment($reportId) {
+        $this->db->query("UPDATE assignments SET assignment_status = 'cancelled' 
+                          WHERE report_id = :report_id 
+                          AND assignment_status IN ('assigned', 'accepted', 'in_progress')");
+        $this->db->bind(':report_id', $reportId);
+        return $this->db->execute();
+    }
+
+    // 5. Thêm phân công mới có kèm Deadline
+    public function assignOfficer($reportId, $officerId, $deadline) {
+        $this->db->query("INSERT INTO assignments (report_id, officer_id, assigned_by, deadline, assignment_status) 
+                          VALUES (:report_id, :officer_id, :assigned_by, :deadline, 'assigned')");
+        $this->db->bind(':report_id', $reportId);
+        $this->db->bind(':officer_id', $officerId);
+        $this->db->bind(':assigned_by', $_SESSION['user_id'] ?? 1);
+        $this->db->bind(':deadline', $deadline);
+        return $this->db->execute();
+    }
+
+    // 6. Lấy danh sách phân công hiện tại của nhiều báo cáo (để hiển thị ra View)
+    public function getAssignmentsForReports(array $reportIds) {
+        $ids = array_values(array_filter(array_map('intval', $reportIds)));
+        if (empty($ids)) return [];
+        $placeholders = [];
+        foreach ($ids as $i => $id) $placeholders[] = ':id' . $i;
+        
+        $this->db->query("SELECT a.report_id, a.officer_id, a.deadline, u.full_name as officer_name 
+                          FROM assignments a
+                          JOIN users u ON a.officer_id = u.id
+                          WHERE a.report_id IN (" . implode(',', $placeholders) . ")
+                          AND a.assignment_status != 'cancelled'
+                          ORDER BY a.id DESC");
+        foreach ($ids as $i => $id) $this->db->bind(':id' . $i, $id);
+        
+        $map = [];
+        foreach ($this->db->resultSet() as $a) {
+            if (!isset($map[$a->report_id])) { $map[$a->report_id] = $a; }
+        }
+        return $map;
+    }
 }

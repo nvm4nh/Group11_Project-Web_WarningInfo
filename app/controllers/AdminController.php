@@ -27,31 +27,44 @@ class AdminController extends Controller {
 
     public function api_statistics() {
         header('Content-Type: application/json; charset=utf-8');
-        $db = new Database();
-
-        // 1. Thống kê theo danh mục
-        $db->query("SELECT c.name, COUNT(r.id) as total FROM categories c LEFT JOIN reports r ON c.id = r.category_id GROUP BY c.id");
-        $byCategory = $db->resultSet();
-
-        // 2. Thống kê theo trạng thái
-        $db->query("SELECT status, COUNT(*) as total FROM reports GROUP BY status");
-        $byStatus = $db->resultSet();
-
-        // 3. Thống kê xu hướng theo tháng
-        $db->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total 
-                    FROM reports 
-                    GROUP BY month 
-                    ORDER BY month ASC");
-        $byMonth = $db->resultSet();
-
+        
         echo json_encode([
             'status' => 'success',
             'data' => [
-                'categories' => $byCategory,
-                'statuses' => $byStatus,
-                'months' => $byMonth
+                'categories' => $this->reportModel->getStatsByCategory(),
+                'statuses'   => $this->reportModel->getStatsByStatus(),
+                'months'     => $this->reportModel->getStatsByMonth()
             ]
         ]);
+        exit;
+    }
+
+    public function export_csv() {
+        $reports = $this->reportModel->getAll();
+        
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="bao_cao_su_co_' . date('Ymd_His') . '.csv"');
+        
+        $output = fopen('php://output', 'w');
+        
+        // Thêm BOM UTF-8 để Excel không lỗi font tiếng Việt
+        fputs($output, "\xEF\xBB\xBF");
+        
+        fputcsv($output, ['Mã BC', 'Tiêu đề', 'Danh mục', 'Mức độ', 'Trạng thái', 'Địa chỉ', 'Ngày gửi']);
+        
+        foreach ($reports as $r) {
+            fputcsv($output, [
+                $r->report_code,
+                $r->title,
+                $r->category_name ?? 'N/A',
+                $r->priority,
+                $r->status,
+                $r->address,
+                date('d/m/Y H:i', strtotime($r->created_at))
+            ]);
+        }
+        
+        fclose($output);
         exit;
     }
 
@@ -65,9 +78,38 @@ class AdminController extends Controller {
         }
 
         $this->view('admin/reports/index', [
-            'title'   => 'Quản lý sự cố môi trường',
-            'reports' => $this->reportModel->getAll(),
+            'title'       => 'Quản lý sự cố môi trường',
+            'reports'     => $reports,
+            'images'      => $this->reportModel->getImagesForReports($ids),
+            'assignments' => $this->reportModel->getAssignmentsForReports($ids),
+            'officers'    => $this->userModel->getOfficers(), // SỬA Ở ĐÂY: Gọi hàm getOfficers() thay vì getByRole()
+            'statuses'    => $statuses
         ]);
+    }
+
+    public function assignOfficer($id = null) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('admin/reports');
+        
+        $officerId = (int)($_POST['officer_id'] ?? 0);
+        $deadline  = $_POST['deadline'] ?? null;
+
+        // Validate deadline: Không được để trống và không được ở quá khứ
+        if (empty($deadline) || strtotime($deadline) < strtotime(date('Y-m-d'))) {
+            setFlash('danger', 'Hạn chót không hợp lệ hoặc đã ở trong quá khứ. Vui lòng chọn lại.');
+            redirect('admin/reports');
+        }
+
+        // Hủy phân công cũ
+        $this->reportModel->cancelAssignment($id);
+        
+        // Thêm phân công mới
+        $this->reportModel->assignOfficer($id, $officerId, $deadline);
+        
+        // Cập nhật trạng thái báo cáo
+        $this->reportModel->updateStatus($id, 'assigned', $_SESSION['user_id'] ?? 1, 'Đã phân công cán bộ xử lý');
+        
+        setFlash('success', 'Đã phân công cán bộ thành công.');
+        redirect('admin/reports');
     }
 
     public function updateReportStatus($id = null) {
@@ -97,13 +139,7 @@ class AdminController extends Controller {
                 if ($note !== '') {
                     $msg .= " Ghi chú: {$note}";
                 }
-                $this->notificationModel->create(
-                    $report->user_id,
-                    $title,
-                    $msg,
-                    (int)$id,
-                    'report_status'
-                );
+                $this->notificationModel->create($report->user_id, $title, $msg, (int)$id, 'report_status');
             }
             setFlash('success', 'Đã cập nhật trạng thái sự cố.');
         } else {

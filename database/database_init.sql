@@ -135,6 +135,7 @@ CREATE TABLE `assignments` (
   `officer_id` INT NOT NULL,
   `assigned_by` INT NULL,
   `assignment_note` TEXT NULL,
+  `deadline` DATETIME NULL,
   `assignment_status` ENUM('assigned', 'accepted', 'in_progress', 'completed', 'cancelled') NOT NULL DEFAULT 'assigned',
   `assigned_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `completed_at` DATETIME NULL,
