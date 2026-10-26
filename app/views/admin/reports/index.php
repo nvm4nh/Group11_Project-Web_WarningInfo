@@ -22,7 +22,7 @@ $statuses    = $data['statuses'] ?? [];
         <p class="text-muted small mb-0">Tiếp nhận, kiểm tra và điều phối tiến trình xử lý báo cáo.</p>
       </div>
       <div class="d-flex gap-2">
-        <!-- NÚT XUẤT CSV ĐÃ ĐƯỢC THÊM VÀO ĐÂY -->
+        <!-- NÚT XUẤT CSV CỦA TV2 -->
         <a href="<?= url('admin/export_csv') ?>" class="btn btn-success btn-sm">
           <i class="bi bi-file-earmark-excel"></i> Xuất báo cáo CSV
         </a>
@@ -60,6 +60,7 @@ $statuses    = $data['statuses'] ?? [];
             $assigned = $assignments[$r->id] ?? null;
             $isClosed = in_array($r->status, $closedStatuses, true);
 
+            // Dữ liệu cho modal "Xem nhanh" — JS chỉ gán bằng textContent nên an toàn với XSS
             $quick = [
               'code'        => $r->report_code,
               'title'       => $r->title,
@@ -93,16 +94,18 @@ $statuses    = $data['statuses'] ?? [];
             <td><?= e($r->category_name ?? 'N/A') ?></td>
             <td><span class="badge <?= $pBadge ?>"><?= e($pText) ?></span></td>
             <td>
-              <form method="post" action="<?= url('admin/updateReportStatus/' . $r->id) ?>" class="d-flex gap-1 align-items-center">
-                <select name="status" class="form-select form-select-sm" style="width: auto;">
-                  <option value="new" <?= $r->status === 'new' ? 'selected' : '' ?>>Mới tiếp nhận</option>
-                  <option value="verifying" <?= $r->status === 'verifying' ? 'selected' : '' ?>>Đang xác minh</option>
-                  <option value="assigned" <?= $r->status === 'assigned' ? 'selected' : '' ?>>Đã phân công</option>
-                  <option value="in_progress" <?= $r->status === 'in_progress' ? 'selected' : '' ?>>Đang xử lý</option>
-                  <option value="resolved" <?= $r->status === 'resolved' ? 'selected' : '' ?>>Đã giải quyết</option>
-                  <option value="rejected" <?= $r->status === 'rejected' ? 'selected' : '' ?>>Từ chối</option>
-                </select>
-                <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+              <form method="post" action="<?= url('admin/updateReportStatus/' . $r->id) ?>" class="d-flex flex-column gap-1">
+                <?= csrf_field() ?>
+                <div class="d-flex gap-1">
+                  <select name="status" class="form-select form-select-sm" aria-label="Trạng thái của <?= e($r->report_code) ?>">
+                    <?php foreach ($statuses as $code => $label): ?>
+                      <option value="<?= e($code) ?>" <?= $r->status === $code ? 'selected' : '' ?>><?= e($label) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+                </div>
+                <input type="text" name="note" class="form-control form-control-sm" maxlength="500"
+                       placeholder="Ghi chú xử lý (tuỳ chọn)" aria-label="Ghi chú / lý do xử lý">
               </form>
               <div class="small mt-1 <?= $assigned ? 'text-primary' : 'text-muted' ?>">
                 <i class="bi bi-person-badge me-1"></i><?= $assigned ? 'Thụ lý: ' . e($assigned->officer_name) : 'Chưa phân công' ?>
@@ -138,56 +141,122 @@ $statuses    = $data['statuses'] ?? [];
   </div>
 </section>
 
-<!-- MODAL PHÂN CÔNG CÁN BỘ (Thêm mới để JS hoạt động) -->
-<div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<!-- Modal: Xem nhanh chi tiết sự cố (TV5) -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="qvTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <form method="post" id="assignForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="assignModalLabel">Phân công cán bộ xử lý</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-header">
+        <div>
+          <span class="badge bg-light text-dark border" data-qv="code"></span>
+          <h5 class="modal-title fw-bold mt-1" id="qvTitle" data-qv="title"></h5>
         </div>
-        <div class="modal-body">
-          <p class="mb-3 text-muted">Mã báo cáo: <strong id="assignCode"></strong></p>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="badge" data-qv="priority"></span>
+          <span class="badge bg-secondary" data-qv="status"></span>
+          <span class="badge bg-light text-dark border"><i class="bi bi-tag me-1"></i><span data-qv="category"></span></span>
+        </div>
+        <dl class="row small mb-3">
+          <dt class="col-sm-3 text-muted fw-normal">Thời điểm</dt>   <dd class="col-sm-9" data-qv="time"></dd>
+          <dt class="col-sm-3 text-muted fw-normal">Địa chỉ</dt>     <dd class="col-sm-9" data-qv="address"></dd>
+          <dt class="col-sm-3 text-muted fw-normal qv-coords">Toạ độ GPS</dt><dd class="col-sm-9 qv-coords" data-qv="coords"></dd>
+          <dt class="col-sm-3 text-muted fw-normal">Người gửi</dt>   <dd class="col-sm-9" data-qv="contact"></dd>
+          <dt class="col-sm-3 text-muted fw-normal">Cán bộ thụ lý</dt><dd class="col-sm-9" data-qv="officer"></dd>
+        </dl>
+        <h6 class="fw-bold">Mô tả chi tiết</h6>
+        <p class="text-secondary mb-3" style="white-space: pre-line;" data-qv="description"></p>
+        <h6 class="fw-bold">Ảnh minh chứng <span class="text-muted fw-normal" data-qv="imageCount"></span></h6>
+        <div class="row g-2" id="qvImages"></div>
+      </div>
+      <div class="modal-footer">
+        <a href="#" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm" id="qvDetailLink">
+          <i class="bi bi-box-arrow-up-right me-1"></i>Mở trang chi tiết
+        </a>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Phân công cán bộ xử lý (TV2) -->
+<div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" action="" class="modal-content" id="assignForm">
+      <?= csrf_field() ?>
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="assignTitle">Phân công cán bộ xử lý</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-3">
+          Sự cố: <span class="badge bg-light text-dark border" id="assignCode"></span>
+          <span class="fw-semibold text-dark" id="assignReportTitle"></span>
+        </p>
+        <?php if (empty($officers)): ?>
+          <div class="alert alert-warning small mb-0">
+            Chưa có tài khoản cán bộ. Vào <a href="<?= url('admin/users') ?>">Quản lý người dùng</a> để cấp vai trò <strong>officer</strong>.
+          </div>
+        <?php else: ?>
           <div class="mb-3">
-            <label class="form-label">Chọn cán bộ hiện trường</label>
-            <select name="officer_id" class="form-select" required>
-              <option value="">-- Chọn cán bộ --</option>
-              <?php foreach ($officers as $officer): ?>
-                <option value="<?= $officer->id ?>"><?= e($officer->full_name) ?></option>
+            <label for="assignOfficer" class="form-label fw-semibold">Cán bộ thụ lý <span class="text-danger">*</span></label>
+            <select name="officer_id" id="assignOfficer" class="form-select" required>
+              <option value="">— Chọn cán bộ —</option>
+              <?php foreach ($officers as $o): ?>
+                <option value="<?= (int)$o->id ?>"><?= e($o->full_name) ?> (<?= $o->role === 'admin' ? 'Quản trị viên' : 'Cán bộ' ?> · <?= e($o->email) ?>)</option>
               <?php endforeach; ?>
             </select>
           </div>
+          
+          <!-- Ô CHỌN NGÀY DEADLINE CỦA TV2 -->
           <div class="mb-3">
-            <label class="form-label">Hạn chót xử lý</label>
-            <!-- Ô chọn ngày deadline -->
-            <input type="date" name="deadline" class="form-control" required min="<?= date('Y-m-d') ?>">
-            <div class="form-text">Chọn ngày cán bộ phải hoàn thành xử lý.</div>
+            <label for="assignDeadline" class="form-label fw-semibold">Hạn chót xử lý <span class="text-danger">*</span></label>
+            <input type="date" name="deadline" id="assignDeadline" class="form-control" required min="<?= date('Y-m-d') ?>">
+            <div class="form-text">Chọn ngày cán bộ phải hoàn thành xử lý (không được ở quá khứ).</div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="submit" class="btn btn-success">Xác nhận Phân công</button>
-        </div>
-      </form>
-    </div>
+
+          <div>
+            <label for="assignNote" class="form-label fw-semibold">Ghi chú giao việc</label>
+            <textarea name="note" id="assignNote" rows="3" class="form-control" maxlength="1000"
+                      placeholder="Ví dụ: Kiểm tra hiện trường trong 24h, phối hợp UBND phường..."></textarea>
+          </div>
+          <div class="form-text mt-2">Trạng thái sự cố sẽ tự chuyển sang <strong>Đã phân công</strong>; cán bộ và người gửi nhận được thông báo.</div>
+        <?php endif; ?>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Huỷ</button>
+        <button type="submit" class="btn btn-success btn-sm" <?= empty($officers) ? 'disabled' : '' ?>>
+          <i class="bi bi-person-check me-1"></i>Phân công
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý Modal Phân công cán bộ
     var assignModal = document.getElementById('assignModal');
     if(assignModal) {
         assignModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             var action = button.getAttribute('data-action');
             var code = button.getAttribute('data-code');
+            var title = button.getAttribute('data-title');
             var currentOfficer = button.getAttribute('data-officer');
-            
+
             var form = document.getElementById('assignForm');
             form.setAttribute('action', action);
             document.getElementById('assignCode').textContent = code;
             
+            var titleEl = document.getElementById('assignReportTitle');
+            if(titleEl) titleEl.textContent = title;
+
+            // Reset lại ô chọn ngày deadline mỗi lần mở modal
+            var deadlineInput = document.getElementById('assignDeadline');
+            if(deadlineInput) deadlineInput.value = '';
+
             // Đặt lại giá trị cán bộ đã chọn trước đó (nếu có)
             var select = form.querySelector('select[name="officer_id"]');
             if(currentOfficer) {
@@ -200,4 +269,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script src="<?= asset('js/admin-reports.js') ?>" defer></script>
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>
