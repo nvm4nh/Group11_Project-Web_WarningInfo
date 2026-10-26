@@ -98,6 +98,13 @@ class AdminController extends Controller {
 
         $officerId = (int)($_POST['officer_id'] ?? 0);
         $note      = trim($_POST['note'] ?? '');
+        $deadline  = trim($_POST['deadline'] ?? '');
+
+        // Validate deadline (Leader yêu cầu: không cho chọn ngày quá khứ)
+        if (!empty($deadline) && strtotime($deadline) < strtotime(date('Y-m-d'))) {
+            setFlash('danger', 'Hạn chót không được ở trong quá khứ.');
+            redirect('admin/reports');
+        }
 
         $report = $this->reportModel->getById($reportId);
         if (!$report) {
@@ -120,7 +127,7 @@ class AdminController extends Controller {
         }
 
         $adminId = $_SESSION['user_id'] ?? null;
-        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note)) {
+        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note, $deadline)) {
             setFlash('danger', 'Có lỗi xảy ra khi phân công.');
             redirect('admin/reports');
         }
@@ -267,4 +274,4 @@ class AdminController extends Controller {
         }
         redirect('admin/categories');
     }
-}
+}
