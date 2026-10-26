@@ -17,6 +17,7 @@ class HomeController extends Controller {
         $this->view('home/index', [
             'title'         => 'Trang chủ',
             'active'        => 'home',
+            'use_map'       => true,   // nạp Leaflet cho khối bản đồ trang chủ
             'stats'         => $stats,
             'latestReports' => $latestReports,
             'categories'    => $categories

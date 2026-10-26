@@ -22,12 +22,16 @@ class AuthController extends Controller {
             if (empty($errors)) {
                 $user = $this->userModel->findByEmail($email);
                 if ($user && password_verify($password, $user->password)) {
+                    // Đổi mã phiên sau khi đăng nhập (chống chiếm phiên – session fixation)
+                    session_regenerate_id(true);
                     $_SESSION['user_id']   = $user->id;
                     $_SESSION['full_name'] = $user->full_name;
                     $_SESSION['email']     = $user->email;
                     $_SESSION['role']      = $user->role;
                     setFlash('success', 'Đăng nhập thành công!');
-                    redirect($user->role === 'admin' ? 'admin' : '');
+                    // Admin vào trang quản trị, cán bộ vào bàn làm việc, người dân về trang chủ
+                    $home = ['admin' => 'admin', 'officer' => 'officer'];
+                    redirect($home[$user->role] ?? '');
                 } else {
                     $errors['general'] = 'Email hoặc mật khẩu không đúng';
                 }
@@ -148,6 +152,8 @@ class AuthController extends Controller {
     }
 
     public function logout() {
+        // Chỉ đăng xuất bằng form POST có CSRF token (link GET từ trang lạ không đăng xuất được người dùng)
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') redirect('');
         $_SESSION = [];
         session_destroy();
         session_start();

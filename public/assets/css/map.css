@@ -1,0 +1,119 @@
+/* =========================================================
+   WarningInfo – Bản đồ số Leaflet (TV1 – Milestone 3)
+   Dùng biến màu trong base.css
+   ========================================================= */
+
+.wi-map {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  border-radius: var(--wi-radius);
+  overflow: hidden;
+  background: #e5ecea;
+  box-shadow: var(--wi-shadow-sm);
+  z-index: 0;                       /* không đè lên navbar / dropdown */
+}
+.wi-map.is-mini { height: 240px; border-radius: var(--wi-radius-sm); }
+.wi-map.is-picking { cursor: crosshair; outline: 3px dashed var(--wi-primary); outline-offset: -3px; }
+.wi-map.is-picking .leaflet-interactive { cursor: crosshair; }
+
+/* Thanh tiến trình khi đang gọi AJAX */
+.wi-map::after {
+  content: '';
+  position: absolute; top: 0; left: 0; height: 3px; width: 0;
+  background: var(--wi-primary);
+  z-index: 1000;
+  transition: width .3s ease;
+}
+.wi-map.is-loading::after { width: 70%; transition: width 2s ease-out; }
+
+/* ---------- Marker dạng ghim ---------- */
+.wi-marker-wrap { background: transparent; border: 0; }
+.wi-marker {
+  --c: var(--wi-medium);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--c);
+  border: 2px solid #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .35);
+  transition: transform .15s ease;
+}
+.wi-marker i { transform: rotate(45deg); color: #fff; font-size: 15px; line-height: 1; }
+.wi-marker:hover { transform: rotate(-45deg) scale(1.12); }
+.wi-marker.lvl-urgent   { --c: #dc2626; }
+.wi-marker.lvl-medium   { --c: #f59e0b; }
+.wi-marker.lvl-resolved { --c: #16a34a; }
+.wi-marker.lvl-urgent::after {      /* nhấp nháy cảnh báo khẩn */
+  content: '';
+  position: absolute; inset: -6px;
+  border-radius: 50% 50% 50% 0;
+  border: 2px solid #dc2626;
+  animation: wi-pulse 1.8s ease-out infinite;
+}
+@keyframes wi-pulse {
+  from { opacity: .8; transform: scale(.8); }
+  to   { opacity: 0;  transform: scale(1.5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wi-marker.lvl-urgent::after { animation: none; }
+}
+
+/* Vị trí người dùng */
+.wi-me {
+  display: block; width: 18px; height: 18px; border-radius: 50%;
+  background: #2563eb; border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, .25);
+}
+
+.wi-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ---------- Chú thích ---------- */
+.wi-map-legend {
+  display: flex; flex-wrap: wrap; gap: 4px 12px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, .95);
+  border-radius: 8px;
+  box-shadow: var(--wi-shadow-sm);
+  font-size: 12px; font-weight: 500; color: var(--wi-text);
+}
+.wi-map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---------- Popup xem nhanh ---------- */
+.wi-leaflet-popup .leaflet-popup-content-wrapper { padding: 0; border-radius: 12px; overflow: hidden; }
+.wi-leaflet-popup .leaflet-popup-content { margin: 0; width: 240px !important; }
+.wi-popup-thumb { display: block; width: 100%; height: 120px; object-fit: cover; background: var(--wi-primary-soft); }
+.wi-popup-body { padding: 10px 12px 12px; font-family: var(--bs-body-font-family); }
+.wi-popup-tags { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--wi-muted); text-transform: uppercase; letter-spacing: .02em; }
+.wi-popup-tags .wi-dot { margin-right: 2px; }
+.wi-popup-title { margin: 4px 0 6px; font-size: 14px; font-weight: 700; line-height: 1.35; color: var(--wi-text); }
+.wi-popup-meta { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--wi-muted); }
+.wi-popup-meta i { width: 14px; display: inline-block; }
+.wi-popup .btn-primary { color: #fff; }
+
+/* ---------- Trang /report/map ---------- */
+.map-page .wi-map { height: calc(100vh - 140px); min-height: 460px; }
+.map-sidebar { position: sticky; top: 84px; }
+.map-sidebar .form-check-label { font-size: 14px; }
+.map-results { max-height: 340px; overflow-y: auto; }
+.wi-map-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--wi-border);
+  color: var(--wi-text); text-decoration: none; font-size: 14px;
+}
+.wi-map-item:hover, .wi-map-item:focus { background: var(--wi-primary-soft); color: var(--wi-text); }
+.wi-map-item:last-child { border-bottom: 0; }
+.min-w-0 { min-width: 0; }
+
+@media (max-width: 991.98px) {
+  .map-page .wi-map { height: 60vh; min-height: 340px; }
+  .map-sidebar { position: static; }
+  .map-results { max-height: none; }
+}
+@media (max-width: 575.98px) {
+  .wi-map { height: 340px; }
+  .wi-map-legend { font-size: 11px; gap: 2px 8px; }
+}

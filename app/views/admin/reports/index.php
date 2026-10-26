@@ -88,17 +88,16 @@ $statuses    = $data['statuses'] ?? [];
             <td><?= e($r->category_name ?? 'N/A') ?></td>
             <td><span class="badge <?= $pBadge ?>"><?= e($pText) ?></span></td>
             <td>
-              <form method="post" action="<?= url('admin/updateReportStatus/' . $r->id) ?>" class="d-flex flex-column gap-1">
-                <div class="d-flex gap-1">
-                  <select name="status" class="form-select form-select-sm" aria-label="Trạng thái của <?= e($r->report_code) ?>">
-                    <?php foreach ($statuses as $code => $label): ?>
-                      <option value="<?= e($code) ?>" <?= $r->status === $code ? 'selected' : '' ?>><?= e($label) ?></option>
-                    <?php endforeach; ?>
-                  </select>
-                  <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
-                </div>
-                <input type="text" name="note" class="form-control form-control-sm" maxlength="500"
-                       placeholder="Ghi chú xử lý (tuỳ chọn)" aria-label="Ghi chú / lý do xử lý">
+              <form method="post" action="<?= url('admin/updateReportStatus/' . $r->id) ?>" class="d-flex gap-1 align-items-center">
+                <select name="status" class="form-select form-select-sm" style="width: auto;">
+                  <option value="new" <?= $r->status === 'new' ? 'selected' : '' ?>>Mới tiếp nhận</option>
+                  <option value="verifying" <?= $r->status === 'verifying' ? 'selected' : '' ?>>Đang xác minh</option>
+                  <option value="assigned" <?= $r->status === 'assigned' ? 'selected' : '' ?>>Đã phân công</option>
+                  <option value="in_progress" <?= $r->status === 'in_progress' ? 'selected' : '' ?>>Đang xử lý</option>
+                  <option value="resolved" <?= $r->status === 'resolved' ? 'selected' : '' ?>>Đã giải quyết</option>
+                  <option value="rejected" <?= $r->status === 'rejected' ? 'selected' : '' ?>>Từ chối</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
               </form>
               <div class="small mt-1 <?= $assigned ? 'text-primary' : 'text-muted' ?>">
                 <i class="bi bi-person-badge me-1"></i><?= $assigned ? 'Thụ lý: ' . e($assigned->officer_name) : 'Chưa phân công' ?>
@@ -131,95 +130,4 @@ $statuses    = $data['statuses'] ?? [];
   </div>
 </section>
 
-<!-- Modal: Xem nhanh chi tiết sự cố (TV5) -->
-<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="qvTitle" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div>
-          <span class="badge bg-light text-dark border" data-qv="code"></span>
-          <h5 class="modal-title fw-bold mt-1" id="qvTitle" data-qv="title"></h5>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-flex flex-wrap gap-2 mb-3">
-          <span class="badge" data-qv="priority"></span>
-          <span class="badge bg-secondary" data-qv="status"></span>
-          <span class="badge bg-light text-dark border"><i class="bi bi-tag me-1"></i><span data-qv="category"></span></span>
-        </div>
-        <dl class="row small mb-3">
-          <dt class="col-sm-3 text-muted fw-normal">Thời điểm</dt>   <dd class="col-sm-9" data-qv="time"></dd>
-          <dt class="col-sm-3 text-muted fw-normal">Địa chỉ</dt>     <dd class="col-sm-9" data-qv="address"></dd>
-          <dt class="col-sm-3 text-muted fw-normal qv-coords">Toạ độ GPS</dt><dd class="col-sm-9 qv-coords" data-qv="coords"></dd>
-          <dt class="col-sm-3 text-muted fw-normal">Người gửi</dt>   <dd class="col-sm-9" data-qv="contact"></dd>
-          <dt class="col-sm-3 text-muted fw-normal">Cán bộ thụ lý</dt><dd class="col-sm-9" data-qv="officer"></dd>
-        </dl>
-        <h6 class="fw-bold">Mô tả chi tiết</h6>
-        <p class="text-secondary mb-3" style="white-space: pre-line;" data-qv="description"></p>
-        <h6 class="fw-bold">Ảnh minh chứng <span class="text-muted fw-normal" data-qv="imageCount"></span></h6>
-        <div class="row g-2" id="qvImages"></div>
-      </div>
-      <div class="modal-footer">
-        <a href="#" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm" id="qvDetailLink">
-          <i class="bi bi-box-arrow-up-right me-1"></i>Mở trang chi tiết
-        </a>
-        <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Đóng</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Phân công cán bộ xử lý (TV2) -->
-<div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignTitle" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="post" action="" class="modal-content" id="assignForm">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="assignTitle">Phân công cán bộ xử lý</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <p class="small text-muted mb-3">
-          Sự cố: <span class="badge bg-light text-dark border" id="assignCode"></span>
-          <span class="fw-semibold text-dark" id="assignReportTitle"></span>
-        </p>
-        <?php if (empty($officers)): ?>
-          <div class="alert alert-warning small mb-0">
-            Chưa có tài khoản cán bộ. Vào <a href="<?= url('admin/users') ?>">Quản lý người dùng</a> để cấp vai trò <strong>officer</strong>.
-          </div>
-        <?php else: ?>
-          <div class="mb-3">
-            <label for="assignOfficer" class="form-label fw-semibold">Cán bộ thụ lý <span class="text-danger">*</span></label>
-            <select name="officer_id" id="assignOfficer" class="form-select" required>
-              <option value="">— Chọn cán bộ —</option>
-              <?php foreach ($officers as $o): ?>
-                <option value="<?= (int)$o->id ?>"><?= e($o->full_name) ?> (<?= $o->role === 'admin' ? 'Quản trị viên' : 'Cán bộ' ?> · <?= e($o->email) ?>)</option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="assignNote" class="form-label fw-semibold">Ghi chú giao việc</label>
-            <textarea name="note" id="assignNote" rows="2" class="form-control" maxlength="1000"
-                      placeholder="Ví dụ: Kiểm tra hiện trường trong 24h, phối hợp UBND phường..."></textarea>
-          </div>
-          <!-- THÊM Ô NHẬP HẠN CHÓT Ở ĐÂY -->
-          <div class="mb-3">
-            <label for="assignDeadline" class="form-label fw-semibold">Hạn chót xử lý</label>
-            <input type="datetime-local" name="deadline" id="assignDeadline" class="form-control">
-          </div>
-          
-          <div class="form-text mt-2">Trạng thái sự cố sẽ tự chuyển sang <strong>Đã phân công</strong>; cán bộ và người gửi nhận được thông báo.</div>
-        <?php endif; ?>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Huỷ</button>
-        <button type="submit" class="btn btn-success btn-sm" <?= empty($officers) ? 'disabled' : '' ?>>
-          <i class="bi bi-person-check me-1"></i>Phân công
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script src="<?= asset('js/admin-reports.js') ?>" defer></script>
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>

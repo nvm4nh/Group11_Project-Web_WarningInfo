@@ -13,6 +13,7 @@
     <?php endif; ?>
 
     <form method="post" action="<?= url('auth/register') ?>" novalidate>
+      <?= csrf_field() ?>
       <div class="mb-3">
         <label class="form-label">Họ và tên</label>
         <input type="text" name="full_name" class="form-control <?= !empty($data['errors']['full_name']) ? 'is-invalid' : '' ?>"

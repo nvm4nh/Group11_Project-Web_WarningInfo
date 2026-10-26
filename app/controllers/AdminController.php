@@ -65,12 +65,8 @@ class AdminController extends Controller {
         }
 
         $this->view('admin/reports/index', [
-            'title'       => 'Quản lý sự cố môi trường',
-            'reports'     => $reports,
-            'images'      => $this->reportModel->getImagesForReports($ids), 
-            'assignments' => $this->reportModel->getActiveAssignments(),    
-            'officers'    => $this->userModel->getOfficers(),
-            'statuses'    => $statuses,
+            'title'   => 'Quản lý sự cố môi trường',
+            'reports' => $this->reportModel->getAll(),
         ]);
     }
 
@@ -113,70 +109,6 @@ class AdminController extends Controller {
         } else {
             setFlash('danger', 'Có lỗi xảy ra khi cập nhật.');
         }
-        redirect('admin/reports');
-    }
-
-    public function assignOfficer($reportId = null) {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$reportId) redirect('admin/reports');
-
-        $officerId = (int)($_POST['officer_id'] ?? 0);
-        $note      = trim($_POST['note'] ?? '');
-        
-        // ĐÃ THÊM: Lấy deadline từ form
-        $deadline  = !empty($_POST['deadline']) ? $_POST['deadline'] : null; 
-
-        $report = $this->reportModel->getById($reportId);
-        if (!$report) {
-            setFlash('danger', 'Không tìm thấy sự cố.');
-            redirect('admin/reports');
-        }
-        if (in_array($report->status, ['resolved', 'closed', 'rejected'], true)) {
-            setFlash('warning', 'Sự cố đã kết thúc xử lý, không thể phân công.');
-            redirect('admin/reports');
-        }
-
-        $officer = null;
-        foreach ($this->userModel->getOfficers() as $o) {
-            if ((int)$o->id === $officerId) { $officer = $o; break; }
-        }
-        if (!$officer) {
-            setFlash('danger', 'Vui lòng chọn cán bộ hợp lệ.');
-            redirect('admin/reports');
-        }
-
-        $adminId = $_SESSION['user_id'] ?? null;
-        
-        // ĐÃ SỬA: Truyền thêm $deadline vào Model
-        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note, $deadline)) {
-            setFlash('danger', 'Có lỗi xảy ra khi phân công.');
-            redirect('admin/reports');
-        }
-
-        $historyNote = 'Phân công cho ' . $officer->full_name . ($note !== '' ? '. ' . $note : '');
-        $oldStatus = $report->status;
-        if ($oldStatus !== 'assigned') {
-            $this->reportModel->updateStatus($reportId, 'assigned', $adminId, $historyNote);
-        }
-
-        $this->notificationModel->create(
-            $officerId,
-            'Bạn được phân công xử lý: ' . $report->report_code,
-            "Sự cố \"{$report->title}\" đã được giao cho bạn." . ($note !== '' ? " Ghi chú: {$note}" : ''),
-            (int)$reportId,
-            'assignment'
-        );
-        
-        if (!empty($report->user_id) && $oldStatus !== 'assigned') {
-            $this->notificationModel->create(
-                $report->user_id,
-                'Cập nhật trạng thái: ' . $report->report_code,
-                "Báo cáo \"{$report->title}\" đã được phân công cán bộ xử lý.",
-                (int)$reportId,
-                'report_status'
-            );
-        }
-
-        setFlash('success', 'Đã phân công ' . $officer->full_name . ' xử lý sự cố ' . $report->report_code . '.');
         redirect('admin/reports');
     }
 

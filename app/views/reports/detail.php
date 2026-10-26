@@ -138,22 +138,31 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
         </div>
 
         <!-- Khung bình luận & Thảo luận -->
+        <?php
+          // Ghi chú nội bộ của cán bộ (is_internal = 1) chỉ cán bộ / quản trị viên thấy
+          $visibleComments = array_values(array_filter($r->comments ?? [], function ($cm) {
+            return !$cm->is_internal || isOfficer();
+          }));
+        ?>
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white py-3 border-bottom">
-            <h5 class="fw-bold mb-0"><i class="bi bi-chat-left-dots me-2 text-primary"></i>Phản hồi & Thảo luận (<?= count($r->comments) ?>)</h5>
+            <h5 class="fw-bold mb-0"><i class="bi bi-chat-left-dots me-2 text-primary"></i>Phản hồi & Thảo luận (<?= count($visibleComments) ?>)</h5>
           </div>
           <div class="card-body p-4">
-            <?php if (empty($r->comments)): ?>
+            <?php if (empty($visibleComments)): ?>
               <p class="text-muted text-center py-3">Chưa có bình luận nào. Hãy gửi phản hồi đầu tiên!</p>
             <?php else: ?>
               <div class="d-flex flex-column gap-3 mb-4">
-                <?php foreach ($r->comments as $cm): ?>
+                <?php foreach ($visibleComments as $cm): ?>
                   <div class="p-3 rounded-3 <?= $cm->is_internal ? 'bg-warning-subtle border-warning' : 'bg-light' ?>">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-1">
                       <span class="fw-bold small">
                         <?= e($cm->full_name ?: 'Ẩn danh') ?>
                         <?php if ($cm->role === 'admin' || $cm->role === 'officer'): ?>
                           <span class="badge bg-primary ms-1">Cán bộ xử lý</span>
+                        <?php endif; ?>
+                        <?php if ($cm->is_internal): ?>
+                          <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lock-fill me-1"></i>Nội bộ</span>
                         <?php endif; ?>
                       </span>
                       <span class="text-muted x-small"><?= date('H:i d/m/Y', strtotime($cm->created_at)) ?></span>
@@ -166,6 +175,7 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 
             <!-- Form bình luận -->
             <form method="post" action="<?= url('report/comment/' . $r->id) ?>">
+              <?= csrf_field() ?>
               <div class="mb-3">
                 <textarea name="content" class="form-control" rows="3" placeholder="Nhập ý kiến xác nhận hoặc bổ sung thông tin hiện trường..." required></textarea>
               </div>
@@ -177,6 +187,31 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 
       <!-- Cột phụ: Lịch sử tiến trình xử lý (Workflow) -->
       <div class="col-lg-4">
+        <?php if (!empty($data['use_map'])): /* Bản đồ vị trí hiện trường – TV1 (Milestone 3) */ ?>
+          <?php
+            $mapPoint = [
+              'lat'         => (float)$r->latitude,
+              'lng'         => (float)$r->longitude,
+              'title'       => $r->title,
+              'category_id' => (int)$r->category_id,
+              'level'       => ReportModel::mapLevel($r->priority, $r->status),
+            ];
+          ?>
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+              <h6 class="fw-bold mb-0"><i class="bi bi-geo-alt me-2 text-primary"></i>Vị trí hiện trường</h6>
+            </div>
+            <div class="card-body p-2">
+              <div class="wi-map is-mini" data-wi-map data-no-scroll-zoom
+                   data-point="<?= e(json_encode($mapPoint, JSON_UNESCAPED_UNICODE)) ?>"
+                   role="region" aria-label="Bản đồ vị trí sự cố"></div>
+              <div class="d-flex gap-2 p-2 pb-1">
+                <a href="<?= url('report/map?focus=' . (int)$r->id) ?>" class="btn btn-outline-primary btn-sm flex-fill"><i class="bi bi-map me-1"></i>Xem bản đồ lớn</a>
+                <a href="https://www.openstreetmap.org/directions?route=%3B<?= (float)$r->latitude ?>%2C<?= (float)$r->longitude ?>" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm flex-fill"><i class="bi bi-sign-turn-right me-1"></i>Chỉ đường</a>
+              </div>
+            </div>
+          </div>
+        <?php endif; ?>
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white py-3 border-bottom">
             <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Tiến trình xử lý</h6>
@@ -209,7 +244,7 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 <script>
 document.getElementById('btnUpvote')?.addEventListener('click', function() {
   const reportId = this.dataset.id;
-  fetch('<?= url("report/upvote/") ?>' + reportId, { method: 'POST' })
+  fetch('<?= url("report/upvote/") ?>' + reportId, { method: 'POST', headers: { 'X-CSRF-Token': '<?= e(csrf_token()) ?>' } })
     .then(res => res.json())
     .then(data => {
       if (data.status === 'success') {

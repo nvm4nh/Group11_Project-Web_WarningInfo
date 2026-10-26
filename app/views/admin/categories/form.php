@@ -10,6 +10,7 @@
           action="<?= $data['mode'] === 'create'
                     ? url('admin/storeCategory')
                     : url('admin/updateCategory/' . $item->id) ?>">
+      <?= csrf_field() ?>
       <div class="mb-3">
         <label class="form-label">Tên danh mục</label>
         <input type="text" name="name"
