@@ -199,6 +199,11 @@ $statuses    = $data['statuses'] ?? [];
               <?php endforeach; ?>
             </select>
           </div>
+                    <div class="mb-3">
+            <label for="assignDeadline" class="form-label fw-semibold">Hạn chót xử lý</label>
+            <input type="date" name="deadline" id="assignDeadline" class="form-control" min="<?= date('Y-m-d') ?>">
+            <div class="form-text">Chọn ngày cán bộ cần hoàn thành. Không được chọn ngày trong quá khứ.</div>
+          </div>
           <div>
             <label for="assignNote" class="form-label fw-semibold">Ghi chú giao việc</label>
             <textarea name="note" id="assignNote" rows="3" class="form-control" maxlength="1000"
