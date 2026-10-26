@@ -493,12 +493,12 @@ public function api_upvote($id = null)
         return $this->jsonError(400, 'Invalid report ID');
     }
 
-    $reportModel = new ReportModel();
-    $report = $reportModel->getById($id);
+    	$reportModel = new ReportModel();
+	$report = $reportModel->getById($id);
 
-    if (!$report) {
-        return $this->jsonError(404, 'Report not found');
-    }
+	if (!$report || !$report->is_public) {
+   	 return $this->jsonError(404, 'Report not found');
+	}
 
     $result = $reportModel->toggleUpvote($id, $_SESSION['user_id']);
     $report = $reportModel->getById($id);
@@ -520,12 +520,12 @@ public function api_comments($id = null)
         return $this->jsonError(400, 'Invalid report ID');
     }
 
-    $reportModel = new ReportModel();
-    $report = $reportModel->getById($id);
+    	$reportModel = new ReportModel();
+	$report = $reportModel->getById($id);
 
-    if (!$report) {
-        return $this->jsonError(404, 'Report not found');
-    }
+	if (!$report || !$report->is_public) {
+    	return $this->jsonError(404, 'Report not found');
+	}
 
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = min(50, max(1, (int)($_GET['limit'] ?? 10)));
@@ -542,7 +542,7 @@ public function api_comments($id = null)
 
     $db->query(
         "SELECT c.id, c.report_id, c.content, c.created_at,
-                u.id AS user_id, u.name AS user_name
+                u.id AS user_id, u.full_name AS user_name
          FROM comments c
          LEFT JOIN users u ON c.user_id = u.id
          WHERE c.report_id = :id AND c.is_internal = 0
@@ -594,10 +594,12 @@ public function api_add_comment()
         return $this->jsonError(400, 'Comment is too long');
     }
 
-    $reportModel = new ReportModel();
-    if (!$reportModel->getById($reportId)) {
-        return $this->jsonError(404, 'Report not found');
-    }
+    	$reportModel = new ReportModel();
+	$report = $reportModel->getById($reportId);
+
+	if (!$report || !$report->is_public) {
+    	return $this->jsonError(404, 'Report not found');
+	}
 
     $ok = $reportModel->addComment(
         $reportId,
