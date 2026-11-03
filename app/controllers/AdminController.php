@@ -25,6 +25,58 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function api_statistics() {
+        header('Content-Type: application/json; charset=utf-8');
+        require_once APPROOT . '/app/models/NotificationModel.php';
+
+        $byCategory = $this->reportModel->getStatsByCategory();
+        $byStatus = $this->reportModel->getStatsByStatus();
+
+        $byStatusTranslated = [];
+        foreach ($byStatus as $row) {
+            $row->label = NotificationModel::statusLabel($row->status);
+            $byStatusTranslated[] = $row;
+        }
+
+        $byMonth = $this->reportModel->getStatsByMonth();
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'categories' => $byCategory,
+                'statuses' => $byStatusTranslated,
+                'months' => $byMonth
+            ]
+        ]);
+        exit;
+    }
+
+    public function export_csv() {
+        require_once APPROOT . '/app/models/NotificationModel.php';
+        $reports = $this->reportModel->getAll();
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="Danh_sach_su_co_' . date('Ymd_His') . '.csv"');
+
+        $output = fopen('php://output', 'w');
+        fputs($output, "\xEF\xBB\xBF");
+        fputcsv($output, ['Mã BC', 'Tiêu đề', 'Danh mục', 'Mức độ', 'Trạng thái', 'Địa chỉ', 'Ngày gửi']);
+
+        foreach ($reports as $r) {
+            fputcsv($output, [
+                $r->report_code,
+                $r->title,
+                $r->category_name ?? 'N/A',
+                $r->priority,
+                NotificationModel::statusLabel($r->status),
+                $r->address,
+                $r->created_at
+            ]);
+        }
+        fclose($output);
+        exit;
+    }
+
     public function reports() {
         $reports = $this->reportModel->getAll();
         $ids = array_map(function ($r) { return $r->id; }, $reports);

@@ -425,4 +425,22 @@ class ReportModel {
             'rejected'   => (int)($res->rejected ?? 0),
         ];
     }
+
+    /** Thống kê theo danh mục */
+    public function getStatsByCategory() {
+        $this->db->query("SELECT c.name, COUNT(r.id) as total FROM categories c LEFT JOIN reports r ON c.id = r.category_id GROUP BY c.id");
+        return $this->db->resultSet();
+    }
+
+    /** Thống kê theo trạng thái */
+    public function getStatsByStatus() {
+        $this->db->query("SELECT status, COUNT(*) as total FROM reports GROUP BY status");
+        return $this->db->resultSet();
+    }
+
+    /** Thống kê xu hướng theo tháng */
+    public function getStatsByMonth() {
+        $this->db->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total FROM reports GROUP BY month ORDER BY month ASC");
+        return $this->db->resultSet();
+    }
 }
