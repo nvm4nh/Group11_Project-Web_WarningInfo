@@ -246,25 +246,26 @@ class ReportModel {
      * Các phân công cũ còn hiệu lực của báo cáo được chuyển sang 'cancelled' để mỗi sự cố chỉ có 1 người thụ lý.
      * Trả về ID phân công mới, false nếu lỗi.
      */
-    public function assignOfficer($reportId, $officerId, $assignedBy, $note = '') {
+    public function assignOfficer($reportId, $officerId, $assignedBy, $note = '', $deadline = null) {
         $this->db->query("UPDATE assignments SET assignment_status = 'cancelled'
                           WHERE report_id = :rid AND assignment_status IN ('assigned', 'accepted', 'in_progress')");
         $this->db->bind(':rid', (int)$reportId);
         $this->db->execute();
 
-        $this->db->query("INSERT INTO assignments (report_id, officer_id, assigned_by, assignment_note)
-                          VALUES (:rid, :oid, :by, :note)");
+                $this->db->query("INSERT INTO assignments (report_id, officer_id, assigned_by, assignment_note, deadline)
+                          VALUES (:rid, :oid, :by, :note, :deadline)");
         $this->db->bind(':rid',  (int)$reportId);
         $this->db->bind(':oid',  (int)$officerId);
         $this->db->bind(':by',   $assignedBy !== null ? (int)$assignedBy : null);
         $this->db->bind(':note', $note !== '' ? $note : null);
+        $this->db->bind(':deadline', $deadline !== '' ? $deadline : null);
         if (!$this->db->execute()) return false;
         return (int)$this->db->lastInsertId();
     }
 
     /** Cán bộ đang thụ lý của từng báo cáo: [report_id => {officer_id, officer_name, assigned_at, assignment_note}] */
     public function getActiveAssignments() {
-        $this->db->query("SELECT a.report_id, a.officer_id, u.full_name AS officer_name, a.assigned_at, a.assignment_note
+        $this->db->query("SELECT a.report_id, a.officer_id, u.full_name AS officer_name, a.assigned_at, a.assignment_note, a.deadline
                           FROM assignments a
                           JOIN users u ON u.id = a.officer_id
                           WHERE a.assignment_status IN ('assigned', 'accepted', 'in_progress')
@@ -423,5 +424,23 @@ class ReportModel {
             'resolved'   => (int)($res->resolved ?? 0),
             'rejected'   => (int)($res->rejected ?? 0),
         ];
+    }
+
+    /** Thống kê theo danh mục */
+    public function getStatsByCategory() {
+        $this->db->query("SELECT c.name, COUNT(r.id) as total FROM categories c LEFT JOIN reports r ON c.id = r.category_id GROUP BY c.id");
+        return $this->db->resultSet();
+    }
+
+    /** Thống kê theo trạng thái */
+    public function getStatsByStatus() {
+        $this->db->query("SELECT status, COUNT(*) as total FROM reports GROUP BY status");
+        return $this->db->resultSet();
+    }
+
+    /** Thống kê xu hướng theo tháng */
+    public function getStatsByMonth() {
+        $this->db->query("SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total FROM reports GROUP BY month ORDER BY month ASC");
+        return $this->db->resultSet();
     }
 }
