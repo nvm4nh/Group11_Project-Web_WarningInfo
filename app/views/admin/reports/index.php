@@ -21,7 +21,10 @@ $statuses    = $data['statuses'] ?? [];
         <h1 class="section-title mb-0">Quản lý sự cố môi trường</h1>
         <p class="text-muted small mb-0">Tiếp nhận, kiểm tra và điều phối tiến trình xử lý báo cáo.</p>
       </div>
-      <a href="<?= url('admin') ?>" class="btn btn-outline-secondary btn-sm">← Quay lại Dashboard</a>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="<?= url('admin/export_csv') ?>" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Xuất báo cáo CSV</a>
+        <a href="<?= url('admin') ?>" class="btn btn-outline-secondary btn-sm">← Quay lại Dashboard</a>
+      </div>
     </div>
 
     <?php if ($f = getFlash()): ?>
@@ -103,6 +106,9 @@ $statuses    = $data['statuses'] ?? [];
               </form>
               <div class="small mt-1 <?= $assigned ? 'text-primary' : 'text-muted' ?>">
                 <i class="bi bi-person-badge me-1"></i><?= $assigned ? 'Thụ lý: ' . e($assigned->officer_name) : 'Chưa phân công' ?>
+                <?php if ($assigned && !empty($assigned->deadline)): ?>
+                  <br><span class="text-danger"><i class="bi bi-clock"></i> Hạn: <?= date('d/m/Y', strtotime($assigned->deadline)) ?></span>
+                <?php endif; ?>
               </div>
             </td>
             <td class="text-nowrap">
@@ -198,6 +204,11 @@ $statuses    = $data['statuses'] ?? [];
                 <option value="<?= (int)$o->id ?>"><?= e($o->full_name) ?> (<?= $o->role === 'admin' ? 'Quản trị viên' : 'Cán bộ' ?> · <?= e($o->email) ?>)</option>
               <?php endforeach; ?>
             </select>
+          </div>
+                    <div class="mb-3">
+            <label for="assignDeadline" class="form-label fw-semibold">Hạn chót xử lý</label>
+            <input type="date" name="deadline" id="assignDeadline" class="form-control" min="<?= date('Y-m-d') ?>">
+            <div class="form-text">Chọn ngày cán bộ cần hoàn thành. Không được chọn ngày trong quá khứ.</div>
           </div>
           <div>
             <label for="assignNote" class="form-label fw-semibold">Ghi chú giao việc</label>

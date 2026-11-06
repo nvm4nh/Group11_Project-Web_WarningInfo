@@ -249,57 +249,116 @@ class ReportController extends Controller {
        Chỉ trả báo cáo công khai; KHÔNG trả thông tin liên hệ (email/SĐT) của người gửi.
        ========================================================= */
     public function api_list() {
-        header('Content-Type: application/json; charset=utf-8');
+    header('Content-Type: application/json; charset=utf-8');
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            http_response_code(405);
-            echo json_encode(['status' => 'error', 'message' => 'Chỉ hỗ trợ phương thức GET'], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
-        $priority = $_GET['priority'] ?? '';
-        $status   = $_GET['status'] ?? '';
-        $filters = [
-            'public_only' => true,
-            'category_id' => (int)($_GET['category_id'] ?? 0) ?: null,
-            'priority'    => in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null,
-            'status'      => in_array($status, ReportModel::STATUSES, true) ? $status : null,
-            'keyword'     => trim((string)($_GET['q'] ?? '')),
-        ];
-
-        require_once APPROOT . '/app/models/NotificationModel.php';   // dùng statusLabel()
-        $data = [];
-        foreach ($this->reportModel->getAll($filters) as $r) {
-            $data[] = [
-                'id'            => (int)$r->id,
-                'report_code'   => $r->report_code,
-                'title'         => $r->title,
-                'description'   => $r->description,
-                'category_id'   => (int)$r->category_id,
-                'category_name' => $r->category_name,
-                'priority'      => $r->priority,
-                'status'        => $r->status,
-                'status_label'  => NotificationModel::statusLabel($r->status),
-                'address'       => $r->address,
-                'latitude'      => $r->latitude !== null ? (float)$r->latitude : null,
-                'longitude'     => $r->longitude !== null ? (float)$r->longitude : null,
-                'upvote_count'  => (int)$r->upvote_count,
-                'comment_count' => (int)$r->comment_count,
-                'thumbnail_url' => $r->thumbnail ? url($r->thumbnail) : null,
-                'detail_url'    => url('report/detail/' . $r->id),
-                'incident_time' => $r->incident_time,
-                'created_at'    => $r->created_at,
-            ];
-        }
-
-        echo json_encode([
-            'status'  => 'success',
-            'count'   => count($data),
-            'filters' => array_filter($filters, function ($v, $k) { return $k !== 'public_only' && $v !== null && $v !== ''; }, ARRAY_FILTER_USE_BOTH),
-            'data'    => $data,
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        $this->jsonError(405, 'Only GET is supported');
     }
+
+    $priority = trim((string)($_GET['priority'] ?? ''));
+    $status = trim((string)($_GET['status'] ?? ''));
+    $keyword = trim((string)($_GET['keyword'] ?? $_GET['q'] ?? ''));
+    $fromDate = trim((string)($_GET['from_date'] ?? ''));
+    $toDate = trim((string)($_GET['to_date'] ?? ''));
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $limit = min(100, max(1, (int)($_GET['limit'] ?? 10)));
+
+    foreach (['from_date' => $fromDate, 'to_date' => $toDate] as $name => $date) {
+        if ($date !== '') {
+            $parsed = DateTime::createFromFormat('!Y-m-d', $date);
+            if (!$parsed || $parsed->format('Y-m-d') !== $date) {
+                $this->jsonError(422, "$name must use YYYY-MM-DD");
+            }
+        }
+    }
+
+    if ($fromDate !== '' && $toDate !== '' && $fromDate > $toDate) {
+        $this->jsonError(422, 'from_date must not be after to_date');
+    }
+
+    if ($priority !== '' && !in_array($priority, ReportModel::PRIORITIES, true)) {
+        $this->jsonError(422, 'Invalid priority');
+    }
+
+    if ($status !== '' && !in_array($status, ReportModel::STATUSES, true)) {
+        $this->jsonError(422, 'Invalid status');
+    }
+
+    $rawCats = $_GET['category_id'] ?? [];
+    $rawCats = is_array($rawCats) ? $rawCats : explode(',', (string)$rawCats);
+    $categoryIds = array_values(array_unique(array_filter(array_map('intval', $rawCats), function ($id) {
+        return $id > 0;
+    })));
+
+    $filters = [
+        'public_only' => true,
+        'priority' => $priority !== '' ? $priority : null,
+        'status' => $status !== '' ? $status : null,
+        'keyword' => $keyword,
+    ];
+
+    require_once APPROOT . '/app/models/NotificationModel.php';
+
+    $reports = $this->reportModel->getAll($filters);
+
+    $reports = array_values(array_filter($reports, function ($r) use ($categoryIds, $fromDate, $toDate) {
+        if ($categoryIds && !in_array((int)$r->category_id, $categoryIds, true)) {
+            return false;
+        }
+
+        $date = substr((string)($r->incident_time ?? $r->created_at ?? ''), 0, 10);
+
+        if ($fromDate !== '' && ($date === '' || $date < $fromDate)) {
+            return false;
+        }
+
+        if ($toDate !== '' && ($date === '' || $date > $toDate)) {
+            return false;
+        }
+
+        return true;
+    }));
+
+    $total = count($reports);
+    $totalPages = (int)ceil($total / $limit);
+    $reports = array_slice($reports, ($page - 1) * $limit, $limit);
+
+    $data = [];
+    foreach ($reports as $r) {
+        $data[] = [
+            'id' => (int)$r->id,
+            'report_code' => $r->report_code,
+            'title' => $r->title,
+            'description' => $r->description,
+            'category_id' => (int)$r->category_id,
+            'category_name' => $r->category_name,
+            'priority' => $r->priority,
+            'status' => $r->status,
+            'status_label' => NotificationModel::statusLabel($r->status),
+            'address' => $r->address,
+            'latitude' => $r->latitude !== null ? (float)$r->latitude : null,
+            'longitude' => $r->longitude !== null ? (float)$r->longitude : null,
+            'upvote_count' => (int)$r->upvote_count,
+            'comment_count' => (int)$r->comment_count,
+            'thumbnail_url' => $r->thumbnail ? url($r->thumbnail) : null,
+            'detail_url' => url('report/detail/' . $r->id),
+            'incident_time' => $r->incident_time,
+            'created_at' => $r->created_at,
+        ];
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'data' => $data,
+        'pagination' => [
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'total_pages' => $totalPages,
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 
     /* =========================================================
        BẢN ĐỒ SỐ LEAFLET (TV1 – Milestone 3, Issue #3)
@@ -414,10 +473,187 @@ class ReportController extends Controller {
     }
 
     private function jsonError($code, $message) {
-        http_response_code($code);
+        header('Content-Type: application/json; charset=utf-8');
+	http_response_code($code);
         echo json_encode(['status' => 'error', 'message' => $message], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+public function api_upvote($id = null)
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        return $this->jsonError(405, 'Method not allowed');
+    }
+
+    if (!isLoggedIn()) {
+        return $this->jsonError(401, 'Please log in first');
+    }
+
+    $id = (int)($id ?? $_POST['report_id'] ?? 0);
+    if ($id <= 0) {
+        return $this->jsonError(400, 'Invalid report ID');
+    }
+
+    	$reportModel = new ReportModel();
+	$report = $reportModel->getById($id);
+
+	if (!$report || !$report->is_public) {
+   	 return $this->jsonError(404, 'Report not found');
+	}
+
+    $result = $reportModel->toggleUpvote($id, $_SESSION['user_id']);
+    $report = $reportModel->getById($id);
+
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'status' => 'success',
+        'action' => $result['action'],
+        'upvotes' => (int)$report->upvote_count,
+        'user_voted' => $result['action'] === 'upvoted'
+    ]);
+    exit;
+}
+
+public function api_comments($id = null)
+{
+    $id = (int)($id ?? $_GET['report_id'] ?? 0);
+    if ($id <= 0) {
+        return $this->jsonError(400, 'Invalid report ID');
+    }
+
+    	$reportModel = new ReportModel();
+	$report = $reportModel->getById($id);
+
+	if (!$report || !$report->is_public) {
+    	return $this->jsonError(404, 'Report not found');
+	}
+
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $limit = min(50, max(1, (int)($_GET['limit'] ?? 10)));
+    $offset = ($page - 1) * $limit;
+
+    $db = new Database();
+    $db->query(
+        "SELECT COUNT(*) AS total
+         FROM comments
+         WHERE report_id = :id AND is_internal = 0"
+    );
+    $db->bind(':id', $id, PDO::PARAM_INT);
+    $total = (int)$db->single()->total;
+
+    $db->query(
+        "SELECT c.id, c.report_id, c.content, c.created_at,
+                u.id AS user_id, u.full_name AS user_name
+         FROM comments c
+         LEFT JOIN users u ON c.user_id = u.id
+         WHERE c.report_id = :id AND c.is_internal = 0
+         ORDER BY c.created_at DESC
+         LIMIT :limit OFFSET :offset"
+    );
+    $db->bind(':id', $id, PDO::PARAM_INT);
+    $db->bind(':limit', $limit, PDO::PARAM_INT);
+    $db->bind(':offset', $offset, PDO::PARAM_INT);
+    $comments = $db->resultSet();
+
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'status' => 'success',
+        'data' => $comments,
+        'pagination' => [
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+            'total_pages' => (int)ceil($total / $limit)
+        ]
+    ]);
+    exit;
+}
+
+public function api_add_comment()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        return $this->jsonError(405, 'Method not allowed');
+    }
+
+    if (!isLoggedIn()) {
+        return $this->jsonError(401, 'Please log in first');
+    }
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($input)) {
+        $input = $_POST;
+    }
+
+    $reportId = (int)($input['report_id'] ?? 0);
+    $content = trim($input['content'] ?? '');
+
+    if ($reportId <= 0 || $content === '') {
+        return $this->jsonError(400, 'Report ID and comment are required');
+    }
+
+    if (mb_strlen($content) > 5000) {
+        return $this->jsonError(400, 'Comment is too long');
+    }
+
+    	$reportModel = new ReportModel();
+	$report = $reportModel->getById($reportId);
+
+	if (!$report || !$report->is_public) {
+    	return $this->jsonError(404, 'Report not found');
+	}
+
+    $ok = $reportModel->addComment(
+        $reportId,
+        $_SESSION['user_id'],
+        $content,
+        0
+    );
+
+    if (!$ok) {
+        return $this->jsonError(500, 'Could not add comment');
+    }
+
+    http_response_code(201);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Comment added'
+    ]);
+    exit;
+}
+
+public function api_xml_feed()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        return $this->jsonError(405, 'Method not allowed');
+    }
+
+    $reportModel = new ReportModel();
+    $reports = $reportModel->getAll(['public_only' => true]);
+
+    $xml = new SimpleXMLElement(
+        '<?xml version="1.0" encoding="UTF-8"?><reports></reports>'
+    );
+
+    foreach ($reports as $report) {
+        $item = $xml->addChild('report');
+        $item->addChild('id', (string)$report->id);
+        $item->addChild('title', htmlspecialchars(
+            (string)$report->title, ENT_XML1, 'UTF-8'
+        ));
+        $item->addChild('description', htmlspecialchars(
+            (string)$report->description, ENT_XML1, 'UTF-8'
+        ));
+        $item->addChild('status', (string)$report->status);
+        $item->addChild('created_at', (string)$report->created_at);
+    }
+
+    header('Content-Type: application/xml; charset=utf-8');
+    echo $xml->asXML();
+    exit;
+}
+
+
 
     public function comment($id = null) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('report');

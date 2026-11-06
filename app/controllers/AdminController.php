@@ -25,6 +25,65 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function api_statistics() {
+        header('Content-Type: application/json; charset=utf-8');
+        require_once APPROOT . '/app/models/NotificationModel.php';
+
+        $byCategory = $this->reportModel->getStatsByCategory();
+        $byStatus = $this->reportModel->getStatsByStatus();
+
+        $byStatusTranslated = [];
+        foreach ($byStatus as $row) {
+            $row->label = NotificationModel::statusLabel($row->status);
+            $byStatusTranslated[] = $row;
+        }
+
+        $byMonth = $this->reportModel->getStatsByMonth();
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'categories' => $byCategory,
+                'statuses' => $byStatusTranslated,
+                'months' => $byMonth
+            ]
+        ]);
+        exit;
+    }
+
+    public function export_csv() {
+        require_once APPROOT . '/app/models/NotificationModel.php';
+        $reports = $this->reportModel->getAll();
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="Danh_sach_su_co_' . date('Ymd_His') . '.csv"');
+
+        $output = fopen('php://output', 'w');
+        fputs($output, "\xEF\xBB\xBF");
+        fputcsv($output, ['Mã BC', 'Tiêu đề', 'Danh mục', 'Mức độ', 'Trạng thái', 'Địa chỉ', 'Ngày gửi']);
+
+        $sanitize = function ($value) {
+            if (is_string($value) && in_array(substr($value, 0, 1), ['=', '+', '-', '@'], true)) {
+                return "'" . $value;
+            }
+            return $value;
+        };
+
+        foreach ($reports as $r) {
+            fputcsv($output, [
+                $r->report_code,
+                $sanitize($r->title),
+                $sanitize($r->category_name ?? 'N/A'),
+                $r->priority,
+                NotificationModel::statusLabel($r->status),
+                $sanitize($r->address),
+                $r->created_at
+            ]);
+        }
+        fclose($output);
+        exit;
+    }
+
     public function reports() {
         $reports = $this->reportModel->getAll();
         $ids = array_map(function ($r) { return $r->id; }, $reports);
@@ -98,6 +157,16 @@ class AdminController extends Controller {
 
         $officerId = (int)($_POST['officer_id'] ?? 0);
         $note      = trim($_POST['note'] ?? '');
+        $deadline  = trim($_POST['deadline'] ?? '');
+        if ($deadline !== '' && strlen($deadline) <= 10) {
+            $deadline .= ' 23:59:59';
+        }
+
+        // Validate deadline (Leader yêu cầu: không cho chọn ngày quá khứ)
+        if (!empty($deadline) && strtotime($deadline) < strtotime(date('Y-m-d'))) {
+            setFlash('danger', 'Hạn chót không được ở trong quá khứ.');
+            redirect('admin/reports');
+        }
 
         $report = $this->reportModel->getById($reportId);
         if (!$report) {
@@ -120,7 +189,7 @@ class AdminController extends Controller {
         }
 
         $adminId = $_SESSION['user_id'] ?? null;
-        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note)) {
+        if (!$this->reportModel->assignOfficer($reportId, $officerId, $adminId, $note, $deadline)) {
             setFlash('danger', 'Có lỗi xảy ra khi phân công.');
             redirect('admin/reports');
         }
@@ -267,4 +336,4 @@ class AdminController extends Controller {
         }
         redirect('admin/categories');
     }
-}
+}
