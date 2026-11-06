@@ -19,10 +19,12 @@ $statuses    = $data['statuses'] ?? [];
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <div>
         <h1 class="section-title mb-0">Quản lý sự cố môi trường</h1>
-        <a href="<?= url('admin/export_csv') ?>" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Xuất báo cáo CSV</a>
         <p class="text-muted small mb-0">Tiếp nhận, kiểm tra và điều phối tiến trình xử lý báo cáo.</p>
       </div>
-      <a href="<?= url('admin') ?>" class="btn btn-outline-secondary btn-sm">← Quay lại Dashboard</a>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="<?= url('admin/export_csv') ?>" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Xuất báo cáo CSV</a>
+        <a href="<?= url('admin') ?>" class="btn btn-outline-secondary btn-sm">← Quay lại Dashboard</a>
+      </div>
     </div>
 
     <?php if ($f = getFlash()): ?>

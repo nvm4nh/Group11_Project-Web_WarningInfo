@@ -62,14 +62,21 @@ class AdminController extends Controller {
         fputs($output, "\xEF\xBB\xBF");
         fputcsv($output, ['Mã BC', 'Tiêu đề', 'Danh mục', 'Mức độ', 'Trạng thái', 'Địa chỉ', 'Ngày gửi']);
 
+        $sanitize = function ($value) {
+            if (is_string($value) && in_array(substr($value, 0, 1), ['=', '+', '-', '@'], true)) {
+                return "'" . $value;
+            }
+            return $value;
+        };
+
         foreach ($reports as $r) {
             fputcsv($output, [
                 $r->report_code,
-                $r->title,
-                $r->category_name ?? 'N/A',
+                $sanitize($r->title),
+                $sanitize($r->category_name ?? 'N/A'),
                 $r->priority,
                 NotificationModel::statusLabel($r->status),
-                $r->address,
+                $sanitize($r->address),
                 $r->created_at
             ]);
         }
@@ -151,6 +158,9 @@ class AdminController extends Controller {
         $officerId = (int)($_POST['officer_id'] ?? 0);
         $note      = trim($_POST['note'] ?? '');
         $deadline  = trim($_POST['deadline'] ?? '');
+        if ($deadline !== '' && strlen($deadline) <= 10) {
+            $deadline .= ' 23:59:59';
+        }
 
         // Validate deadline (Leader yêu cầu: không cho chọn ngày quá khứ)
         if (!empty($deadline) && strtotime($deadline) < strtotime(date('Y-m-d'))) {

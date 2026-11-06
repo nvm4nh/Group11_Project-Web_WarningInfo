@@ -1,6 +1,6 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
 
-<section class="section">
+<section class="section" data-statistics-url="<?= e(url('admin/api_statistics')) ?>">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="section-title mb-0">Bảng điều khiển Admin</h1>
@@ -87,60 +87,7 @@
   </div>
 </section>
 
-<!-- Yêu cầu 5: Ghim phiên bản Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    fetch('<?= url('admin/api_statistics') ?>')
-      .then(response => response.json())
-      .then(res => {
-        if (res.status === 'success') {
-          new Chart(document.getElementById('categoryChart'), {
-            type: 'doughnut',
-            data: {
-              labels: res.data.categories.map(item => item.name),
-              datasets: [{
-                data: res.data.categories.map(item => item.total),
-                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69']
-              }]
-            },
-            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-          });
-
-          new Chart(document.getElementById('statusChart'), {
-            type: 'bar',
-            data: {
-              labels: res.data.statuses.map(item => item.label), // Dùng nhãn tiếng Việt
-              datasets: [{
-                label: 'Số lượng',
-                data: res.data.statuses.map(item => item.total),
-                backgroundColor: '#4e73df',
-                borderRadius: 4
-              }]
-            },
-            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
-          });
-
-          new Chart(document.getElementById('monthChart'), {
-            type: 'line',
-            data: {
-              labels: res.data.months.map(item => item.month),
-              datasets: [{
-                label: 'Số lượng sự cố',
-                data: res.data.months.map(item => item.total),
-                borderColor: '#e74a3b',
-                backgroundColor: 'rgba(231, 74, 59, 0.1)',
-                fill: true,
-                tension: 0.3,
-                pointRadius: 5
-              }]
-            },
-            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-          });
-        }
-      })
-      .catch(err => console.error('Lỗi API biểu đồ:', err));
-  });
-</script>
+<script src="<?= asset('js/admin-charts.js') ?>"></script>
 
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>
