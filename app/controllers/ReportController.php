@@ -49,7 +49,11 @@ class ReportController extends Controller {
         if (!$id) redirect('report');
 
         $report = $this->reportModel->getById($id);
-        if (!$report) {
+        // Báo cáo không công khai: chỉ người gửi và cán bộ / quản trị viên được xem (các API đã chặn tương tự)
+        $canView = $report && ($report->is_public
+            || isOfficer()
+            || (isLoggedIn() && (int)$report->user_id === (int)$_SESSION['user_id']));
+        if (!$canView) {
             setFlash('danger', 'Không tìm thấy sự cố này.');
             redirect('report');
         }
