@@ -98,6 +98,8 @@
   }
 
   bell.addEventListener('show.bs.dropdown', load);
+  // Trang "Thông báo của tôi" đánh dấu đã đọc bằng AJAX (ajax-interaction.js) → cập nhật lại chuông
+  document.addEventListener('wi:notifications-changed', load);
   if (btnReadAll) btnReadAll.addEventListener('click', readAll);
   setInterval(() => { if (document.visibilityState === 'visible') load(); }, 60000);
   load();
