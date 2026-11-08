@@ -1,0 +1,187 @@
+﻿<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset='utf-8'>
+<title>Kế hoạch phân công nhiệm vụ Milestone 3</title>
+<style>
+body { font-family: 'Calibri', 'Times New Roman', sans-serif; font-size: 11pt; line-height: 1.4; color: #222222; margin: 2cm; }
+h1 { color: #0D47A1; font-size: 14pt; border-bottom: 2px solid #0D47A1; padding-bottom: 4px; margin-top: 18pt; }
+h2 { color: #1565C0; font-size: 12pt; margin-top: 14pt; margin-bottom: 4pt; }
+table { width: 100%; border-collapse: collapse; margin: 12pt 0; font-size: 10pt; }
+th, td { border: 1px solid #CCCCCC; padding: 6pt 8pt; vertical-align: top; }
+th { background-color: #0D47A1; color: #FFFFFF; font-weight: bold; text-align: left; }
+.sub-header { text-align: center; color: #555555; margin-bottom: 15pt; }
+.title-box { text-align: center; margin: 20pt 0; }
+.badge { font-family: monospace; font-weight: bold; color: #0D47A1; background: #E3F2FD; padding: 2px 4px; }
+.meta-box { background-color: #F8F9FA; border-left: 4px solid #0D47A1; padding: 8pt 12pt; margin: 6pt 0; font-size: 10pt; }
+ul { margin-top: 4pt; margin-bottom: 8pt; padding-left: 20pt; }
+li { margin-bottom: 3pt; }
+</style>
+</head>
+<body>
+<div class='sub-header'>
+  <p style='margin:0; font-size:11pt; font-weight:bold; color:#0D47A1;'>TRƯỜNG ĐẠI HỌC KINH TẾ TP. HỒ CHÍ MINH (UEH)</p>
+  <p style='margin:0; font-size:10pt; font-weight:bold; color:#555555;'>TRƯỜNG CÔNG NGHỆ VÀ THIẾT KẾ – KHOA CÔNG NGHỆ THÔNG TIN KINH DOANH</p>
+  <p style='margin:4pt 0 0 0; font-size:10pt;'>Học phần: <b>Phát Triển Ứng Dụng Web</b> &nbsp;|&nbsp; Giảng viên: <b>TS. Đặng Ngọc Hoàng Thành</b></p>
+  <p style='margin:2pt 0 0 0; font-size:10pt;'>Đề tài: <b>WarningInfo – Hệ Thống Báo Cáo & Cảnh Báo Vấn Đề Môi Trường</b> &nbsp;|&nbsp; Nhóm: <b>11</b></p>
+  <hr style='border: 0; border-top: 1px solid #0D47A1; margin-top: 8pt;'>
+</div>
+
+<div class='title-box'>
+  <h2 style='font-size: 16pt; color: #0D47A1; margin: 0; text-transform: uppercase;'>KẾ HOẠCH TRIỂN KHAI & PHÂN CÔNG NHIỆM VỤ CHI TIẾT</h2>
+  <h3 style='font-size: 13pt; color: #1565C0; margin: 5pt 0;'>MILESTONE 3: TÍCH HỢP NÂNG CAO, AJAX, WEBSERVICE & BẢN ĐỒ TƯƠNG TÁC (TUẦN 6 – TUẦN 8)</h3>
+</div>
+
+<h1>I. ĐÁNH GIÁ TỔNG QUAN & MỤC TIÊU CỐT LÕI</h1>
+<p><b>1. Hiện trạng sau Milestone 2:</b> Nhóm đã hoàn thành trọn vẹn 100% cốt lõi nghiệp vụ MVP (Upload đa ảnh hiện trường, định vị GPS sơ bộ, phân hệ duyệt bài của Admin, lưu lịch sử trạng thái <code>report_status_history</code>, tự động kích hoạt thông báo <code>notifications</code> và màn hình 'Báo cáo của tôi'). Toàn bộ mã nguồn đã được kiểm thử chéo và merge an toàn vào nhánh <code>develop</code>.</p>
+<p><b>2. Mục tiêu trọng tâm Milestone 3 (Tiêu chuẩn điểm 9.0 – 10.0 của UEH):</b></p>
+<ul>
+  <li>Xây dựng hệ thống <b>WebService RESTful API (JSON/XML)</b> hoàn chỉnh phục vụ trao đổi dữ liệu bất đồng bộ.</li>
+  <li>Hiện thực hóa kỹ thuật <b>AJAX toàn diện</b>: Bộ lọc sự cố đa tiêu chí không tải lại trang, nút Upvote tin cậy, tải thêm bình luận động (Load More) và đánh dấu đã đọc thông báo tức thì.</li>
+  <li>Tích hợp <b>Bản đồ số tương tác Leaflet.js (OpenStreetMap)</b> trực quan hóa vị trí các điểm nóng sự cố theo tọa độ GPS và tìm kiếm sự cố xung quanh người dùng.</li>
+  <li>Nâng cấp Dashboard Quản trị với biểu đồ phân tích trực quan <b>Chart.js</b> và tính năng Xuất báo cáo dữ liệu (Export CSV/Excel).</li>
+  <li>Hoàn thiện bản thảo Chương 5 cuốn Báo cáo Đồ án UEH và quản lý minh chứng qua GitHub Issues & Pull Requests.</li>
+</ul>
+
+<h1>II. BẢNG PHÂN CÔNG NHIỆM VỤ TỔNG QUAN (NHÓM 11)</h1>
+<table>
+  <thead>
+    <tr>
+      <th style='width:5%; text-align:center;'>STT</th>
+      <th style='width:22%;'>Thành viên</th>
+      <th style='width:20%;'>Vai trò</th>
+      <th style='width:23%;'>Nhánh Git</th>
+      <th style='width:30%;'>Sản phẩm bàn giao</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style='text-align:center;'>1</td>
+      <td><b>Khiếu Hoàng Nam Anh</b><br><small style='color:#666;'>TV1 - Nhóm trưởng</small></td>
+      <td>Team Lead & Kiến trúc hệ thống</td>
+      <td><span class='badge'>feature/tv1-system-leaflet-map</span></td>
+      <td>• Bản đồ số Leaflet.js tương tác<br>• Endpoint GeoJSON sự cố<br>• Quản trị dự án & Review PR</td>
+    </tr>
+    <tr style='background:#F8F9FA;'>
+      <td style='text-align:center;'>2</td>
+      <td><b>Trần Yến Phụng</b><br><small style='color:#666;'>TV2</small></td>
+      <td>Backend Admin & Workflow</td>
+      <td><span class='badge'>feature/tv2-admin-statistics-export</span></td>
+      <td>• API Thống kê Chart.js<br>• Phân công cán bộ xử lý<br>• Xuất báo cáo CSV UTF-8</td>
+    </tr>
+    <tr>
+      <td style='text-align:center;'>3</td>
+      <td><b>Lê Tố Nguyệt Minh</b><br><small style='color:#666;'>TV3</small></td>
+      <td>Backend Features & WebService</td>
+      <td><span class='badge'>feature/tv3-webservice-rest-api</span></td>
+      <td>• WebService RESTful API (JSON)<br>• Endpoint Lọc sự cố & Tương tác<br>• WebService XML Feed</td>
+    </tr>
+    <tr style='background:#F8F9FA;'>
+      <td style='text-align:center;'>4</td>
+      <td><b>Lê Trọng Hiếu</b><br><small style='color:#666;'>TV4</small></td>
+      <td>Frontend UI/UX & Responsive</td>
+      <td><span class='badge'>feature/tv4-ui-map-and-filters</span></td>
+      <td>• Giao diện Bản đồ (/report/map)<br>• Custom Marker & Popup Leaflet<br>• Bộ ảnh chụp Mobile Responsive</td>
+    </tr>
+    <tr>
+      <td style='text-align:center;'>5</td>
+      <td><b>Nguyễn Thế Luân</b><br><small style='color:#666;'>TV5</small></td>
+      <td>Frontend AJAX Integration & QA</td>
+      <td><span class='badge'>feature/tv5-ajax-core-and-docs</span></td>
+      <td>• ajax-filter.js (Lọc không reload)<br>• ajax-interaction.js (Upvote, Bình luận)<br>• Soạn Chương 5 Báo cáo UEH</td>
+    </tr>
+  </tbody>
+</table>
+
+<h1>III. CHI TIẾT CÁC GITHUB ISSUES CHO MILESTONE 3</h1>
+
+<h2>📌 Issue #1: [TV3] Xây dựng bộ WebService RESTful API (JSON/XML) cho sự cố và tương tác</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Lê Tố Nguyệt Minh (TV3) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv3-webservice-rest-api</span><br>
+  <b>Labels:</b> <code>backend</code>, <code>webservice</code>, <code>api</code>, <code>enhancement</code>
+</div>
+<p><i>Mô tả:</i> Xây dựng các endpoint WebService cung cấp dữ liệu JSON chuẩn RESTful phục vụ Client gọi AJAX bất đồng bộ và mở rộng định dạng XML feed theo tiêu chí đồ án.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Hoàn thiện endpoint <code>GET /report/api_list</code>: Hỗ trợ bộ lọc <code>category_id</code>, <code>severity</code>, <code>status</code>, <code>from_date</code>, <code>to_date</code>, <code>keyword</code>, <code>page</code>, <code>limit</code>.</li>
+  <li>Xây dựng endpoint <code>POST /report/api_upvote</code>: Xử lý tăng điểm tin cậy sự cố, chống spam theo session/user, trả về JSON kết quả.</li>
+  <li>Xây dựng endpoint <code>GET /report/api_comments/{id}</code> và <code>POST /report/api_add_comment</code>: Nạp và gửi bình luận nhanh không reload.</li>
+  <li>Xây dựng endpoint <code>GET /report/api_geojson</code>: Chuẩn hóa tọa độ sự cố theo định dạng GeoJSON chuẩn cho Leaflet Map.</li>
+  <li>Xây dựng endpoint <code>GET /report/api_xml_feed</code>: Xuất bản tin cảnh báo khẩn cấp theo chuẩn XML.</li>
+</ul>
+<p><b>Tiêu chí nghiệm thu:</b> Header trả về <code>Content-Type: application/json; charset=utf-8</code>, PDO Prepared Statements 100%, test thành công trên Postman.</p>
+
+<h2>📌 Issue #2: [TV5] Tích hợp AJAX toàn diện vào giao diện Public (Lọc không reload, Upvote, Bình luận)</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Nguyễn Thế Luân (TV5) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv5-ajax-core-and-docs</span><br>
+  <b>Labels:</b> <code>frontend</code>, <code>ajax</code>, <code>javascript</code>, <code>high-priority</code>
+</div>
+<p><i>Mô tả:</i> Loại bỏ hoàn toàn reload trang ở các màn hình công khai bằng Fetch API hoặc jQuery AJAX, tạo cảm giác mượt mà và hiện đại.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Viết script <code>public/assets/js/ajax-filter.js</code>: Bắt sự kiện dropdown và search input (debounce 300ms), gọi API và render lại danh sách sự cố.</li>
+  <li>Viết script <code>public/assets/js/ajax-interaction.js</code>: Bấm nút Upvote tăng số ngay lập tức có animation; nạp thêm bình luận (Load More).</li>
+  <li>Xử lý AJAX thông báo: Đánh dấu đã đọc thông báo khi người dùng nhấn xem trên Header Navbar mà không reload.</li>
+  <li>Tích hợp hiệu ứng Loading Skeleton và thông báo Toast khi xử lý thành công hoặc gặp lỗi.</li>
+</ul>
+<p><b>Tiêu chí nghiệm thu:</b> Lọc sự cố không chớp màn hình, URL cập nhật qua <code>history.pushState</code>, giao diện phản hồi tức thì.</p>
+
+<h2>📌 Issue #3: [TV1 & TV4] Tích hợp Bản đồ số Leaflet.js hiển thị điểm ghim sự cố theo tọa độ GPS</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Khiếu Hoàng Nam Anh (TV1) & Lê Trọng Hiếu (TV4) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv1-system-leaflet-map</span><br>
+  <b>Labels:</b> <code>frontend</code>, <code>map</code>, <code>leaflet</code>, <code>feature</code>
+</div>
+<p><i>Mô tả:</i> Trực quan hóa dữ liệu sự cố môi trường ngoài thực địa bằng bản đồ tương tác mã nguồn mở Leaflet.js kết hợp OpenStreetMap.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Nhúng thư viện Leaflet.js vào layout giao diện chung.</li>
+  <li>Xây dựng component bản đồ tại Trang chủ và trang riêng <code>/report/map</code>.</li>
+  <li>Nạp dữ liệu GeoJSON từ API và sinh Marker tương ứng theo từng tọa độ sự cố.</li>
+  <li>Phân biệt màu Marker: Đỏ (Khẩn cấp), Vàng (Trung bình), Xanh (Đã giải quyết).</li>
+  <li>Thiết kế Popup xem nhanh: hiển thị ảnh thu nhỏ, tên sự cố, địa chỉ và nút 'Xem chi tiết'.</li>
+  <li>Tính năng 'Sự cố gần tôi': Lọc bán kính 2km - 5km dựa trên tọa độ GPS của người dùng.</li>
+</ul>
+<p><b>Tiêu chí nghiệm thu:</b> Bản đồ hiển thị mượt mà trên Mobile & Desktop, ghim đúng tọa độ trong cơ sở dữ liệu.</p>
+
+<h2>📌 Issue #4: [TV2] Xây dựng Biểu đồ thống kê Admin Dashboard (Chart.js) & Xuất dữ liệu báo cáo</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Trần Yến Phụng (TV2) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv2-admin-statistics-export</span><br>
+  <b>Labels:</b> <code>admin</code>, <code>chart</code>, <code>export</code>, <code>backend</code>
+</div>
+<p><i>Mô tả:</i> Nâng cấp Admin Dashboard thành trung tâm chỉ huy với các biểu đồ trực quan hóa dữ liệu và công cụ xuất file báo cáo.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Xây dựng endpoint <code>GET /admin/api_statistics</code>: Trả về số liệu thống kê danh mục, xu hướng theo tháng và tỷ lệ xử lý.</li>
+  <li>Tích hợp thư viện Chart.js vào Admin Dashboard: Vẽ biểu đồ tròn (Pie) và cột (Bar) nạp bằng AJAX.</li>
+  <li>Hoàn thiện tính năng Phân công cán bộ: Admin phân công cán bộ phụ trách xử lý sự cố có ghi chú hạn chót.</li>
+  <li>Xây dựng chức năng Xuất báo cáo (Export Report): Xuất danh sách sự cố ra file CSV/Excel hỗ trợ font UTF-8 BOM tiếng Việt.</li>
+</ul>
+<p><b>Tiêu chí nghiệm thu:</b> Biểu đồ tương tác mượt, file CSV mở trên Microsoft Excel hiển thị đúng tiếng Việt không lỗi phông.</p>
+
+<h2>📌 Issue #5: [TV5 & TV1] Soạn thảo Chương 5 Báo cáo Đồ án UEH & Kiểm thử hệ thống (QA Testing)</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Nguyễn Thế Luân (TV5) & Khiếu Hoàng Nam Anh (TV1) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv5-ajax-core-and-docs</span><br>
+  <b>Labels:</b> <code>documentation</code>, <code>testing</code>, <code>ueh-report</code>
+</div>
+<p><i>Mô tả:</i> Tài liệu hóa học thuật toàn bộ kiến trúc AJAX / WebService vào cuốn Báo cáo theo chuẩn UEH và tổ chức kiểm thử phần mềm.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Viết Chương 5 Báo cáo Đồ án: Đặc tả chi tiết từng WebService API, vẽ Sequence Diagram luồng AJAX bất đồng bộ.</li>
+  <li>Chụp ảnh minh chứng thực tế: Màn hình Bản đồ Leaflet, bộ lọc động không reload, biểu đồ Chart.js trong Admin.</li>
+  <li>Thực hiện kiểm thử chéo (Cross-testing): Test trên Chrome DevTools ở các kích thước 375px, 414px, 768px, 1200px.</li>
+  <li>Ghi nhận bug lên GitHub Issues và kiểm tra việc sửa lỗi của các thành viên.</li>
+</ul>
+<p><b>Tiêu chí nghiệm thu:</b> File báo cáo cập nhật đầy đủ cấu trúc của Khoa, bảng phân công có đánh giá mức độ đóng góp minh bạch.</p>
+
+<h1>IV. QUY TRÌNH PHỐI HỢP GIT & LÀM VIỆC NHÓM TRÊN GITHUB</h1>
+<ul>
+  <li><b>1. Khởi tạo Milestone 3:</b> Tạo Milestone <i>'Milestone 3: Advanced Features, AJAX & WebService'</i> trên GitHub Projects, đặt hạn chót cuối Tuần 8.</li>
+  <li><b>2. Quy tắc tạo nhánh:</b> Luôn checkout từ develop mới nhất:
+    <div style='background:#EEE; padding:4pt 8pt; font-family:monospace; margin:4pt 0;'>git checkout develop &amp;&amp; git pull origin develop &amp;&amp; git checkout -b feature/tv...</div>
+  </li>
+  <li><b>3. Quy tắc Commit chuẩn:</b> Sử dụng Conventional Commits (<code>feat</code>, <code>fix</code>, <code>docs</code>, <code>refactor</code>).</li>
+  <li><b>4. Quy trình Pull Request:</b> Mở PR vào nhánh <code>develop</code>, gắn thẻ <code>Closes #&lt;issue_id&gt;</code> và chờ Team Lead review trước khi merge.</li>
+  <li><b>5. Lưu vết minh chứng:</b> Chụp ảnh màn hình các PR đã merge, Network tab gọi AJAX và biểu đồ đóng góp của từng thành viên để nhúng vào Phụ lục Báo cáo UEH.</li>
+</ul>
+
+</body>
+</html>
