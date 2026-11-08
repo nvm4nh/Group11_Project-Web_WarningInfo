@@ -127,60 +127,102 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
               </div>
             </div>
 
-            <!-- Nút tương tác Upvote cộng đồng (Gọi AJAX) -->
+            <!-- Nút xác nhận sự cố (Upvote) – AJAX POST report/api_upvote/{id}, xử lý ở ajax-interaction.js -->
+            <?php $voted = !empty($data['has_upvoted']); ?>
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
-              <button class="btn btn-outline-primary" id="btnUpvote" data-id="<?= $r->id ?>">
-                <i class="bi bi-hand-thumbs-up me-1"></i> Tôi cũng thấy sự cố này (<span id="upvoteCount"><?= (int)$r->upvote_count ?></span>)
+              <button type="button" class="btn btn-upvote <?= $voted ? 'btn-primary is-voted' : 'btn-outline-primary' ?>" id="btnUpvote"
+                      data-endpoint="<?= url('report/api_upvote/' . (int)$r->id) ?>"
+                      <?php if (!isLoggedIn()): ?>data-login-url="<?= url('auth/login') ?>"<?php endif; ?>
+                      aria-pressed="<?= $voted ? 'true' : 'false' ?>">
+                <i class="bi <?= $voted ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up' ?> me-1"></i>
+                <span class="upvote-text"><?= $voted ? 'Bạn đã xác nhận' : 'Tôi cũng thấy sự cố này' ?></span>
+                (<span class="upvote-count" id="upvoteCount"><?= (int)$r->upvote_count ?></span>)
               </button>
               <span class="text-muted small">Người gửi: <?= e($r->author_name ?: 'Cộng đồng ẩn danh') ?></span>
             </div>
           </div>
         </div>
 
-        <!-- Khung bình luận & Thảo luận -->
+        <!-- Khung bình luận (TV5 – M3): trang đầu render sẵn, "Tải thêm" và gửi bình luận chạy bằng AJAX (ajax-interaction.js).
+             Khi tắt JS: form vẫn gửi bình thường tới report/comment/{id}. -->
         <?php
-          // Ghi chú nội bộ của cán bộ (is_internal = 1) chỉ cán bộ / quản trị viên thấy
-          $visibleComments = array_values(array_filter($r->comments ?? [], function ($cm) {
-            return !$cm->is_internal || isOfficer();
-          }));
+          $comments     = $data['comments'] ?? [];
+          $commentTotal = (int)($data['comment_total'] ?? 0);
+          $commentLimit = (int)($data['comment_limit'] ?? 5);
         ?>
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white py-3 border-bottom">
-            <h5 class="fw-bold mb-0"><i class="bi bi-chat-left-dots me-2 text-primary"></i>Phản hồi & Thảo luận (<?= count($visibleComments) ?>)</h5>
-          </div>
-          <div class="card-body p-4">
-            <?php if (empty($visibleComments)): ?>
-              <p class="text-muted text-center py-3">Chưa có bình luận nào. Hãy gửi phản hồi đầu tiên!</p>
-            <?php else: ?>
-              <div class="d-flex flex-column gap-3 mb-4">
-                <?php foreach ($visibleComments as $cm): ?>
-                  <div class="p-3 rounded-3 <?= $cm->is_internal ? 'bg-warning-subtle border-warning' : 'bg-light' ?>">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-1">
-                      <span class="fw-bold small">
-                        <?= e($cm->full_name ?: 'Ẩn danh') ?>
-                        <?php if ($cm->role === 'admin' || $cm->role === 'officer'): ?>
-                          <span class="badge bg-primary ms-1">Cán bộ xử lý</span>
-                        <?php endif; ?>
-                        <?php if ($cm->is_internal): ?>
-                          <span class="badge bg-warning text-dark ms-1"><i class="bi bi-lock-fill me-1"></i>Nội bộ</span>
-                        <?php endif; ?>
-                      </span>
+        <?php if (!empty($data['internal_notes'])): /* Ghi chú nội bộ – chỉ cán bộ / quản trị viên thấy */ ?>
+          <div class="card border-0 shadow-sm mb-4 border-start border-warning border-4">
+            <div class="card-body p-4">
+              <h6 class="fw-bold mb-3"><i class="bi bi-lock-fill text-warning me-2"></i>Ghi chú nội bộ của cán bộ (<?= count($data['internal_notes']) ?>)</h6>
+              <div class="d-flex flex-column gap-2">
+                <?php foreach ($data['internal_notes'] as $cm): ?>
+                  <div class="p-3 rounded-3 bg-warning-subtle">
+                    <div class="d-flex flex-wrap justify-content-between gap-1 mb-1">
+                      <span class="fw-bold small"><?= e($cm->full_name ?: 'Cán bộ') ?></span>
                       <span class="text-muted x-small"><?= date('H:i d/m/Y', strtotime($cm->created_at)) ?></span>
                     </div>
-                    <p class="mb-0 small text-secondary"><?= e($cm->content) ?></p>
+                    <p class="mb-0 small text-secondary" style="white-space: pre-line;"><?= e($cm->content) ?></p>
                   </div>
                 <?php endforeach; ?>
               </div>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <div class="card border-0 shadow-sm" id="commentBox"
+             data-endpoint="<?= url('report/api_comments/' . (int)$r->id) ?>"
+             data-add-endpoint="<?= url('report/api_add_comment') ?>"
+             data-report-id="<?= (int)$r->id ?>" data-limit="<?= $commentLimit ?>" data-page="1">
+          <div class="card-header bg-white py-3 border-bottom">
+            <h5 class="fw-bold mb-0"><i class="bi bi-chat-left-dots me-2 text-primary"></i>Phản hồi & Thảo luận (<span id="commentTotal"><?= $commentTotal ?></span>)</h5>
+          </div>
+          <div class="card-body p-4">
+            <!-- Form bình luận đặt trên cùng: bình luận mới nhất hiện ngay bên dưới -->
+            <?php if (isLoggedIn()): ?>
+              <form method="post" action="<?= url('report/comment/' . $r->id) ?>" id="commentForm" class="mb-4">
+                <?= csrf_field() ?>
+                <div class="mb-2">
+                  <label for="commentContent" class="visually-hidden">Nội dung bình luận</label>
+                  <textarea name="content" id="commentContent" class="form-control" rows="3" maxlength="5000"
+                            placeholder="Nhập ý kiến xác nhận hoặc bổ sung thông tin hiện trường..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm px-4">
+                  <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>Gửi phản hồi
+                </button>
+              </form>
+            <?php else: ?>
+              <div class="alert alert-light border small mb-4">
+                <i class="bi bi-person-lock me-1"></i>
+                <a href="<?= url('auth/login') ?>">Đăng nhập</a> để gửi phản hồi về sự cố này.
+              </div>
             <?php endif; ?>
 
-            <!-- Form bình luận -->
-            <form method="post" action="<?= url('report/comment/' . $r->id) ?>">
-              <?= csrf_field() ?>
-              <div class="mb-3">
-                <textarea name="content" class="form-control" rows="3" placeholder="Nhập ý kiến xác nhận hoặc bổ sung thông tin hiện trường..." required></textarea>
+            <p class="text-muted text-center py-3 mb-0<?= $commentTotal > 0 ? ' d-none' : '' ?>" id="commentEmpty">Chưa có bình luận nào. Hãy gửi phản hồi đầu tiên!</p>
+            <div class="d-flex flex-column gap-3" id="commentList" aria-live="polite">
+              <?php foreach ($comments as $cm): ?>
+                <div class="comment-item p-3 rounded-3 bg-light" data-id="<?= (int)$cm->id ?>">
+                  <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-1">
+                    <span class="fw-bold small">
+                      <?= e($cm->user_name ?: 'Ẩn danh') ?>
+                      <?php if (in_array($cm->user_role, ['admin', 'officer'], true)): ?>
+                        <span class="badge bg-primary ms-1">Cán bộ xử lý</span>
+                      <?php endif; ?>
+                    </span>
+                    <span class="text-muted x-small"><?= date('H:i d/m/Y', strtotime($cm->created_at)) ?></span>
+                  </div>
+                  <p class="mb-0 small text-secondary" style="white-space: pre-line;"><?= e($cm->content) ?></p>
+                </div>
+              <?php endforeach; ?>
+            </div>
+
+            <?php if ($commentTotal > count($comments)): ?>
+              <div class="text-center mt-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnLoadMoreComments">
+                  <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>
+                  Tải thêm bình luận (<span data-remaining><?= $commentTotal - count($comments) ?></span>)
+                </button>
               </div>
-              <button type="submit" class="btn btn-primary btn-sm px-4">Gửi phản hồi</button>
-            </form>
+            <?php endif; ?>
           </div>
         </div>
       </div>
@@ -241,20 +283,6 @@ $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
   </div>
 </section>
 
-<script>
-document.getElementById('btnUpvote')?.addEventListener('click', function() {
-  const reportId = this.dataset.id;
-  fetch('<?= url("report/upvote/") ?>' + reportId, { method: 'POST', headers: { 'X-CSRF-Token': '<?= e(csrf_token()) ?>' } })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === 'success') {
-        document.getElementById('upvoteCount').textContent = data.count;
-      } else {
-        alert(data.message);
-      }
-    });
-});
-</script>
-
+<script src="<?= asset('js/ajax-interaction.js') ?>" defer></script>
 <script src="<?= asset('js/gallery.js') ?>" defer></script>
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>

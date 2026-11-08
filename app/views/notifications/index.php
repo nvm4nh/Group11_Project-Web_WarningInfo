@@ -20,12 +20,12 @@ $typeStyle = [
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div>
         <h1 class="h3 fw-bold mb-1"><i class="bi bi-bell text-primary me-2"></i>Thông báo của tôi</h1>
-        <p class="text-muted mb-0">
+        <p class="text-muted mb-0" data-notif-summary>
           <?= $unread > 0 ? 'Bạn có <strong>' . $unread . '</strong> thông báo chưa đọc.' : 'Bạn đã đọc hết thông báo.' ?>
         </p>
       </div>
       <?php if ($unread > 0): ?>
-        <form method="post" action="<?= url('notification/readAll') ?>" class="m-0">
+        <form method="post" action="<?= url('notification/readAll') ?>" class="m-0" data-notif-read-all>
           <?= csrf_field() ?>
           <input type="hidden" name="filter" value="<?= e($filter) ?>">
           <button type="submit" class="btn btn-outline-primary btn-sm">
@@ -54,7 +54,7 @@ $typeStyle = [
       </li>
       <li class="nav-item">
         <a class="nav-link<?= $filter === 'unread' ? ' active' : '' ?>" href="<?= url('notification?filter=unread') ?>">
-          Chưa đọc <span class="badge rounded-pill bg-danger ms-1"><?= $unread ?></span>
+          Chưa đọc <span class="badge rounded-pill bg-danger ms-1" data-notif-tab-count><?= $unread ?></span>
         </a>
       </li>
     </ul>
@@ -69,7 +69,7 @@ $typeStyle = [
       </div>
     <?php else: ?>
       <div class="card border-0 shadow-sm overflow-hidden">
-        <ul class="list-unstyled mb-0 notif-list">
+        <ul class="list-unstyled mb-0 notif-list" data-notif-page data-filter="<?= e($filter) ?>">
           <?php foreach ($items as $n): ?>
             <?php [$icon, $icCls, $typeText] = $typeStyle[$n->notification_type] ?? $typeStyle['general']; ?>
             <li class="notif-item<?= $n->is_read ? '' : ' is-unread' ?>">
@@ -107,4 +107,5 @@ $typeStyle = [
   </div>
 </section>
 
+<script src="<?= asset('js/ajax-interaction.js') ?>" defer></script>
 <?php require APPROOT . '/app/views/layouts/footer.php'; ?>
