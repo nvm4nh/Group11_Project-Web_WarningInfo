@@ -81,3 +81,34 @@
 /* View đang dùng bg-orange cho mức độ "Cao" nhưng Bootstrap không có sẵn → badge bị trong suốt */
 .bg-orange { background-color: var(--wi-high, #ea580c) !important; color: #fff !important; }
 .x-small { font-size: .75rem; }
+
+/* ---------- Hiệu ứng AJAX (Milestone 3 – TV5): ajax-filter.js, ajax-interaction.js ---------- */
+/* Khung xương khi đang tải danh sách sự cố */
+.skeleton {
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef1f4 25%, #f8fafc 37%, #eef1f4 63%);
+  background-size: 400% 100%;
+  animation: wi-shimmer 1.4s ease infinite;
+}
+.skeleton-card .card-body { display: flex; flex-direction: column; gap: 12px; min-height: 190px; }
+.skeleton-badges { height: 20px; width: 55%; }
+.skeleton-title  { height: 22px; width: 85%; }
+.skeleton-line   { height: 12px; width: 100%; }
+.skeleton-line.short { width: 60%; }
+@keyframes wi-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* Thẻ / bình luận mới xuất hiện mờ dần; thông báo đã đọc mờ đi khi bị bỏ khỏi tab "Chưa đọc" */
+.fade-in  { animation: wi-fade-in .35s ease both; }
+.fade-out { opacity: 0; transition: opacity .3s ease; }
+@keyframes wi-fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.comment-item.is-new { box-shadow: inset 3px 0 0 var(--wi-primary, #0f766e); }
+
+/* Nút xác nhận sự cố (upvote): số "nảy" lên khi bấm */
+.btn-upvote { transition: background-color .2s ease, color .2s ease, transform .1s ease; }
+.btn-upvote:active { transform: scale(.97); }
+.number-bounce { display: inline-block; animation: wi-bounce .35s ease; }
+@keyframes wi-bounce { 0% { transform: scale(1); } 40% { transform: scale(1.45); } 100% { transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .fade-in, .number-bounce { animation: none; }
+}

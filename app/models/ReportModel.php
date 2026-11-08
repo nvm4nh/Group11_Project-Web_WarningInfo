@@ -7,6 +7,35 @@ class ReportModel {
                         'assigned', 'in_progress', 'resolved', 'closed', 'rejected'];
     const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
+    /* Nhãn + lớp màu badge (TV5 – Milestone 3). Dùng chung cho thẻ sự cố render bằng PHP
+       và bằng AJAX (ajax-filter.js nhận qua data-badges) để hai nơi luôn hiển thị giống nhau. */
+    const PRIORITY_BADGES = [
+        'critical' => ['Nghiêm trọng', 'bg-danger text-white'],
+        'high'     => ['Cao',          'bg-orange text-white'],
+        'medium'   => ['Trung bình',   'bg-warning text-dark'],
+        'low'      => ['Thấp',         'bg-success text-white'],
+    ];
+    const STATUS_BADGES = [
+        'new'            => ['Mới tiếp nhận',         'bg-secondary'],
+        'received'       => ['Đã tiếp nhận',          'bg-secondary'],
+        'need_more_info' => ['Cần bổ sung thông tin', 'bg-warning text-dark'],
+        'verifying'      => ['Đang xác minh',         'bg-info text-dark'],
+        'verified'       => ['Đã xác minh',           'bg-info text-dark'],
+        'assigned'       => ['Đã phân công',          'bg-primary'],
+        'in_progress'    => ['Đang xử lý',            'bg-primary'],
+        'resolved'       => ['Đã giải quyết',         'bg-success'],
+        'closed'         => ['Đã đóng',               'bg-dark'],
+        'rejected'       => ['Từ chối',               'bg-dark'],
+    ];
+
+    public static function priorityBadge($priority) {
+        return self::PRIORITY_BADGES[$priority] ?? self::PRIORITY_BADGES['medium'];
+    }
+
+    public static function statusBadge($status) {
+        return self::STATUS_BADGES[$status] ?? [(string)$status, 'bg-secondary'];
+    }
+
     public function __construct() {
         $this->db = new Database();
     }
@@ -216,7 +245,48 @@ class ReportModel {
         $this->db->bind(':user_id',     $userId);
         $this->db->bind(':content',     $content);
         $this->db->bind(':is_internal', $isInternal);
-        return $this->db->execute();
+        // Trả về id bình luận vừa tạo (truthy) để API trả lại bình luận cho giao diện AJAX
+        return $this->db->execute() ? (int)$this->db->lastInsertId() : false;
+    }
+
+    /** Bình luận công khai (không gồm ghi chú nội bộ), mới nhất trước – dùng cho trang chi tiết và api_comments */
+    public function getPublicComments($reportId, $limit = 5, $offset = 0) {
+        $this->db->query("SELECT c.id, c.report_id, c.content, c.created_at,
+                                 u.id AS user_id, u.full_name AS user_name, u.role AS user_role
+                          FROM comments c
+                          LEFT JOIN users u ON c.user_id = u.id
+                          WHERE c.report_id = :id AND c.is_internal = 0
+                          ORDER BY c.created_at DESC, c.id DESC
+                          LIMIT :limit OFFSET :offset");
+        $this->db->bind(':id', (int)$reportId, PDO::PARAM_INT);
+        $this->db->bind(':limit', (int)$limit, PDO::PARAM_INT);
+        $this->db->bind(':offset', (int)$offset, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
+
+    public function countPublicComments($reportId) {
+        $this->db->query("SELECT COUNT(*) AS total FROM comments WHERE report_id = :id AND is_internal = 0");
+        $this->db->bind(':id', (int)$reportId, PDO::PARAM_INT);
+        return (int)$this->db->single()->total;
+    }
+
+    /** 1 bình luận kèm tên/vai trò người viết (trả về sau khi gửi bình luận bằng AJAX) */
+    public function getCommentById($commentId) {
+        $this->db->query("SELECT c.id, c.report_id, c.content, c.created_at,
+                                 u.id AS user_id, u.full_name AS user_name, u.role AS user_role
+                          FROM comments c
+                          LEFT JOIN users u ON c.user_id = u.id
+                          WHERE c.id = :id LIMIT 1");
+        $this->db->bind(':id', (int)$commentId, PDO::PARAM_INT);
+        return $this->db->single();
+    }
+
+    /** Người dùng đã ủng hộ (upvote) sự cố này chưa – để hiện đúng trạng thái nút khi mở trang */
+    public function hasUpvoted($reportId, $userId) {
+        $this->db->query("SELECT 1 FROM upvotes WHERE report_id = :rid AND user_id = :uid LIMIT 1");
+        $this->db->bind(':rid', (int)$reportId, PDO::PARAM_INT);
+        $this->db->bind(':uid', (int)$userId, PDO::PARAM_INT);
+        return (bool)$this->db->single();
     }
 
     public function updateStatus($reportId, $newStatus, $changedBy, $note = '') {

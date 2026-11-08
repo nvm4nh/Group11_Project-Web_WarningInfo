@@ -22,32 +22,58 @@ class ReportController extends Controller {
             'keyword'     => $keyword
         ];
 
+        // Phân trang "Xem thêm" (TV5 – M3): ?page=N hiển thị N trang đầu, để trang vẫn dùng được khi tắt JS.
+        // Khi bật JS, ajax-filter.js gọi report/api_list để nạp trang kế tiếp mà không tải lại trang.
+        $page = max(1, (int)($_GET['page'] ?? 1));
+
         $reports    = $this->reportModel->getAll($filters);
         $categories = $this->categoryModel->getAll();
+        $total      = count($reports);
 
         $this->view('reports/index', [
             'title'       => 'Danh sách sự cố & cảnh báo',
             'active'      => 'report',
-            'reports'     => $reports,
+            'reports'     => array_slice($reports, 0, $page * self::LIST_PAGE_SIZE),
+            'total'       => $total,
+            'page'        => $page,
+            'page_size'   => self::LIST_PAGE_SIZE,
             'categories'  => $categories,
             'filters'     => $filters
         ]);
     }
 
+    const LIST_PAGE_SIZE     = 9;  // thẻ sự cố mỗi lần nạp ở /report (lưới 3 cột)
+    const COMMENT_PAGE_SIZE  = 5;  // bình luận mỗi lần nạp ở trang chi tiết
+
     public function detail($id = null) {
         if (!$id) redirect('report');
 
         $report = $this->reportModel->getById($id);
-        if (!$report) {
+        // Báo cáo không công khai: chỉ người gửi và cán bộ / quản trị viên được xem (các API đã chặn tương tự)
+        $canView = $report && ($report->is_public
+            || isOfficer()
+            || (isLoggedIn() && (int)$report->user_id === (int)$_SESSION['user_id']));
+        if (!$canView) {
             setFlash('danger', 'Không tìm thấy sự cố này.');
             redirect('report');
         }
 
+        // Bình luận công khai: trang đầu render sẵn, các trang sau nạp bằng AJAX (api_comments)
+        // Ghi chú nội bộ (is_internal = 1) chỉ cán bộ / quản trị viên thấy, hiển thị ở khối riêng
+        $internalNotes = isOfficer()
+            ? array_values(array_filter($report->comments ?? [], function ($cm) { return (int)$cm->is_internal === 1; }))
+            : [];
+
         $this->view('reports/detail', [
-            'title'  => $report->title,
-            'active'  => 'report',
-            'report'  => $report,
-            'use_map' => $report->latitude !== null && $report->longitude !== null,
+            'title'          => $report->title,
+            'active'         => 'report',
+            'report'         => $report,
+            'comments'       => $this->reportModel->getPublicComments($report->id, self::COMMENT_PAGE_SIZE, 0),
+            'comment_total'  => $this->reportModel->countPublicComments($report->id),
+            'comment_limit'  => self::COMMENT_PAGE_SIZE,
+            'internal_notes' => $internalNotes,
+            'has_upvoted'    => isLoggedIn() && $this->reportModel->hasUpvoted($report->id, $_SESSION['user_id']),
+            'use_map'        => $report->latitude !== null && $report->longitude !== null,
         ]);
     }
 
@@ -486,7 +512,7 @@ public function api_upvote($id = null)
     }
 
     if (!isLoggedIn()) {
-        return $this->jsonError(401, 'Please log in first');
+        return $this->jsonError(401, 'Vui lòng đăng nhập để xác nhận sự cố.');
     }
 
     $id = (int)($id ?? $_POST['report_id'] ?? 0);
@@ -518,42 +544,19 @@ public function api_comments($id = null)
 {
     $id = (int)($id ?? $_GET['report_id'] ?? 0);
     if ($id <= 0) {
-        return $this->jsonError(400, 'Invalid report ID');
+        return $this->jsonError(400, 'Mã sự cố không hợp lệ.');
     }
 
-    	$reportModel = new ReportModel();
-	$report = $reportModel->getById($id);
-
-	if (!$report || !$report->is_public) {
-    	return $this->jsonError(404, 'Report not found');
-	}
+    $report = $this->reportModel->getById($id);
+    if (!$report || !$report->is_public) {
+        return $this->jsonError(404, 'Không tìm thấy sự cố.');
+    }
 
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = min(50, max(1, (int)($_GET['limit'] ?? 10)));
-    $offset = ($page - 1) * $limit;
-
-    $db = new Database();
-    $db->query(
-        "SELECT COUNT(*) AS total
-         FROM comments
-         WHERE report_id = :id AND is_internal = 0"
-    );
-    $db->bind(':id', $id, PDO::PARAM_INT);
-    $total = (int)$db->single()->total;
-
-    $db->query(
-        "SELECT c.id, c.report_id, c.content, c.created_at,
-                u.id AS user_id, u.full_name AS user_name
-         FROM comments c
-         LEFT JOIN users u ON c.user_id = u.id
-         WHERE c.report_id = :id AND c.is_internal = 0
-         ORDER BY c.created_at DESC
-         LIMIT :limit OFFSET :offset"
-    );
-    $db->bind(':id', $id, PDO::PARAM_INT);
-    $db->bind(':limit', $limit, PDO::PARAM_INT);
-    $db->bind(':offset', $offset, PDO::PARAM_INT);
-    $comments = $db->resultSet();
+    $total = $this->reportModel->countPublicComments($id);
+    $comments = array_map([$this, 'commentToArray'],
+        $this->reportModel->getPublicComments($id, $limit, ($page - 1) * $limit));
 
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
@@ -563,9 +566,10 @@ public function api_comments($id = null)
             'page' => $page,
             'limit' => $limit,
             'total' => $total,
-            'total_pages' => (int)ceil($total / $limit)
+            'total_pages' => (int)ceil($total / $limit),
+            'has_more' => $page * $limit < $total,
         ]
-    ]);
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
 
@@ -576,7 +580,7 @@ public function api_add_comment()
     }
 
     if (!isLoggedIn()) {
-        return $this->jsonError(401, 'Please log in first');
+        return $this->jsonError(401, 'Vui lòng đăng nhập để gửi bình luận.');
     }
 
     $input = json_decode(file_get_contents('php://input'), true);
@@ -585,41 +589,48 @@ public function api_add_comment()
     }
 
     $reportId = (int)($input['report_id'] ?? 0);
-    $content = trim($input['content'] ?? '');
+    $content = trim((string)($input['content'] ?? ''));
 
     if ($reportId <= 0 || $content === '') {
-        return $this->jsonError(400, 'Report ID and comment are required');
+        return $this->jsonError(422, 'Vui lòng nhập nội dung bình luận.');
     }
 
     if (mb_strlen($content) > 5000) {
-        return $this->jsonError(400, 'Comment is too long');
+        return $this->jsonError(422, 'Bình luận tối đa 5000 ký tự.');
     }
 
-    	$reportModel = new ReportModel();
-	$report = $reportModel->getById($reportId);
-
-	if (!$report || !$report->is_public) {
-    	return $this->jsonError(404, 'Report not found');
-	}
-
-    $ok = $reportModel->addComment(
-        $reportId,
-        $_SESSION['user_id'],
-        $content,
-        0
-    );
-
-    if (!$ok) {
-        return $this->jsonError(500, 'Could not add comment');
+    $report = $this->reportModel->getById($reportId);
+    if (!$report || !$report->is_public) {
+        return $this->jsonError(404, 'Không tìm thấy sự cố.');
     }
 
+    $commentId = $this->reportModel->addComment($reportId, $_SESSION['user_id'], $content, 0);
+    if (!$commentId) {
+        return $this->jsonError(500, 'Không lưu được bình luận, vui lòng thử lại.');
+    }
+
+    // Trả lại bình luận vừa tạo để giao diện chèn ngay vào danh sách (không tải lại trang)
     http_response_code(201);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'status' => 'success',
-        'message' => 'Comment added'
-    ]);
+        'message' => 'Đã gửi bình luận.',
+        'comment' => $this->commentToArray($this->reportModel->getCommentById($commentId)),
+        'total' => $this->reportModel->countPublicComments($reportId),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
+}
+
+/** Chuẩn hoá 1 bình luận cho JSON: chỉ các trường giao diện cần, không lộ thông tin khác của người dùng */
+private function commentToArray($c) {
+    return [
+        'id' => (int)$c->id,
+        'content' => $c->content,
+        'user_name' => $c->user_name ?: 'Ẩn danh',
+        'is_staff' => in_array($c->user_role, ['admin', 'officer'], true),
+        'created_at' => $c->created_at,
+        'created_at_text' => date('H:i d/m/Y', strtotime($c->created_at)),
+    ];
 }
 
 public function api_xml_feed()
@@ -656,37 +667,16 @@ public function api_xml_feed()
 
 
     public function comment($id = null) {
+        // Đường dự phòng khi trình duyệt tắt JS (bản AJAX dùng api_add_comment) – cùng quy tắc: phải đăng nhập
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('report');
+        requireLogin();
 
         $content = trim($_POST['content'] ?? '');
-        if ($content !== '') {
-            $userId = $_SESSION['user_id'] ?? null;
-            $this->reportModel->addComment($id, $userId, $content, 0);
+        if ($content !== '' && mb_strlen($content) <= 5000) {
+            $this->reportModel->addComment($id, $_SESSION['user_id'], $content, 0);
             setFlash('success', 'Đã gửi phản hồi thành công.');
         }
         redirect('report/detail/' . $id);
-    }
-
-    public function upvote($id = null) {
-        header('Content-Type: application/json');
-        if (!isLoggedIn()) {
-            echo json_encode(['status' => 'error', 'message' => 'Vui lòng đăng nhập để ủng hộ báo cáo này.']);
-            exit;
-        }
-
-        if (!$id) {
-            echo json_encode(['status' => 'error', 'message' => 'Mã báo cáo không hợp lệ.']);
-            exit;
-        }
-
-        $res = $this->reportModel->toggleUpvote($id, $_SESSION['user_id']);
-        $report = $this->reportModel->getById($id);
-        echo json_encode([
-            'status' => 'success',
-            'action' => $res['action'],
-            'count'  => $report ? $report->upvote_count : 0
-        ]);
-        exit;
     }
 
     public function my_reports() {
