@@ -278,7 +278,7 @@ class ReportController extends Controller {
     header('Content-Type: application/json; charset=utf-8');
 
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        $this->jsonError(405, 'Only GET is supported');
+        $this->jsonError(405, 'Chỉ hỗ trợ phương thức GET');
     }
 
     $priority = trim((string)($_GET['priority'] ?? ''));
@@ -293,21 +293,21 @@ class ReportController extends Controller {
         if ($date !== '') {
             $parsed = DateTime::createFromFormat('!Y-m-d', $date);
             if (!$parsed || $parsed->format('Y-m-d') !== $date) {
-                $this->jsonError(422, "$name must use YYYY-MM-DD");
+                $this->jsonError(422, "Trường ngày phải có định dạng YYYY-MM-DD");
             }
         }
     }
 
     if ($fromDate !== '' && $toDate !== '' && $fromDate > $toDate) {
-        $this->jsonError(422, 'from_date must not be after to_date');
+        $this->jsonError(422, 'Ngày bắt đầu không được sau ngày kết thúc');
     }
 
     if ($priority !== '' && !in_array($priority, ReportModel::PRIORITIES, true)) {
-        $this->jsonError(422, 'Invalid priority');
+        $this->jsonError(422, 'Mức độ ưu tiên không hợp lệ');
     }
 
     if ($status !== '' && !in_array($status, ReportModel::STATUSES, true)) {
-        $this->jsonError(422, 'Invalid status');
+        $this->jsonError(422, 'Trạng thái không hợp lệ');
     }
 
     $rawCats = $_GET['category_id'] ?? [];
@@ -508,7 +508,7 @@ class ReportController extends Controller {
 public function api_upvote($id = null)
 {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        return $this->jsonError(405, 'Method not allowed');
+        return $this->jsonError(405, 'Phương thức không được hỗ trợ');
     }
 
     if (!isLoggedIn()) {
@@ -517,14 +517,14 @@ public function api_upvote($id = null)
 
     $id = (int)($id ?? $_POST['report_id'] ?? 0);
     if ($id <= 0) {
-        return $this->jsonError(400, 'Invalid report ID');
+        return $this->jsonError(400, 'Mã sự cố không hợp lệ');
     }
 
     	$reportModel = new ReportModel();
 	$report = $reportModel->getById($id);
 
 	if (!$report || !$report->is_public) {
-   	 return $this->jsonError(404, 'Report not found');
+return $this->jsonError(404, 'Không tìm thấy sự cố');
 	}
 
     $result = $reportModel->toggleUpvote($id, $_SESSION['user_id']);
@@ -576,7 +576,7 @@ public function api_comments($id = null)
 public function api_add_comment()
 {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        return $this->jsonError(405, 'Method not allowed');
+        return $this->jsonError(405, 'Phương thức không được hỗ trợ');
     }
 
     if (!isLoggedIn()) {
@@ -636,7 +636,7 @@ private function commentToArray($c) {
 public function api_xml_feed()
 {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        return $this->jsonError(405, 'Method not allowed');
+        return $this->jsonError(405, 'Phương thức không được hỗ trợ');
     }
 
     $reportModel = new ReportModel();
