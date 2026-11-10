@@ -7,7 +7,6 @@ function isAdmin() {
     return isLoggedIn() && ($_SESSION['role'] ?? '') === 'admin';
 }
 
-// Cán bộ xử lý sự cố (officer). Admin cũng có thể được phân công nên được vào bàn làm việc cán bộ.
 function isOfficer() {
     return isLoggedIn() && in_array($_SESSION['role'] ?? '', ['officer', 'admin'], true);
 }
@@ -28,8 +27,8 @@ function requireLogin() {
 
 function requireAdmin() {
     if (!isAdmin()) {
-        setFlash('danger', 'Bạn không có quyền truy cập trang quản trị');
-        redirect('auth/login');
+        setFlash('danger', 'Bạn không có quyền truy cập khu vực Quản trị');
+        redirect('');
     }
 }
 
