@@ -1,0 +1,207 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset='utf-8'>
+<title>Kế hoạch phân công nhiệm vụ Milestone 4</title>
+<style>
+body { font-family: 'Calibri', 'Times New Roman', sans-serif; font-size: 11pt; line-height: 1.4; color: #222222; margin: 2cm; }
+h1 { color: #0D47A1; font-size: 14pt; border-bottom: 2px solid #0D47A1; padding-bottom: 4px; margin-top: 18pt; }
+h2 { color: #1565C0; font-size: 12pt; margin-top: 14pt; margin-bottom: 4pt; }
+table { width: 100%; border-collapse: collapse; margin: 12pt 0; font-size: 10pt; }
+th, td { border: 1px solid #CCCCCC; padding: 6pt 8pt; vertical-align: top; }
+th { background-color: #0D47A1; color: #FFFFFF; font-weight: bold; text-align: left; }
+.sub-header { text-align: center; color: #555555; margin-bottom: 15pt; }
+.title-box { text-align: center; margin: 20pt 0; }
+.badge { font-family: monospace; font-weight: bold; color: #0D47A1; background: #E3F2FD; padding: 2px 4px; }
+.meta-box { background-color: #F8F9FA; border-left: 4px solid #0D47A1; padding: 8pt 12pt; margin: 6pt 0; font-size: 10pt; }
+ul { margin-top: 4pt; margin-bottom: 8pt; padding-left: 20pt; }
+li { margin-bottom: 3pt; }
+</style>
+</head>
+<body>
+<div class='sub-header'>
+  <p style='margin:0; font-size:11pt; font-weight:bold; color:#0D47A1;'>TRƯỜNG ĐẠI HỌC KINH TẾ TP. HỒ CHÍ MINH (UEH)</p>
+  <p style='margin:0; font-size:10pt; font-weight:bold; color:#555555;'>TRƯỜNG CÔNG NGHỆ VÀ THIẾT KẾ – KHOA CÔNG NGHỆ THÔNG TIN KINH DOANH</p>
+  <p style='margin:4pt 0 0 0; font-size:10pt;'>Học phần: <b>Phát Triển Ứng Dụng Web</b> &nbsp;|&nbsp; Giảng viên: <b>TS. Đặng Ngọc Hoàng Thành</b></p>
+  <p style='margin:2pt 0 0 0; font-size:10pt;'>Đề tài: <b>WarningInfo – Hệ Thống Báo Cáo & Cảnh Báo Vấn Đề Môi Trường Đô Thị</b> &nbsp;|&nbsp; Nhóm: <b>11</b></p>
+  <hr style='border: 0; border-top: 1px solid #0D47A1; margin-top: 8pt;'>
+</div>
+
+<div class='title-box'>
+  <h2 style='font-size: 16pt; color: #0D47A1; margin: 0; text-transform: uppercase;'>KẾ HOẠCH TRIỂN KHAI & PHÂN CÔNG NHIỆM VỤ GITHUB</h2>
+  <h3 style='font-size: 13pt; color: #1565C0; margin: 5pt 0;'>MILESTONE 4: KIỂM THỬ TOÀN DIỆN, TRIỂN KHAI HOSTING & BẢO VỆ ĐỒ ÁN (TUẦN 9 – TUẦN 10)</h3>
+</div>
+
+<h1>I. ĐÁNH GIÁ TỔNG QUAN & MỤC TIÊU CỐT LÕI</h1>
+<p><b>1. Hiện trạng sau Milestone 3:</b> Nhóm đã hoàn thành trọn vẹn 100% các tính năng nghiệp vụ nâng cao theo tiêu chuẩn điểm 9.0 – 10.0 của UEH:</p>
+<ul>
+  <li>Tích hợp Bản đồ số tương tác <b>Leaflet.js & OpenStreetMap</b>, ghim vị trí GPS và bộ lọc bán kính "Sự cố gần tôi" theo công thức Haversine.</li>
+  <li>Hệ thống <b>WebService RESTful API (JSON/XML)</b> cung cấp đầy đủ các endpoint phục vụ Client bất đồng bộ và cung cấp luồng tin XML chuẩn.</li>
+  <li>Kỹ thuật <b>AJAX toàn diện</b>: Bộ lọc sự cố đa tiêu chí tức thì có Debounce 300ms, nút Upvote nhảy số kèm hiệu ứng đổi màu, nạp và gửi bình luận nhanh không reload trang, chống XSS triệt để.</li>
+  <li>Trung tâm điều hành Quản trị thông minh (<b>Admin Dashboard</b>) với 3 biểu đồ tương tác <b>Chart.js 4.4.1</b> và chức năng xuất báo cáo <b>CSV UTF-8</b> có tiền tố BOM chuẩn cho Microsoft Excel.</li>
+  <li>Phân hệ Bàn làm việc cán bộ hiện trường (<code>/officer</code>), phân công nhiệm vụ có thời hạn xử lý (Deadline) và cơ chế phòng chống tấn công <b>CSRF Token</b> bắt buộc cho toàn bộ Form POST.</li>
+  <li>Toàn bộ mã nguồn đã được kiểm thử chéo và merge hoàn tất vào nhánh <code>develop</code> và nhánh chính <code>main</code>.</li>
+</ul>
+
+<p><b>2. Mục tiêu trọng tâm của Milestone 4 (Tiêu chuẩn nghiệm thu Xuất sắc – Điểm 10 UEH):</b></p>
+<ul>
+  <li><b>Triển khai Web Hosting & Tên miền thực tế:</b> Đưa ứng dụng WarningInfo vận hành ổn định trên môi trường Internet thực tế có kết nối cơ sở dữ liệu đám mây, kích hoạt chứng chỉ SSL/HTTPS và thiết lập cấu hình môi trường sản xuất an toàn.</li>
+  <li><b>Khắc phục triệt để các tồn đọng nhỏ (Polishing & Bug Fixes):</b> Xây dựng trang hiển thị lỗi 404 thân thiện kèm mã HTTP 404 thay vì redirect về trang chủ; tối ưu luồng chuyển hướng khi không đủ quyền admin; đồng bộ hóa thông báo phản hồi của API sang tiếng Việt chuẩn.</li>
+  <li><b>Kiểm thử nghiệm thu người dùng (UAT) & Đo lường hiệu năng:</b> Thực hiện kịch bản kiểm thử toàn diện trên Hosting, đánh giá tốc độ tải trang và chỉ số Google Lighthouse.</li>
+  <li><b>Đóng gói Báo cáo Đồ án UEH hoàn chỉnh:</b> Tổng hợp toàn bộ từ Chương 1 đến Chương 6 thành cuốn Báo cáo chính thức (.docx/.pdf) đúng quy định học thuật của Khoa và Nhà trường.</li>
+  <li><b>Chuẩn bị Bảo vệ Đồ án:</b> Thiết kế bộ Slide thuyết trình PowerPoint/Canva chuyên nghiệp, sản xuất Video Clip Demo nghiệp vụ (5 – 7 phút) và đóng gói bản phát hành chính thức <code>Release v1.0.0</code> trên GitHub.</li>
+</ul>
+
+<h1>II. BẢNG PHÂN CÔNG NHIỆM VỤ TỔNG QUAN (NHÓM 11)</h1>
+<table>
+  <thead>
+    <tr>
+      <th style='width:5%; text-align:center;'>STT</th>
+      <th style='width:22%;'>Thành viên</th>
+      <th style='width:20%;'>Vai trò</th>
+      <th style='width:23%;'>Nhánh Git</th>
+      <th style='width:30%;'>Sản phẩm bàn giao</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style='text-align:center;'>1</td>
+      <td><b>Khiếu Hoàng Nam Anh</b><br><small style='color:#666;'>TV1 - Nhóm trưởng</small></td>
+      <td>Team Lead & DevOps / Deployment</td>
+      <td><span class='badge'>feature/tv1-deployment-release</span></td>
+      <td>• URL Website hoạt động trực tiếp trên Hosting có SSL<br>• Cấu hình CSDL Production & .htaccess<br>• Bản phát hành Release v1.0.0 trên GitHub</td>
+    </tr>
+    <tr style='background:#F8F9FA;'>
+      <td style='text-align:center;'>2</td>
+      <td><b>Trần Yến Phụng</b><br><small style='color:#666;'>TV2</small></td>
+      <td>Backend Polishing & Presentation</td>
+      <td><span class='badge'>feature/tv2-security-presentation</span></td>
+      <td>• Tinh chỉnh requireAdmin() và Middleware<br>• Bộ Slide thuyết trình bảo vệ đồ án (PowerPoint/Canva)<br>• Rà soát các bộ lọc và biểu đồ Chart.js</td>
+    </tr>
+    <tr>
+      <td style='text-align:center;'>3</td>
+      <td><b>Lê Tố Nguyệt Minh</b><br><small style='color:#666;'>TV3</small></td>
+      <td>API Localization & Video Demo</td>
+      <td><span class='badge'>feature/tv3-api-polish-demo-video</span></td>
+      <td>• Việt hóa 100% các câu thông báo phản hồi API<br>• Video Clip Demo hoàn chỉnh (5 – 7 phút)<br>• Rà soát tài liệu đặc tả API chuẩn RESTful</td>
+    </tr>
+    <tr style='background:#F8F9FA;'>
+      <td style='text-align:center;'>4</td>
+      <td><b>Lê Trọng Hiếu</b><br><small style='color:#666;'>TV4</small></td>
+      <td>Frontend UX Polishing & Security</td>
+      <td><span class='badge'>feature/tv4-ui-polish-404-page</span></td>
+      <td>• Giao diện lỗi errors/404.php và errors/500.php<br>• Nâng cấp Dispatcher core/App.php trả mã HTTP 404<br>• Bổ sung Meta SEO, Favicon và kiểm tra upload an toàn</td>
+    </tr>
+    <tr>
+      <td style='text-align:center;'>5</td>
+      <td><b>Nguyễn Thế Luân</b><br><small style='color:#666;'>TV5</small></td>
+      <td>Báo cáo Đồ án UEH & Kiểm thử UAT</td>
+      <td><span class='badge'>feature/tv5-final-report-uat</span></td>
+      <td>• Cuốn Báo cáo Đồ án hoàn chỉnh (.docx & .pdf)<br>• Biên bản nghiệm thu kiểm thử UAT trên Hosting<br>• Bảng tổng kết đánh giá tỷ lệ đóng góp của 5 thành viên</td>
+    </tr>
+  </tbody>
+</table>
+
+<h1>III. DANH SÁCH CHI TIẾT CÁC GITHUB ISSUES CHO MILESTONE 4</h1>
+
+<h2>📌 Issue #36: [TV1] Triển khai hệ thống lên Web Hosting thực tế và Đóng gói Release v1.0.0</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Khiếu Hoàng Nam Anh (TV1) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv1-deployment-release</span><br>
+  <b>Labels:</b> <code>devops</code>, <code>deployment</code>, <code>high-priority</code> &nbsp;|&nbsp; <b>Milestone:</b> Milestone 4
+</div>
+<p><i>Mục tiêu:</i> Đưa ứng dụng WarningInfo vận hành ổn định trên môi trường Internet thực tế phục vụ Giảng viên và cộng đồng trải nghiệm.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Khởi tạo môi trường Web Hosting (Apache/LiteSpeed, PHP >= 8.1, MySQL/MariaDB) và kích hoạt chứng chỉ SSL miễn phí (Let's Encrypt HTTPS).</li>
+  <li>Thiết lập file cấu hình môi trường sản xuất (<code>config/config.php</code>): Tự động phát hiện URL hoặc cấu hình tách biệt giữa localhost và domain chính thức; tắt <code>display_errors</code> để bảo mật.</li>
+  <li>Import CSDL chuẩn hóa <code>database_init.sql</code> lên máy chủ Production và cấu hình tài khoản quản trị mẫu.</li>
+  <li>Phân quyền thư mục lưu trữ ảnh <code>public/uploads/</code> (chmod 755) đảm bảo upload ảnh ổn định và ngăn ngừa thực thi mã độc PHP.</li>
+  <li>Tạo tag và phát hành GitHub Release <code>v1.0.0</code> đính kèm tài liệu hướng dẫn bàn giao kỹ thuật.</li>
+</ul>
+
+<h2>📌 Issue #37: [TV4] Xây dựng trang xử lý lỗi 404/500 và tinh chỉnh UI/UX hoàn thiện</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Lê Trọng Hiếu (TV4) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv4-ui-polish-404-page</span><br>
+  <b>Labels:</b> <code>frontend</code>, <code>ui-ux</code>, <code>enhancement</code> &nbsp;|&nbsp; <b>Milestone:</b> Milestone 4
+</div>
+<p><i>Mục tiêu:</i> Nâng cao trải nghiệm người dùng, đảm bảo website xử lý tinh tế khi gặp liên kết hỏng hoặc lỗi hệ thống thay vì redirect ngầm.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Nâng cấp Dispatcher <code>core/App.php</code>: Khi người dùng truy cập URL không tồn tại, trả về đúng mã trạng thái HTTP 404 (<code>http_response_code(404)</code>) thay vì redirect ngầm về trang chủ.</li>
+  <li>Thiết kế view giao diện trang lỗi đẹp mắt: <code>app/views/errors/404.php</code> và <code>app/views/errors/500.php</code> theo đúng ngôn ngữ thiết kế Bootstrap 5 của dự án kèm nút 'Quay lại trang chủ'.</li>
+  <li>Bổ sung thẻ Meta SEO, OpenGraph (ảnh thumbnail chia sẻ mạng xã hội) và Favicon chuẩn hóa trên toàn hệ thống.</li>
+  <li>Rà soát căn chỉnh khoảng cách, font chữ và hiệu ứng hover trên toàn bộ các trang.</li>
+</ul>
+
+<h2>📌 Issue #38: [TV3 & TV2] Tối ưu hóa phân quyền Backend và Việt hóa WebService API</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Lê Tố Nguyệt Minh (TV3) & Trần Yến Phụng (TV2) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv3-api-polish-demo-video</span><br>
+  <b>Labels:</b> <code>backend</code>, <code>security</code>, <code>webservice</code> &nbsp;|&nbsp; <b>Milestone:</b> Milestone 4
+</div>
+<p><i>Mục tiêu:</i> Hoàn thiện tính toàn vẹn nghiệp vụ Backend và tính thân thiện của API.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Rà soát và cập nhật helper <code>core/Controller.php</code> / <code>requireAdmin()</code>: Khi người dùng thông thường hoặc cán bộ truy cập trái phép vào <code>/admin</code>, chuyển hướng về trang chủ kèm Flash Alert cảnh báo 'Bạn không có quyền truy cập khu vực Quản trị' (thay vì chuyển về trang đăng nhập gây hiểu nhầm).</li>
+  <li>Đồng bộ hóa toàn bộ các thông điệp phản hồi lỗi của WebService API (<code>ReportController.php</code>, <code>NotificationController.php</code>, <code>AdminController.php</code>) sang tiếng Việt chuẩn ('Phương thức không được hỗ trợ', 'Trạng thái không hợp lệ', 'Khoảng thời gian không hợp lệ',...).</li>
+  <li>Kiểm tra ràng buộc dữ liệu: Đảm bảo không thể phân công cán bộ khi sự cố đã đóng (<code>closed</code>) hoặc bị từ chối (<code>rejected</code>).</li>
+</ul>
+
+<h2>📌 Issue #39: [TV5 & TV1] Hoàn thiện toàn bộ cuốn Báo cáo Đồ án UEH và nghiệm thu UAT</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Nguyễn Thế Luân (TV5) & Khiếu Hoàng Nam Anh (TV1) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv5-final-report-uat</span><br>
+  <b>Labels:</b> <code>documentation</code>, <code>ueh-report</code>, <code>qa</code> &nbsp;|&nbsp; <b>Milestone:</b> Milestone 4
+</div>
+<p><i>Mục tiêu:</i> Hoàn thành tài liệu thuyết minh đồ án học thuật đạt tiêu chuẩn cao nhất của Khoa CNTTKD – UEH.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Hợp nhất các chương thành cuốn Báo cáo Đồ án cuối kỳ hoàn chỉnh (<code>BAO_CAO_DO_AN_WARNINGINFO_CUOI_KY.docx</code>):
+    <ul>
+      <li>Chương 1: Tổng quan đề tài & Bối cảnh đô thị thông minh.</li>
+      <li>Chương 2: Phân tích yêu cầu, Use Case & Thiết kế CSDL (3NF).</li>
+      <li>Chương 3: Kiến trúc MVC và Hiện thực hóa lõi hệ thống.</li>
+      <li>Chương 4: Quản trị sự cố, Bàn làm việc cán bộ & An ninh CSRF.</li>
+      <li>Chương 5: Bản đồ tương tác Leaflet, WebService RESTful, AJAX & Báo cáo QA Testing (hợp nhất từ 2 file draft của Milestone 3).</li>
+      <li>Chương 6: Triển khai môi trường Hosting, Đánh giá kết quả & Hướng phát triển.</li>
+    </ul>
+  </li>
+  <li>Chèn đầy đủ Mục lục tự động, Danh mục hình ảnh, Danh mục bảng biểu và Tài liệu tham khảo theo quy chuẩn UEH.</li>
+  <li>Lập Bảng tự đánh giá tỷ lệ hoàn thành và đóng góp công việc của 5 thành viên (100% công bằng, minh bạch).</li>
+  <li>Thực hiện kiểm thử nghiệm thu UAT trên đường link Hosting thực tế, lập biên bản nghiệm thu đính kèm phụ lục.</li>
+</ul>
+
+<h2>📌 Issue #40: [TV2 & TV3] Xây dựng Slide Thuyết trình và Sản xuất Video Demo hoàn chỉnh</h2>
+<div class='meta-box'>
+  <b>Assignee:</b> Trần Yến Phụng (TV2) & Lê Tố Nguyệt Minh (TV3) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv2-security-presentation</span><br>
+  <b>Labels:</b> <code>presentation</code>, <code>video-demo</code>, <code>admin</code> &nbsp;|&nbsp; <b>Milestone:</b> Milestone 4
+</div>
+<p><i>Mục tiêu:</i> Chuẩn bị tư liệu truyền thông và phương tiện thuyết trình bảo vệ đồ án trước Hội đồng / Giảng viên.</p>
+<p><b>Checklist công việc:</b></p>
+<ul>
+  <li>Thiết kế Slide thuyết trình bảo vệ đồ án (khoảng 20 – 25 slides):
+    <ul>
+      <li>Đặt vấn đề & Mục tiêu giải pháp đề tài WarningInfo.</li>
+      <li>Kiến trúc công nghệ (MVC thuần, Leaflet.js, AJAX, WebService, Chart.js).</li>
+      <li>Luồng quy trình tương tác 3 bên (Người dân – Cán bộ – Admin).</li>
+      <li>Demo các tính năng nổi bật.</li>
+      <li>Kết quả đạt được & Bài học kinh nghiệm.</li>
+    </ul>
+  </li>
+  <li>Quay và biên tập Video Clip Demo hoàn chỉnh (thời lượng 5 – 7 phút):
+    <ul>
+      <li>Kịch bản xuyên suốt: Người dân chụp ảnh gửi sự cố có GPS &rarr; Xem vị trí trên Bản đồ tương tác &rarr; Quản trị viên duyệt và phân công có hạn chót &rarr; Cán bộ hiện trường nhận việc và cập nhật tiến độ &rarr; Người dân nhận thông báo tức thì, thả Upvote và bình luận tương tác.</li>
+      <li>Thuyết minh tiếng Việt rõ ràng, chèn phụ đề và nhạc nền phù hợp.</li>
+      <li>Xuất video Full HD 1080p và upload lên YouTube / Google Drive chia sẻ công khai.</li>
+    </ul>
+  </li>
+</ul>
+
+<h1>IV. TIÊU CHÍ ĐÁNH GIÁ ĐỒ ÁN XUẤT SẮC (CHUẨN ĐIỂM 10 UEH)</h1>
+<ol>
+  <li><b>Tính hoàn chỉnh & Ổn định:</b> Website vận hành trơn tru trên Hosting thực tế, không có lỗi PHP Warning/Notice, không có lỗi Javascript trên Console.</li>
+  <li><b>Tuân thủ Kiến trúc:</b> Mô hình MVC PHP thuần tách bạch rõ ràng giữa Model, View, Controller; an toàn bảo mật (CSRF, PDO Prepared Statement, XSS Filtering).</li>
+  <li><b>Tính ứng dụng cao:</b> Kết hợp xuất sắc giữa Bản đồ số Leaflet.js, Kỹ thuật AJAX mượt mà và Biểu đồ thống kê Chart.js.</li>
+  <li><b>Hồ sơ minh bạch:</b> Quản lý dự án chuyên nghiệp trên GitHub (Issues, Pull Requests, Milestones rõ ràng theo từng thành viên).</li>
+  <li><b>Chất lượng Báo cáo & Thuyết trình:</b> Văn phong học thuật chuẩn mực, bố cục rõ ràng, slide trực quan và video thuyết minh thuyết phục.</li>
+</ol>
+</body>
+</html>
+

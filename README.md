@@ -92,10 +92,10 @@ Group11_Project-Web_WarningInfo/
   *Trạng thái: Hoàn thành 100%.* Khởi tạo Repository, thiết kế CSDL ERD, đặc tả Use Case, thiết kế Wireframe UI.
 - ✅ **Milestone 2: Xây dựng Backend Core & Giao diện tĩnh (Tuần 3 – 5)**  
   *Trạng thái: Hoàn thành 100%.* Xác thực người dùng, upload ảnh minh chứng an toàn, quy trình duyệt sự cố Admin, lưu lịch sử `report_status_history`, tự động tạo `notifications`.
-- 🚀 **Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác (Tuần 6 – 8)**  
-  *Trạng thái: Đang hoàn thiện các hạng mục tích hợp & kiểm thử.* Tiêu chuẩn hướng đến điểm 9.0 – 10.0 của UEH.
-- ⏳ **Milestone 4: Kiểm thử, Hoàn thiện Báo cáo & Triển khai Hosting (Tuần 9 – 10)**  
-  *Kế hoạch:* Kiểm thử tổng thể, triển khai Shared Hosting/Cloud và đóng gói báo cáo hoàn chỉnh.
+- ✅ **Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác (Tuần 6 – 8)**  
+  *Trạng thái: Hoàn thành 100% Codebase.* Đã hợp nhất vào nhánh `develop` và `main`. Tích hợp Bản đồ Leaflet.js, WebService REST API, AJAX lọc động, Upvote, Bình luận, Admin Chart.js, Xuất CSV UTF-8 và bảo mật CSRF.
+- 🚀 **Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)**  
+  *Trạng thái: Đang triển khai.* Đưa ứng dụng lên Web Hosting thực tế (SSL), xử lý các điểm tồn đọng nhỏ, kiểm thử UAT, hoàn thiện toàn bộ cuốn Báo cáo Đồ án UEH, Slide thuyết trình và Video Demo. Xem chi tiết tại [KE_HOACH_PHAN_CONG_MILESTONE_4.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_4.md).
 
 ---
 
@@ -148,15 +148,16 @@ Hệ thống cung cấp danh mục API chuẩn RESTful phục vụ giao tiếp A
    cd Group11_Project-Web_WarningInfo
    ```
 2. **Thiết lập Cơ sở dữ liệu:**
-   - Mở phpMyAdmin hoặc MySQL Workbench, tạo một cơ sở dữ liệu mới có tên `warning_info_db` với bảng mã `utf8mb4_unicode_ci`.
-   - Nhập (Import) tệp tin CSDL tại: `database/warning_info_db.sql` hoặc `database/db_warninginfo_full.sql`.
+   - Mở phpMyAdmin hoặc MySQL Workbench và nhập (Import) tệp `database/database_init.sql`. Tệp này tự tạo cơ sở dữ liệu `warninginfo_db` (bảng mã `utf8mb4_unicode_ci`), 10 bảng và dữ liệu mẫu, nên không cần tạo CSDL trước.
+   - Hoặc dùng dòng lệnh: `mysql -u root < database/database_init.sql`
+   - Lưu ý: cột `deadline` của bảng `assignments` đã có sẵn trong `database_init.sql`. Chỉ chạy `database/migrations/m3_add_deadline.sql` khi nâng cấp một CSDL cũ được tạo trước Milestone 3, nếu chạy trên CSDL mới sẽ báo lỗi trùng cột.
 3. **Cấu hình kết nối:**
    - Kiểm tra tệp `config/config.php`:
      ```php
      define('DB_HOST', 'localhost');
      define('DB_USER', 'root');
      define('DB_PASS', '');
-     define('DB_NAME', 'warning_info_db');
+     define('DB_NAME', 'warninginfo_db');
      define('URLROOT', 'http://localhost/Group11_Project-Web_WarningInfo');
      ```
 4. **Phân quyền thư mục tải lên:**
@@ -169,9 +170,11 @@ Hệ thống cung cấp danh mục API chuẩn RESTful phục vụ giao tiếp A
 ### 7.1. Danh sách Tài khoản Kiểm thử (Mặc định)
 | Loại tài khoản | Tên đăng nhập / Email | Mật khẩu | Quyền hạn |
 |:---|:---|:---:|:---|
-| **Quản trị viên (Admin)** | `admin@warninginfo.vn` | `123456` | Truy cập Admin Dashboard, duyệt tin, phân công cán bộ, xem biểu đồ, xuất CSV. |
-| **Cán bộ hiện trường (Officer)** | `officer@warninginfo.vn` | `123456` | Truy cập Bàn làm việc cán bộ (`/officer`), tiếp nhận sự cố, cập nhật tiến độ xử lý. |
-| **Người dân (Citizen)** | `citizen@gmail.com` | `123456` | Gửi phản ánh hiện trường, xem bản đồ số, theo dõi tiến độ sự cố của mình. |
+| **Quản trị viên (Admin)** | `admin@warninginfo.com` | `password` | Truy cập Admin Dashboard, duyệt tin, phân công cán bộ, xem biểu đồ, xuất CSV. |
+| **Cán bộ hiện trường (Officer)** | `officer@warninginfo.com` | `password` | Truy cập Bàn làm việc cán bộ (`/officer`), tiếp nhận sự cố, cập nhật tiến độ xử lý. |
+| **Người dân (Citizen)** | `an.demo@warninginfo.local` | `password` | Gửi phản ánh hiện trường, xem bản đồ số, theo dõi tiến độ sự cố của mình. |
+
+> Ngoài ra còn 2 tài khoản người dân mẫu: `binh.demo@warninginfo.local` và `cuong.demo@warninginfo.local` (cùng mật khẩu `password`). Các tài khoản này được tạo bởi `database/database_init.sql`.
 
 ### 7.2. Các đường dẫn trải nghiệm tính năng nổi bật Milestone 3
 - 🗺️ **Bản đồ số tương tác:** `http://localhost/Group11_Project-Web_WarningInfo/report/map`
