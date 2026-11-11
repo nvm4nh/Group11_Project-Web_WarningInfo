@@ -14,7 +14,10 @@ $h = function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>Hệ thống đang gặp sự cố | WarningInfo</title>
+  <meta name="theme-color" content="#0f766e">
+  <link rel="icon" href="<?= $h($home . 'favicon.ico') ?>" sizes="48x48">
   <link rel="icon" href="<?= $h($asset . 'img/logo.svg') ?>" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="<?= $h($asset . 'img/icons/apple-touch-icon.png') ?>">
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">

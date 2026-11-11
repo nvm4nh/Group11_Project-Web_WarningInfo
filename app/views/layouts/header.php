@@ -1,13 +1,43 @@
-<?php /* Layout đầu trang (TV4) – bản tĩnh: menu cố định, chưa lấy dữ liệu từ CSDL */ ?>
+<?php /* Layout đầu trang (TV4): thẻ SEO / OpenGraph / favicon, thanh menu, chuông thông báo */ ?>
 <!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
-  <title><?= e($data['title'] ?? 'Trang chủ') ?> | WarningInfo</title>
-  <meta name="description" content="WarningInfo – Hệ thống báo cáo và cảnh báo vấn đề môi trường từ cộng đồng.">
+  <?php $seo = seo_meta($data ?? []); /* SEO + OpenGraph theo từng trang – view_helper.php (Milestone 4) */ ?>
+  <title><?= e($seo['title']) ?></title>
+  <meta name="description" content="<?= e($seo['description']) ?>">
+  <meta name="robots" content="<?= e($seo['robots']) ?>">
+  <?php if ($seo['canonical']): ?>
+  <link rel="canonical" href="<?= e($seo['canonical']) ?>">
+  <?php endif; ?>
+  <meta name="theme-color" content="#0f766e">
+  <!-- OpenGraph: ảnh + tiêu đề xem trước khi chia sẻ link lên Facebook, Zalo, Messenger -->
+  <meta property="og:site_name" content="WarningInfo">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:type" content="<?= e($seo['type']) ?>">
+  <meta property="og:title" content="<?= e($seo['og_title']) ?>">
+  <meta property="og:description" content="<?= e($seo['description']) ?>">
+  <meta property="og:url" content="<?= e($seo['canonical'] ?? url($_GET['url'] ?? '')) ?>">
+  <meta property="og:image" content="<?= e($seo['image']) ?>">
+  <?php if ($seo['image_size']): ?>
+  <meta property="og:image:width" content="<?= (int)$seo['image_size'][0] ?>">
+  <meta property="og:image:height" content="<?= (int)$seo['image_size'][1] ?>">
+  <?php endif; ?>
+  <meta property="og:image:alt" content="<?= e($seo['image_alt']) ?>">
+  <?php if ($seo['published']): ?>
+  <meta property="article:published_time" content="<?= e($seo['published']) ?>">
+  <?php endif; ?>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<?= e($seo['og_title']) ?>">
+  <meta name="twitter:description" content="<?= e($seo['description']) ?>">
+  <meta name="twitter:image" content="<?= e($seo['image']) ?>">
+  <!-- Favicon: .ico cho trình duyệt cũ, SVG cho trình duyệt mới, icon màn hình chính iPhone / Android -->
+  <link rel="icon" href="<?= url('favicon.ico') ?>" sizes="48x48">
   <link rel="icon" href="<?= asset('img/logo.svg') ?>" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="<?= asset('img/icons/apple-touch-icon.png') ?>">
+  <link rel="manifest" href="<?= url('site.webmanifest') ?>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
