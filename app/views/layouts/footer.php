@@ -1,6 +1,11 @@
 <?php /* Layout cuối trang (TV4) */ ?>
   </main>
   <footer class="footer-wi" id="footer">
+    <!-- Hàng cây viền trên chân trang: mọc lên khi cuộn tới (forest.js thêm class .in) -->
+    <svg class="footer-trees reveal" viewBox="0 0 1440 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      <g class="ft-far"><?= wi_treeline(407, 1440, 150, ['count' => 30, 'min' => 46, 'max' => 96, 'palms' => .2, 'fill' => 4]) ?></g>
+      <g class="ft-near"><?= wi_treeline(912, 1440, 150, ['count' => 18, 'min' => 34, 'max' => 70, 'palms' => .35, 'fill' => 4]) ?></g>
+    </svg>
     <div class="container">
       <div class="row g-4">
         <div class="col-lg-4">
@@ -47,6 +52,7 @@
       </div>
       <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between gap-2">
         <span>© <?= date('Y') ?> WarningInfo. Đồ án môn Lập trình Web – Nhóm 11.</span>
+        <span class="footer-note"><i class="bi bi-tree me-1"></i>Mỗi báo cáo là một mầm xanh cho thành phố</span>
       </div>
     </div>
   </footer>

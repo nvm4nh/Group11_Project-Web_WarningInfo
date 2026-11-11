@@ -1,35 +1,20 @@
 <?php
-$totalReports = number_format($data['stats']['total_reports'] ?? 0, 0, ',', '.');
-$processing   = number_format($data['stats']['processing'] ?? 0, 0, ',', '.');
-$resolved     = number_format($data['stats']['resolved'] ?? 0, 0, ',', '.');
-$totalUsers   = number_format($data['stats']['total_users'] ?? 0, 0, ',', '.');
+/* Trang chủ – dải số liệu: 4 ô trong một dải liền, số chạy tăng dần khi cuộn tới (main.js – [data-count]) */
+$statCells = [
+  ['bi-megaphone',     'background:var(--wi-primary-soft);color:var(--wi-primary)', (int)($data['stats']['total_reports'] ?? 0), 'Báo cáo đã gửi'],
+  ['bi-gear',          'background:#ede9fe;color:#6d28d9',                          (int)($data['stats']['processing'] ?? 0),    'Đang xử lý'],
+  ['bi-check2-circle', 'background:#dcfce7;color:#15803d',                          (int)($data['stats']['resolved'] ?? 0),      'Đã giải quyết'],
+  ['bi-people',        'background:#fff3d6;color:#8a5200',                          (int)($data['stats']['total_users'] ?? 0),   'Thành viên'],
+];
 ?>
 <!-- ========== THỐNG KÊ ========== -->
 <div class="container stats-wrap">
-  <div class="row g-3">
-    <div class="col-6 col-lg-3">
-      <div class="card-surface stat-card">
-        <span class="icon-circle bg-primary-soft text-primary"><i class="bi bi-megaphone"></i></span>
-        <div><div class="num"><?= $totalReports ?></div><div class="label">Báo cáo đã gửi</div></div>
+  <div class="stats-band">
+    <?php foreach ($statCells as [$icon, $tint, $num, $label]): ?>
+      <div class="stat-card">
+        <span class="icon-circle" style="<?= $tint ?>"><i class="bi <?= $icon ?>"></i></span>
+        <div><div class="num" data-count="<?= $num ?>"><?= number_format($num, 0, ',', '.') ?></div><div class="label"><?= $label ?></div></div>
       </div>
-    </div>
-    <div class="col-6 col-lg-3">
-      <div class="card-surface stat-card">
-        <span class="icon-circle" style="background:#ede9fe;color:#7c3aed"><i class="bi bi-gear"></i></span>
-        <div><div class="num"><?= $processing ?></div><div class="label">Đang xử lý</div></div>
-      </div>
-    </div>
-    <div class="col-6 col-lg-3">
-      <div class="card-surface stat-card">
-        <span class="icon-circle" style="background:#dcfce7;color:#16a34a"><i class="bi bi-check2-circle"></i></span>
-        <div><div class="num"><?= $resolved ?></div><div class="label">Đã giải quyết</div></div>
-      </div>
-    </div>
-    <div class="col-6 col-lg-3">
-      <div class="card-surface stat-card">
-        <span class="icon-circle" style="background:#fff7ed;color:#ea580c"><i class="bi bi-people"></i></span>
-        <div><div class="num"><?= $totalUsers ?></div><div class="label">Thành viên</div></div>
-      </div>
-    </div>
+    <?php endforeach; ?>
   </div>
 </div>

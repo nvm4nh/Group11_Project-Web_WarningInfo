@@ -23,7 +23,7 @@ foreach (($r->images ?? []) as $img) {
 $hasGps = $r->latitude !== null && $r->longitude !== null && $r->latitude !== '' && $r->longitude !== '';
 ?>
 
-<section class="section py-4 bg-light border-bottom">
+<section class="section py-4 bg-light border-bottom page-canopy"><?= wi_canopy() ?>
   <div class="container">
     <a href="<?= url('officer') ?>" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left me-1"></i> Bàn làm việc</a>
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mt-2">

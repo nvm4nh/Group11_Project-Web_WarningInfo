@@ -1,12 +1,13 @@
 <?php /* Trang chủ – 6 cảnh báo mới nhất từ CSDL, lọc theo mức độ bằng ?severity=... */ ?>
 <!-- ========== CẢNH BÁO MỚI NHẤT ==========
      Hiện tại lọc bằng link ?severity=...  TV5 có thể đổi sang AJAX (data-severity) -->
-<section class="section bg-white border-top border-bottom" id="latest">
+<section class="section section-paper" id="latest">
+  <?= wi_sprig_svg('sec-sprig sec-sprig-left sway') ?>
   <div class="container">
     <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
       <div>
-        <span class="section-eyebrow"><i class="bi bi-broadcast"></i> Cập nhật liên tục</span>
         <h2 class="section-title">Cảnh báo mới nhất</h2>
+        <p class="section-desc mb-0">Cập nhật liên tục từ báo cáo của người dân.</p>
       </div>
       <ul class="nav nav-pills gap-1 flex-nowrap overflow-x-auto pb-1 mw-100" id="latestTabs">
         <?php $sev = $data['severity'] ?? null; ?>
@@ -24,7 +25,7 @@
           </div>
         </div>
       <?php endif; ?>
-      <?php foreach (($data['latestReports'] ?? []) as $r): ?>
+      <?php foreach (array_values($data['latestReports'] ?? []) as $i => $r): ?>
         <?php
           [$icon, , $placeholder]       = categoryVisual($r->category_id);
           [$sevText, $sevCls, $sevIcon] = severityVisual($r->priority);
@@ -32,7 +33,7 @@
           $thumb = !empty($r->thumbnail) ? uploadUrl($r->thumbnail) : asset('img/placeholder/' . $placeholder);
           $desc  = (string)$r->description;
         ?>
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-4 reveal" style="--i:<?= $i % 3 ?>">
           <article class="alert-card" data-id="<?= (int)$r->id ?>">
             <div class="thumb">
               <img src="<?= e($thumb) ?>" alt="<?= e($r->title) ?>" loading="lazy">

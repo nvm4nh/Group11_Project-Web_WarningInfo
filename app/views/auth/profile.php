@@ -1,6 +1,6 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
 
-<section class="py-4 bg-light">
+<section class="py-4 bg-light page-canopy"><?= wi_canopy() ?>
   <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
