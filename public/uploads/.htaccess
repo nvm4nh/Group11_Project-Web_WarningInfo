@@ -1,7 +1,21 @@
-# Thư mục chứa file người dùng tải lên — CHỈ phục vụ ảnh tĩnh, cấm thực thi mã
+# Thư mục chứa ảnh người dân tải lên — CHỈ phục vụ ảnh tĩnh, KHÔNG BAO GIỜ chạy mã.
+# TV4 – Milestone 4: rà soát lại để an toàn trên Hosting (Apache + PHP-FPM, LiteSpeed, cPanel),
+# không chỉ trên XAMPP. Kết quả kiểm tra: docs/KIEM_TRA_AN_TOAN_UPLOAD.md
 Options -Indexes -ExecCGI
 
-# Tắt PHP trong thư mục này (mod_php của XAMPP)
+# 1) DANH SÁCH TRẮNG: mặc định chặn tất cả, chỉ mở cho file ảnh có ĐÚNG MỘT dấu chấm
+#    (vd: 3f9c…e1.jpg). Tên kiểu "anh.php.jpg", ".htaccess", ".user.ini" đều bị chặn.
+Require all denied
+<FilesMatch "(?i)^[^.]+\.(jpe?g|png|webp)$">
+  Require all granted
+</FilesMatch>
+
+# 2) Lớp bảo vệ thứ hai: bất kỳ tên file nào CHỨA đuôi script (kể cả đuôi kép) → chặn
+<FilesMatch "(?i)\.(php\d?|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp|htm|html|shtml|svg|js)(\.|$)">
+  Require all denied
+</FilesMatch>
+
+# 3) Tắt PHP trong thư mục này (mod_php của XAMPP)
 <IfModule mod_php.c>
   php_flag engine off
 </IfModule>
@@ -12,10 +26,14 @@ Options -Indexes -ExecCGI
   php_flag engine off
 </IfModule>
 
-# Chặn mọi file không phải ảnh
-<FilesMatch "(?i)\.(php\d?|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp|htm|html|shtml|svg|js)$">
-  Require all denied
-</FilesMatch>
-<FilesMatch "^\.">
-  Require all denied
-</FilesMatch>
+# 4) Hosting cPanel đời cũ gắn PHP theo đuôi bằng AddHandler → bỏ gắn trong thư mục này
+<IfModule mod_mime.c>
+  RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .pl .py .cgi .sh
+  RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
+</IfModule>
+
+# 5) Trình duyệt không được "đoán" kiểu file và không chạy script nếu mở ảnh trực tiếp
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Content-Security-Policy "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox"
+</IfModule>
