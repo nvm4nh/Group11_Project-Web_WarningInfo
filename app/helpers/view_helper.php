@@ -29,6 +29,31 @@ function queryUrl($path, array $params = []) {
     return url($path) . ($qs ? '?' . $qs : '');
 }
 
+// Lấy 1 tham số trên URL dưới dạng CHUỖI: get_param('status'), get_param('keyword', get_param('q')).
+// Người dùng có thể gửi ?status[]=x hoặc ?status[][]=x (mảng) – khi đó lấy giá trị đầu tiên,
+// không để PHP báo "Array to string conversion" (TV4 – Milestone 4).
+function get_param($key, $default = '') {
+    $value = $_GET[$key] ?? $default;
+    while (is_array($value)) {
+        $value = reset($value);
+    }
+    return is_scalar($value) ? trim((string)$value) : '';
+}
+
+// Mọi ô nhập trong các form của hệ thống đều gửi 1 giá trị, nhưng request giả mạo có thể gửi title[]=x
+// → trim() / strlen() nhận mảng gây lỗi 500 hoặc Warning. public/index.php gọi hàm này 1 lần để đưa mọi ô về chuỗi.
+// Sau này có form gửi mảng thật (vd checkbox ids[]) thì thêm tên ô vào $keepArrays.
+function normalize_post_input(array $keepArrays = []) {
+    foreach ($_POST as $key => $value) {
+        if (is_array($value) && !in_array($key, $keepArrays, true)) {
+            while (is_array($value)) {
+                $value = reset($value);
+            }
+            $_POST[$key] = is_scalar($value) ? (string)$value : '';
+        }
+    }
+}
+
 function redirect($path) {
     header('Location: ' . url($path));
     exit;
@@ -127,7 +152,7 @@ function seo_excerpt($text, $max = 160) {
  */
 function seo_meta(array $data = []) {
     $site  = defined('SITENAME') ? SITENAME : 'WarningInfo';
-    $parts = array_values(array_filter(explode('/', trim((string)($_GET['url'] ?? ''), '/')), 'strlen'));
+    $parts = array_values(array_filter(explode('/', request_path()), 'strlen'));
     $route = strtolower(($parts[0] ?? 'home') . '/' . ($parts[1] ?? 'index'));   // "report/detail", "home/index"...
 
     $intro = 'Người dân gửi phản ánh ô nhiễm, rác thải, ngập úng kèm ảnh và vị trí GPS; theo dõi tiến độ xử lý của cán bộ môi trường tại TP.HCM.';
@@ -142,7 +167,8 @@ function seo_meta(array $data = []) {
     ];
 
     $title  = trim((string)($data['title'] ?? ''));
-    $isHome = $route === 'home/index';
+    $status = http_response_code();
+    $isHome = $route === 'home/index' && !(is_int($status) && $status >= 400);   // trang lỗi giữ tiêu đề riêng
     $slogan = $site . ' – Báo cáo & cảnh báo môi trường từ cộng đồng';
     $seo = [
         'title'       => $isHome ? $slogan : ($title !== '' ? $title . ' | ' : '') . $site,
@@ -183,7 +209,6 @@ function seo_meta(array $data = []) {
     // Không cho công cụ tìm kiếm lập chỉ mục: trang quản trị / cán bộ / cá nhân và mọi trang lỗi (404, 403, 500)
     $private = in_array(strtolower($parts[0] ?? ''), ['admin', 'officer', 'notification'], true)
         || in_array($route, ['auth/profile', 'report/my_reports'], true);
-    $status = http_response_code();
     if ($private || !empty($data['noindex']) || (is_int($status) && $status >= 400)) {
         $seo['robots']    = 'noindex, nofollow';
         $seo['canonical'] = null;

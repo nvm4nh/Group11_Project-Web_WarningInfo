@@ -9,12 +9,12 @@ class ReportController extends Controller {
     }
 
     public function index() {
-        // Tham số lọc luôn đưa về 1 giá trị chuỗi (link cũ dạng ?status[]=... hoặc gõ tay sai trước đây gây lỗi Fatal)
-        $one = function ($v) { return is_array($v) ? (string)(reset($v) ?: '') : trim((string)$v); };
-        $category_id = (int)$one($_GET['category_id'] ?? ($_GET['category'] ?? '')) ?: null;
-        $priority    = $one($_GET['priority'] ?? ($_GET['severity'] ?? ''));
-        $status      = $one($_GET['status'] ?? '');
-        $keyword     = $one($_GET['q'] ?? '');
+        // Tham số lọc luôn đưa về 1 giá trị chuỗi bằng get_param() (link dạng ?status[]=... hay ?status[][]=...
+        // trước đây gây lỗi Fatal / Warning)
+        $category_id = (int)get_param('category_id', get_param('category')) ?: null;
+        $priority    = get_param('priority', get_param('severity'));
+        $status      = get_param('status');
+        $keyword     = get_param('q');
         $priority    = in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null;
         $status      = in_array($status, ReportModel::STATUSES, true) ? $status : null;
 
@@ -289,11 +289,11 @@ class ReportController extends Controller {
         $this->jsonError(405, 'Chỉ hỗ trợ phương thức GET');
     }
 
-    $priority = trim((string)($_GET['priority'] ?? ''));
-    $status = trim((string)($_GET['status'] ?? ''));
-    $keyword = trim((string)($_GET['keyword'] ?? $_GET['q'] ?? ''));
-    $fromDate = trim((string)($_GET['from_date'] ?? ''));
-    $toDate = trim((string)($_GET['to_date'] ?? ''));
+    $priority = get_param('priority');
+    $status = get_param('status');
+    $keyword = get_param('keyword', get_param('q'));
+    $fromDate = get_param('from_date');
+    $toDate = get_param('to_date');
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = min(100, max(1, (int)($_GET['limit'] ?? 10)));
 
@@ -434,8 +434,8 @@ class ReportController extends Controller {
         // category_id chấp nhận: 3 | 1,2,3 | category_id[]=1&category_id[]=2
         $rawCats = $_GET['category_id'] ?? [];
         $catList = is_array($rawCats) ? $rawCats : explode(',', (string)$rawCats);
-        $priority = (string)($_GET['priority'] ?? '');
-        $state    = (string)($_GET['state'] ?? 'all');
+        $priority = get_param('priority');
+        $state    = get_param('state', 'all');
 
         $filters = [
             'category_ids' => array_values(array_filter(array_map('intval', $catList))),
@@ -597,7 +597,7 @@ public function api_add_comment()
     }
 
     $reportId = (int)($input['report_id'] ?? 0);
-    $content = trim((string)($input['content'] ?? ''));
+    $content = is_string($input['content'] ?? null) ? trim($input['content']) : '';   // JSON {"content": [...]} → coi như rỗng
 
     if ($reportId <= 0 || $content === '') {
         return $this->jsonError(422, 'Vui lòng nhập nội dung bình luận.');

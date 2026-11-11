@@ -44,6 +44,7 @@ class App {
 
     public function parseUrl() {
         if(isset($_GET['url'])) {
+            if (!is_string($_GET['url'])) show_404();   // ?url[]=... : đường dẫn giả mạo dạng mảng → 404 thay vì lỗi 500
             return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
         }
         return [];

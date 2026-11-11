@@ -19,7 +19,7 @@
   <meta property="og:type" content="<?= e($seo['type']) ?>">
   <meta property="og:title" content="<?= e($seo['og_title']) ?>">
   <meta property="og:description" content="<?= e($seo['description']) ?>">
-  <meta property="og:url" content="<?= e($seo['canonical'] ?? url($_GET['url'] ?? '')) ?>">
+  <meta property="og:url" content="<?= e($seo['canonical'] ?? url(request_path())) ?>">
   <meta property="og:image" content="<?= e($seo['image']) ?>">
   <?php if ($seo['image_size']): ?>
   <meta property="og:image:width" content="<?= (int)$seo['image_size'][0] ?>">
