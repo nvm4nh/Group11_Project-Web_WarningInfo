@@ -17,7 +17,8 @@ class Database {
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
         } catch(PDOException $e) {
-            die('Lỗi kết nối CSDL: ' . $e->getMessage());
+            // Không in thẳng lỗi ra trang (lộ thông tin máy chủ); ném lỗi để public/index.php hiện trang 500 và ghi log
+            throw new RuntimeException('Không kết nối được cơ sở dữ liệu: ' . $e->getMessage(), 0, $e);
         }
     }
 
