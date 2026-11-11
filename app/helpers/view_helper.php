@@ -29,6 +29,15 @@ function queryUrl($path, array $params = []) {
     return url($path) . ($qs ? '?' . $qs : '');
 }
 
+// Đường dẫn của trang đang mở, không có query string: "report/detail/5", "" ở trang chủ.
+// seo_meta() dùng để biết trang nào, header.php dùng cho og:url. Commit c9ff374 gọi hàm này nhưng chưa khai báo
+// → mọi trang lỗi 500. ?url[]=... (mảng) coi như trang chủ.
+function request_path() {
+    $path = $_GET['url'] ?? '';
+    if (!is_string($path)) return '';
+    return trim(filter_var($path, FILTER_SANITIZE_URL), '/');
+}
+
 // Lấy 1 tham số trên URL dưới dạng CHUỖI: get_param('status'), get_param('keyword', get_param('q')).
 // Người dùng có thể gửi ?status[]=x hoặc ?status[][]=x (mảng) – khi đó lấy giá trị đầu tiên,
 // không để PHP báo "Array to string conversion" (TV4 – Milestone 4).
