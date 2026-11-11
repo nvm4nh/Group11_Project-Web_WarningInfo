@@ -81,6 +81,34 @@ function uploadUrl($path) {
     return preg_match('#^https?://#i', $path) ? $path : url(preg_replace('#^/?(public/)?#', '', $path));
 }
 
+/* ---------- Giới hạn upload theo cấu hình máy chủ (TV4 – Milestone 4: kiểm tra trên Hosting) ---------- */
+
+// "2M" => 2097152, "512K" => 524288, "1G" => 1073741824 (giá trị trong php.ini)
+function ini_bytes($value) {
+    $value = trim((string)$value);
+    if ($value === '') return 0;
+    $units = ['k' => 1024, 'm' => 1048576, 'g' => 1073741824];
+    return (int)((float)$value * ($units[strtolower(substr($value, -1))] ?? 1));
+}
+
+/**
+ * Giới hạn upload THỰC TẾ = mức nhỏ hơn giữa quy định của ứng dụng và php.ini của máy chủ.
+ * XAMPP để upload_max_filesize = 40M, nhưng nhiều hosting mặc định chỉ 2M / post_max_size 8M:
+ * form phải báo đúng con số đó để người dân không bị mất công nhập lại khi gửi.
+ */
+function upload_limits($maxFiles, $maxBytes) {
+    $perFile = ini_bytes(ini_get('upload_max_filesize'));
+    $post    = ini_bytes(ini_get('post_max_size'));
+    $count   = (int)ini_get('max_file_uploads');
+    $perFile = $perFile > 0 ? min($maxBytes, $perFile) : $maxBytes;
+    $files   = $count > 0 ? min($maxFiles, $count) : $maxFiles;
+    $total   = $files * $perFile;
+    if ($post > 0) $total = min($total, max($perFile, $post - 262144));   // chừa ~256KB cho phần chữ của form
+    $mb = function ($b) { return rtrim(rtrim(number_format($b / 1048576, 1, ',', ''), '0'), ',') . 'MB'; };
+    return ['files' => $files, 'file_bytes' => $perFile, 'total_bytes' => $total,
+            'file_label' => $mb($perFile), 'total_label' => $mb($total)];
+}
+
 /* ---------- SEO: thẻ meta, OpenGraph, Twitter Card (TV4 – Milestone 4) ---------- */
 
 // Cắt đoạn văn còn tối đa $max ký tự, không cắt giữa chữ: seo_excerpt('Nước kênh ...', 160)

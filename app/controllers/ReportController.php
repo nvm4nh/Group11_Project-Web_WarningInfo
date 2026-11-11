@@ -223,7 +223,11 @@ class ReportController extends Controller {
                 $errors['images'] = "Tải ảnh $label lên không thành công, vui lòng thử lại.";
                 return [];
             }
-            if ($file['size'] <= 0 || $file['size'] > self::UPLOAD_MAX_BYTES) {
+            if ($file['size'] <= 0) {   // TV4 – Milestone 4: file rỗng trước đây bị báo nhầm là "vượt quá 5MB"
+                $errors['images'] = "Tệp $label rỗng (0 byte), vui lòng chọn lại ảnh.";
+                return [];
+            }
+            if ($file['size'] > self::UPLOAD_MAX_BYTES) {
                 $errors['images'] = "Ảnh $label vượt quá 5MB.";
                 return [];
             }
