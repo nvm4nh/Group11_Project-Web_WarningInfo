@@ -2,10 +2,10 @@
    WarningInfo – Trang lỗi 404 / 500 (TV4 – Milestone 4)
    ========================================================= */
 
-.error-page { padding: 56px 0 72px; background: radial-gradient(ellipse at top, var(--wi-primary-soft, #e6f4f2) 0%, transparent 60%); }
+.error-page { padding: 56px 0 72px; background: radial-gradient(ellipse at top, var(--wi-primary-soft, #e3f0df) 0%, transparent 60%); }
 .error-card {
   max-width: 640px; margin: 0 auto; text-align: center;
-  background: #fff; border: 1px solid var(--wi-border, #e5e7eb); border-radius: 20px;
+  background: #fff; border: 1px solid var(--wi-border, #dbe5d6); border-radius: 20px;
   padding: 40px 32px 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
 }
 
@@ -14,7 +14,7 @@
 .error-code {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: clamp(4.5rem, 14vw, 7rem); font-weight: 800; line-height: 1; letter-spacing: -2px;
-  background: linear-gradient(135deg, var(--wi-primary, #0f766e), #14b8a6);
+  background: linear-gradient(135deg, var(--wi-primary, #1b6b45), #4fa868);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .error-code i {
@@ -27,7 +27,7 @@
 @keyframes error-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .error-code i { animation: none; } }
 
-.error-title { font-size: clamp(1.35rem, 3.2vw, 1.75rem); font-weight: 800; margin: 8px 0 10px; color: var(--wi-text, #1f2a37); }
+.error-title { font-size: clamp(1.35rem, 3.2vw, 1.75rem); font-weight: 800; margin: 8px 0 10px; color: var(--wi-text, #17251c); }
 .error-text { color: #475569; margin: 0 auto 14px; max-width: 480px; }
 .error-path {
   display: inline-block; max-width: 100%; margin: 0 0 18px; padding: 4px 12px; border-radius: 999px;
@@ -42,13 +42,13 @@
 .error-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 22px; }
 .error-links {
   display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 10px;
-  padding-top: 18px; border-top: 1px dashed var(--wi-border, #e5e7eb); font-size: .88rem; color: #64748b;
+  padding-top: 18px; border-top: 1px dashed var(--wi-border, #dbe5d6); font-size: .88rem; color: #64748b;
 }
 .error-links a {
   display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
-  background: var(--wi-primary-soft, #e6f4f2); color: var(--wi-primary, #0f766e); font-weight: 600; text-decoration: none;
+  background: var(--wi-primary-soft, #e3f0df); color: var(--wi-primary, #1b6b45); font-weight: 600; text-decoration: none;
 }
-.error-links a:hover { background: #d4ece8; }
+.error-links a:hover { background: #d3e8cd; }
 .error-foot { margin: 18px 0 0; font-size: .8rem; color: #94a3b8; }
 .error-foot code { color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
 
@@ -67,10 +67,10 @@
 .error-debug summary { cursor: pointer; font-weight: 600; margin-bottom: 6px; }
 
 /* Trang 500 độc lập (không có header/footer chung) */
-.error-standalone { min-height: 100vh; background: var(--wi-bg, #f6f8f7); }
-.error-topbar { padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--wi-border, #e5e7eb); }
-.error-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; color: var(--wi-text, #1f2a37); text-decoration: none; }
-.error-brand em { font-style: normal; color: var(--wi-primary, #0f766e); }
+.error-standalone { min-height: 100vh; background: var(--wi-bg, #eff5ea); }
+.error-topbar { padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--wi-border, #dbe5d6); }
+.error-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; color: var(--wi-text, #17251c); text-decoration: none; }
+.error-brand em { font-style: normal; color: var(--wi-primary, #1b6b45); }
 
 @media (max-width: 575.98px) {
   .error-page { padding: 32px 0 48px; }
@@ -78,3 +78,18 @@
   .error-actions .btn { flex: 1 1 calc(50% - 10px); }
   .error-hotline { align-items: flex-start; }
 }
+
+/* ---------- Giao diện "tán rừng": lạc đường giữa rừng ---------- */
+.error-page { position: relative; overflow: hidden; background: none; }
+.error-page > .container { position: relative; z-index: 1; }
+.error-card { border-radius: 24px; box-shadow: var(--wi-shadow-lg); border-color: var(--wi-border, #dbe5d6); }
+.error-code { font-family: var(--wi-font-display, Georgia, serif); font-weight: 600; background: linear-gradient(135deg, #0d3b28, #4fa868); -webkit-background-clip: text; background-clip: text; }
+.error-code i { color: #2f8a55; }
+.error-title { font-family: var(--wi-font-display, Georgia, serif); font-weight: 600; }
+.error-sprig { position: absolute; z-index: 0; bottom: 100%; color: rgba(27, 107, 69, .2); --leaf-2: rgba(111, 191, 115, .3); --wi-vein: transparent; }
+.error-sprig-l { left: -60px; margin-bottom: -30px; width: clamp(220px, 30vw, 430px); --rot: 58deg; }
+.error-sprig-r { left: calc(100% - 20px); margin-bottom: -30px; width: clamp(200px, 26vw, 380px); --rot: 162deg; }
+.error-standalone { background: var(--wi-bg, #eff5ea) radial-gradient(1000px 520px at 100% 0%, rgba(155, 214, 122, .25), transparent 62%); }
+.error-topbar { background: rgba(250, 253, 247, .9); }
+.error-brand { font-family: var(--wi-font-display, Georgia, serif); font-weight: 600; }
+.error-brand img { filter: hue-rotate(-26deg) saturate(.92); }

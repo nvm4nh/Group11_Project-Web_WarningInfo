@@ -2,10 +2,12 @@
 <link href="<?= asset('css/errors.css') ?>" rel="stylesheet">
 
 <section class="error-page">
+  <?= wi_sprig_svg('error-sprig error-sprig-l sway', 'frond') ?>
+  <?= wi_sprig_svg('error-sprig error-sprig-r sway') ?>
   <div class="container">
     <div class="error-card">
       <div class="error-visual" aria-hidden="true">
-        <span class="error-code">4<i class="bi bi-geo-alt-fill"></i>4</span>
+        <span class="error-code">4<i class="bi bi-tree-fill"></i>4</span>
       </div>
       <h1 class="error-title">Không tìm thấy trang</h1>
       <p class="error-text"><?= e($data['message'] ?? '') ?></p>

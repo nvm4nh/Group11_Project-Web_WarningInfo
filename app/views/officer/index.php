@@ -12,7 +12,7 @@ $tabs = [
 ];
 ?>
 
-<section class="page-header">
+<section class="page-header"><?= wi_canopy() ?>
   <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
