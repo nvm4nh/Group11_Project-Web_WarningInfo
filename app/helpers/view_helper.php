@@ -46,3 +46,38 @@ function timeAgo($seconds, $datetime = null) {
     if ($s < 7 * 86400) return floor($s / 86400) . ' ngày trước';
     return $datetime ? date('d/m/Y', strtotime($datetime)) : floor($s / 86400) . ' ngày trước';
 }
+
+/* ---------- Biểu tượng / màu theo danh mục & mức độ (Milestone 4 – trang chủ) ---------- */
+
+// categoryVisual(2) => ['bi-droplet-half', 'cat-water', 'water.svg']; danh mục admin tự thêm dùng kiểu "khác"
+function categoryVisual($categoryId) {
+    $map = [
+        1 => ['bi-trash3',              'cat-waste',  'waste.svg'],
+        2 => ['bi-droplet-half',        'cat-water',  'water.svg'],
+        3 => ['bi-cloud-haze2',         'cat-air',    'air.svg'],
+        4 => ['bi-cloud-lightning-rain','cat-flood',  'flood.svg'],
+        5 => ['bi-tree',                'cat-forest', 'forest.svg'],
+        6 => ['bi-volume-up',           'cat-noise',  'noise.svg'],
+        7 => ['bi-exclamation-octagon', 'cat-chem',   'chem.svg'],
+    ];
+    return $map[(int)$categoryId] ?? ['bi-exclamation-circle', 'cat-other', 'other.svg'];
+}
+
+// severityVisual('high') => ['Cao', 'sev-high', 'bi-exclamation-triangle-fill'] (huy hiệu .badge-severity ở trang chủ)
+function severityVisual($priority) {
+    $map = [
+        'critical' => ['Nghiêm trọng', 'sev-critical', 'bi-exclamation-octagon-fill'],
+        'high'     => ['Cao',          'sev-high',     'bi-exclamation-triangle-fill'],
+        'medium'   => ['Trung bình',   'sev-medium',   'bi-exclamation-circle-fill'],
+        'low'      => ['Thấp',         'sev-low',      'bi-info-circle-fill'],
+    ];
+    return $map[$priority] ?? $map['medium'];
+}
+
+// Đường dẫn ảnh đã upload (file_path trong CSDL có thể có hoặc không có "public/" ở đầu)
+function uploadUrl($path) {
+    $path = trim((string)$path);
+    if ($path === '') return '';
+    return preg_match('#^https?://#i', $path) ? $path : url(preg_replace('#^/?(public/)?#', '', $path));
+}
+

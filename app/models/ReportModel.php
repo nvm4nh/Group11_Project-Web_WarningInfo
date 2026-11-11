@@ -73,7 +73,8 @@ class ReportModel {
         $sql = "SELECT r.*, c.name as category_name,
                 (SELECT COUNT(*) FROM upvotes u WHERE u.report_id = r.id) as upvote_count,
                 (SELECT COUNT(*) FROM comments cm WHERE cm.report_id = r.id AND cm.is_internal = 0) as comment_count,
-                (SELECT file_path FROM report_images img WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail
+                (SELECT file_path FROM report_images img WHERE img.report_id = r.id ORDER BY img.id ASC LIMIT 1) as thumbnail,
+                TIMESTAMPDIFF(SECOND, r.created_at, NOW()) as age_seconds
                 FROM reports r
                 LEFT JOIN categories c ON r.category_id = c.id
                 WHERE r.is_public = 1";
@@ -89,6 +90,43 @@ class ReportModel {
         }
         $this->db->bind(':limit', (int)$limit, PDO::PARAM_INT);
         return $this->db->resultSet();
+    }
+
+    /* ---------- Dữ liệu trang chủ (TV4 – Milestone 4) ---------- */
+
+    /** Sự cố khẩn cấp (cao / nghiêm trọng) chưa xử lý xong – khung "Đang diễn ra" ở trang chủ */
+    public function getUrgentOpen($limit = 3) {
+        $this->db->query("SELECT r.id, r.title, r.priority, r.status, r.category_id, r.created_at,
+                                 c.name AS category_name,
+                                 TIMESTAMPDIFF(SECOND, r.created_at, NOW()) AS age_seconds
+                          FROM reports r
+                          LEFT JOIN categories c ON c.id = r.category_id
+                          WHERE r.is_public = 1
+                            AND r.priority IN ('critical', 'high')
+                            AND r.status NOT IN ('resolved', 'closed', 'rejected')
+                          ORDER BY FIELD(r.priority, 'critical', 'high'), r.created_at DESC
+                          LIMIT :limit");
+        $this->db->bind(':limit', (int)$limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
+
+    /** Số sự cố công khai được gửi trong N giờ gần nhất */
+    public function countRecent($hours = 24) {
+        $this->db->query("SELECT COUNT(*) AS total FROM reports
+                          WHERE is_public = 1 AND created_at >= NOW() - INTERVAL :hours HOUR");
+        $this->db->bind(':hours', (int)$hours, PDO::PARAM_INT);
+        $row = $this->db->single();
+        return (int)($row->total ?? 0);
+    }
+
+    /** Số sự cố công khai theo từng danh mục: [category_id => số lượng] */
+    public function countPublicByCategory() {
+        $this->db->query("SELECT category_id, COUNT(*) AS total FROM reports WHERE is_public = 1 GROUP BY category_id");
+        $map = [];
+        foreach ($this->db->resultSet() as $row) {
+            $map[(int)$row->category_id] = (int)$row->total;
+        }
+        return $map;
     }
 
     public function getAll($filters = []) {
