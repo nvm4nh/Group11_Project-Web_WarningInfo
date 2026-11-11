@@ -1,4 +1,4 @@
-<?php /* Layout cuối trang (TV4) – bản tĩnh */ ?>
+<?php /* Layout cuối trang (TV4) */ ?>
   </main>
   <footer class="footer-wi" id="footer">
     <div class="container">
@@ -15,19 +15,25 @@
           <ul class="list-unstyled footer-links mb-0">
             <li><a href="<?= url('') ?>">Trang chủ</a></li>
             <li><a href="<?= url('report') ?>">Cảnh báo mới</a></li>
+            <li><a href="<?= url('report/map') ?>">Bản đồ sự cố</a></li>
             <li><a href="<?= url('report/create') ?>">Gửi báo cáo</a></li>
-            <li><a href="<?= url('auth/register') ?>">Đăng ký thành viên</a></li>
+            <?php if (isLoggedIn()): ?>
+              <li><a href="<?= url('report/my_reports') ?>">Báo cáo của tôi</a></li>
+            <?php else: ?>
+              <li><a href="<?= url('auth/register') ?>">Đăng ký thành viên</a></li>
+            <?php endif; ?>
           </ul>
         </div>
         <div class="col-6 col-md-4 col-lg-3">
           <h6>Danh mục</h6>
           <ul class="list-unstyled footer-links mb-0">
-            <li><a href="<?= url('report?category%5B0%5D=1') ?>">Ô nhiễm rác thải</a></li>
-            <li><a href="<?= url('report?category%5B0%5D=2') ?>">Ô nhiễm nguồn nước</a></li>
-            <li><a href="<?= url('report?category%5B0%5D=3') ?>">Ô nhiễm không khí</a></li>
-            <li><a href="<?= url('report?category%5B0%5D=4') ?>">Ngập úng</a></li>
-            <li><a href="<?= url('report?category%5B0%5D=5') ?>">Cháy rừng</a></li>
-            <li><a href="<?= url('report?category%5B0%5D=6') ?>">Tiếng ồn</a></li>
+            <li><a href="<?= url('report?category_id=1') ?>">Ô nhiễm rác thải</a></li>
+            <li><a href="<?= url('report?category_id=2') ?>">Ô nhiễm nguồn nước</a></li>
+            <li><a href="<?= url('report?category_id=3') ?>">Ô nhiễm không khí</a></li>
+            <li><a href="<?= url('report?category_id=4') ?>">Ngập úng</a></li>
+            <li><a href="<?= url('report?category_id=5') ?>">Cháy rừng</a></li>
+            <li><a href="<?= url('report?category_id=6') ?>">Tiếng ồn</a></li>
+            <li><a href="<?= url('report?category_id=7') ?>">Sự cố hoá chất</a></li>
           </ul>
         </div>
         <div class="col-md-4 col-lg-3">

@@ -136,3 +136,18 @@
 @media (min-width: 992px) and (max-width: 1399.98px) {
   .navbar-wi .nav-btn-text { display: none; }
 }
+
+/* ---------- Thanh menu máy tính (Milestone 4): nút kính lúp thay ô tìm kiếm; 992–1199px nút "Gửi báo cáo" chỉ hiện biểu tượng ---------- */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .navbar-wi .nav-btn-text-md { display: none; }
+  .navbar-wi .navbar-nav .nav-link { padding-left: .55rem; padding-right: .55rem; }
+}
+.nav-search-btn {
+  align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%;
+  background: #f1f5f4; color: var(--wi-text, #1f2a37); font-size: 1.05rem; text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+}
+.nav-search-btn:hover { background: var(--wi-primary-soft, #e6f4f2); color: var(--wi-primary, #0f766e); }
+
+.navbar-wi .btn > .bi + .nav-btn-text,
+.navbar-wi .btn > .bi + .nav-btn-text-md { margin-left: .2rem; }

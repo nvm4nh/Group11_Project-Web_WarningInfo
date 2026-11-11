@@ -75,12 +75,14 @@
           </li>
           <li class="nav-item"><a class="nav-link" href="<?= url('') ?>#cach-hoat-dong">Hướng dẫn</a></li>
         </ul>
-        <form class="nav-search position-relative me-lg-3 d-lg-none d-xl-block" action="<?= url('report') ?>" method="get" role="search">
+        <!-- Máy tính: thanh menu đã đủ chật nên chỉ hiện nút kính lúp mở trang tìm kiếm; điện thoại (menu thu gọn) hiện ô tìm kiếm đầy đủ -->
+        <a href="<?= url('report') ?>#reportFilter" class="nav-search-btn d-none d-lg-inline-flex me-lg-2" title="Tìm cảnh báo" aria-label="Tìm cảnh báo"><i class="bi bi-search"></i></a>
+        <form class="nav-search position-relative me-lg-3 d-lg-none" action="<?= url('report') ?>" method="get" role="search">
           <i class="bi bi-search"></i>
           <input class="form-control" type="search" name="q" placeholder="Tìm cảnh báo..." aria-label="Tìm kiếm">
         </form>
         <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
-          <a href="<?= url('report/create') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-megaphone me-1"></i> Gửi báo cáo</a>
+          <a href="<?= url('report/create') ?>" class="btn btn-warning fw-semibold" title="Gửi báo cáo"><i class="bi bi-megaphone"></i><span class="nav-btn-text-md"> Gửi báo cáo</span></a>
           <?php if (isLoggedIn()): ?>
             <?php if (($_SESSION['role'] ?? '') === 'officer'): ?>
               <a href="<?= url('officer') ?>" class="btn btn-outline-secondary<?= ($data['active'] ?? '') === 'officer' ? ' active' : '' ?>" title="Bàn làm việc cán bộ"><i class="bi bi-briefcase"></i><span class="nav-btn-text"> Bàn làm việc</span></a>
