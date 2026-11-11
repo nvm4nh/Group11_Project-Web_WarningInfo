@@ -9,10 +9,14 @@ class ReportController extends Controller {
     }
 
     public function index() {
-        $category_id = $_GET['category_id'] ?? ($_GET['category'][0] ?? null);
-        $priority    = $_GET['priority'] ?? ($_GET['severity'][0] ?? null);
-        $status      = $_GET['status'] ?? null;
-        $keyword     = trim($_GET['q'] ?? '');
+        // Tham số lọc luôn đưa về 1 giá trị chuỗi (link cũ dạng ?status[]=... hoặc gõ tay sai trước đây gây lỗi Fatal)
+        $one = function ($v) { return is_array($v) ? (string)(reset($v) ?: '') : trim((string)$v); };
+        $category_id = (int)$one($_GET['category_id'] ?? ($_GET['category'] ?? '')) ?: null;
+        $priority    = $one($_GET['priority'] ?? ($_GET['severity'] ?? ''));
+        $status      = $one($_GET['status'] ?? '');
+        $keyword     = $one($_GET['q'] ?? '');
+        $priority    = in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null;
+        $status      = in_array($status, ReportModel::STATUSES, true) ? $status : null;
 
         $filters = [
             'public_only' => true,
@@ -46,7 +50,7 @@ class ReportController extends Controller {
     const COMMENT_PAGE_SIZE  = 5;  // bình luận mỗi lần nạp ở trang chi tiết
 
     public function detail($id = null) {
-        if (!$id) redirect('report');
+        if (!$id || !ctype_digit((string)$id)) show_404('Đường dẫn sự cố không hợp lệ.');
 
         $report = $this->reportModel->getById($id);
         // Báo cáo không công khai: chỉ người gửi và cán bộ / quản trị viên được xem (các API đã chặn tương tự)
@@ -54,8 +58,8 @@ class ReportController extends Controller {
             || isOfficer()
             || (isLoggedIn() && (int)$report->user_id === (int)$_SESSION['user_id']));
         if (!$canView) {
-            setFlash('danger', 'Không tìm thấy sự cố này.');
-            redirect('report');
+            // Trang 404 thay vì quay về danh sách (TV4 – Milestone 4): đúng mã HTTP và người dùng biết lý do
+            show_404('Sự cố bạn tìm không tồn tại, đã bị gỡ hoặc chưa được công khai.');
         }
 
         // Bình luận công khai: trang đầu render sẵn, các trang sau nạp bằng AJAX (api_comments)
