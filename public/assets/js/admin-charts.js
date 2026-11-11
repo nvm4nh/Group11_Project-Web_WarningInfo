@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
           labels: res.data.categories.map(item => item.name),
           datasets: [{
             data: res.data.categories.map(item => item.total),
-            backgroundColor: ['#1b6b45', '#2f8fb3', '#c2410c', '#f4b93a', '#8a5a2b', '#7c5fb0', '#b23a48']
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69']
           }]
         },
         options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
           datasets: [{
             label: 'Số lượng',
             data: res.data.statuses.map(item => item.total),
-            backgroundColor: '#2f8a55',
+            backgroundColor: '#4e73df',
             borderRadius: 4
           }]
         },
@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
           datasets: [{
             label: 'Số lượng sự cố',
             data: res.data.months.map(item => item.total),
-            borderColor: '#1b6b45',
-            backgroundColor: 'rgba(111, 191, 115, 0.22)',
+            borderColor: '#e74a3b',
+            backgroundColor: 'rgba(231, 74, 59, 0.1)',
             fill: true,
             tension: 0.3,
             pointRadius: 5

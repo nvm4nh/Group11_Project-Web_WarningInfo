@@ -3,6 +3,7 @@
   <div class="container">
     <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
       <div>
+        <span class="section-eyebrow"><i class="bi bi-geo-alt"></i> Bản đồ số</span>
         <h2 class="section-title">Điểm nóng môi trường quanh bạn</h2>
         <p class="text-muted mb-0">Đang theo dõi <b id="homeMapCount">0</b> sự cố chưa được giải quyết.</p>
       </div>

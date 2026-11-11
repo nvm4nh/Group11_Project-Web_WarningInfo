@@ -316,7 +316,7 @@
       this.nearLayer.clearLayers();
       const c = [this.near.lat, this.near.lng];
       this.nearCircle = L.circle(c, {
-        radius: this.near.radius * 1000, color: '#1b6b45', weight: 1.5, fillOpacity: 0.08, dashArray: '6 6',
+        radius: this.near.radius * 1000, color: '#0f766e', weight: 1.5, fillOpacity: 0.08, dashArray: '6 6',
       }).addTo(this.nearLayer);
       L.marker(c, {
         icon: L.divIcon({ className: 'wi-marker-wrap', html: '<span class="wi-me"></span>', iconSize: [18, 18], iconAnchor: [9, 9] }),

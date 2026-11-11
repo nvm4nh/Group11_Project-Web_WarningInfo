@@ -1,36 +1,11 @@
-<?php /* Trang chủ – khối hero: cảnh rừng nhiều lớp (SVG), ô tìm kiếm + khung "Đang diễn ra" (sự cố khẩn cấp lấy từ CSDL)
-         Cảnh nền: mặt trời / tia nắng đi theo con trỏ chuột, các lớp cây trượt lệch nhau (parallax) – xem forest.js */ ?>
+<?php /* Trang chủ – khối hero: tìm kiếm + khung "Đang diễn ra" (sự cố khẩn cấp lấy từ CSDL) */ ?>
 <!-- ========== HERO ========== -->
-<section class="hero forest-hero" data-forest-hero>
-  <div class="fh-scene" aria-hidden="true">
-    <div class="fh-sky"></div>
-    <div class="fh-sun"></div>
-    <div class="fh-layer" data-depth=".03">
-      <svg class="fh-band fh-city" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"><?= wi_skyline(77, 1440, 320, 150) ?></svg>
-    </div>
-    <div class="fh-layer" data-depth=".07">
-      <svg class="fh-band fh-trees-far" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"><?= wi_treeline(31, 1440, 300, ['count' => 34, 'min' => 64, 'max' => 120, 'palms' => .14, 'fill' => 40]) ?></svg>
-    </div>
-    <div class="fh-rays"></div>
-    <div class="fh-layer" data-depth=".15">
-      <svg class="fh-band fh-trees-mid" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"><?= wi_treeline(58, 1440, 306, ['count' => 20, 'min' => 78, 'max' => 150, 'palms' => .32, 'fill' => 30]) ?></svg>
-    </div>
-    <canvas class="fh-motes"></canvas>
-    <div class="fh-layer fh-front" data-depth=".3">
-      <?= wi_sprig_svg('fh-leaf fh-leaf-l1 sway') ?>
-      <?= wi_sprig_svg('fh-leaf fh-leaf-l2 sway', 'frond') ?>
-    </div>
-    <div class="fh-layer fh-front" data-depth=".46">
-      <?= wi_sprig_svg('fh-leaf fh-leaf-r1 sway') ?>
-      <?= wi_sprig_svg('fh-leaf fh-leaf-r2 sway', 'frond') ?>
-      <?= wi_sprig_svg('fh-leaf fh-leaf-r3 sway') ?>
-    </div>
-    <svg class="fh-ground" viewBox="0 0 1440 90" preserveAspectRatio="none" focusable="false"><path d="M0 46C210 4 420 78 720 42S1210 8 1440 52V90H0Z"/></svg>
-  </div>
+<section class="hero">
   <div class="container">
     <div class="row align-items-center g-4 g-lg-5">
-      <div class="col-lg-7 fh-copy">
-        <h1 class="mb-3">Thấy vấn đề môi trường?<br>Báo ngay để cùng xử lý.</h1>
+      <div class="col-lg-7">
+        <span class="hero-badge"><i class="bi bi-shield-check"></i> Nền tảng cộng đồng giám sát môi trường</span>
+        <h1 class="mt-3 mb-3">Thấy vấn đề môi trường?<br><span class="hl">Báo ngay</span> để cùng xử lý.</h1>
         <p class="lead mb-4">Gửi báo cáo kèm hình ảnh và vị trí chỉ trong 1 phút. Theo dõi cảnh báo ô nhiễm, thiên tai và sự cố môi trường gần bạn.</p>
         <form class="hero-search d-flex flex-column flex-sm-row gap-2 gap-sm-0" id="heroSearch" action="<?= url('report') ?>" method="get" role="search">
           <div class="d-flex align-items-center flex-grow-1">
@@ -51,7 +26,7 @@
           <a href="<?= url('report') ?>" class="btn btn-outline-light btn-lg">Xem cảnh báo</a>
         </div>
       </div>
-      <div class="col-lg-5 fh-side">
+      <div class="col-lg-5">
         <?php
           // Khung "Đang diễn ra": sự cố mức Cao / Nghiêm trọng chưa xử lý xong (dữ liệu thật – Milestone 4)
           $urgent    = $data['urgentReports'] ?? [];
@@ -64,7 +39,7 @@
           </div>
           <?php if (empty($urgent)): ?>
             <div class="mini-alert">
-              <span class="icon-circle" style="background:#dcfce7;color:#15803d"><i class="bi bi-shield-check"></i></span>
+              <span class="icon-circle" style="background:#dcfce7;color:#16a34a"><i class="bi bi-shield-check"></i></span>
               <div>
                 <h6 class="mb-1">Hiện không có sự cố khẩn cấp nào</h6>
                 <div class="small text-muted-2">Các sự cố mức Cao / Nghiêm trọng đang xử lý sẽ hiện ở đây.</div>
@@ -85,8 +60,8 @@
               </div>
             <?php endforeach; ?>
           <?php endif; ?>
-          <div class="aqi-chip mt-3">
-            <div class="aqi-value"><?= $recent24h ?></div>
+          <div class="aqi-chip mt-3" style="background:var(--wi-primary-soft);border-color:#b7dcd6">
+            <div class="aqi-value text-primary"><?= $recent24h ?></div>
             <div class="small">
               <b class="d-block">Báo cáo mới trong 24 giờ</b>
               <span class="text-muted-2"><?= $recent24h > 0 ? 'Cảm ơn cộng đồng đã chung tay' : 'Thấy sự cố? Hãy là người báo đầu tiên' ?></span>

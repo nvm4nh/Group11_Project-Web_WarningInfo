@@ -12,7 +12,7 @@
   <?php if ($seo['canonical']): ?>
   <link rel="canonical" href="<?= e($seo['canonical']) ?>">
   <?php endif; ?>
-  <meta name="theme-color" content="#1b6b45">
+  <meta name="theme-color" content="#0f766e">
   <!-- OpenGraph: ảnh + tiêu đề xem trước khi chia sẻ link lên Facebook, Zalo, Messenger -->
   <meta property="og:site_name" content="WarningInfo">
   <meta property="og:locale" content="vi_VN">
@@ -40,7 +40,7 @@
   <link rel="manifest" href="<?= url('site.webmanifest') ?>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <!-- CSS của dự án (tách theo trang) -->
@@ -48,22 +48,12 @@
   <link href="<?= asset('css/layout.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/components.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/home.css') ?>" rel="stylesheet">
-  <link href="<?= asset('css/forest.css') ?>" rel="stylesheet">
   <?php if (!empty($data['use_map'])): /* Bản đồ Leaflet.js – TV1 (Milestone 3) */ ?>
   <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
   <link href="<?= asset('css/map.css') ?>" rel="stylesheet">
   <?php endif; ?>
-  <!-- Giao diện "tán rừng": bật hiệu ứng khi có JS; nếu forest.js không tải được thì sau 4 giây trả về trạng thái tĩnh -->
-  <script>document.documentElement.classList.add('wi-js');setTimeout(function(){if(!window.WIForest)document.documentElement.classList.remove('wi-js')},4000);</script>
 </head>
 <body>
-  <?php require APPROOT . '/app/views/layouts/_forest.php'; ?>
-  <!-- Nền chung: vệt nắng chạy theo con trỏ chuột + bóng lá ở hai góc màn hình (forest.css / forest.js) -->
-  <div class="wi-ambient" aria-hidden="true">
-    <div class="wi-ambient-light"></div>
-    <?= wi_sprig_svg('wi-ambient-leaf a1') ?>
-    <?= wi_sprig_svg('wi-ambient-leaf a2', 'frond') ?>
-  </div>
   <nav class="navbar navbar-expand-lg navbar-wi sticky-top">
     <div class="container">
       <a class="navbar-brand" href="<?= url('') ?>">
@@ -155,7 +145,5 @@
         </div>
       </div>
     </div>
-    <!-- Cành cây mọc dài theo tiến độ cuộn trang -->
-    <span class="wi-growth" aria-hidden="true"><i></i></span>
   </nav>
   <main>

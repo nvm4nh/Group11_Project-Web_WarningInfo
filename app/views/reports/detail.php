@@ -29,7 +29,7 @@ $stText  = $statusLabel($r->status);
 $stBadge = $statusMap[$r->status][1] ?? 'bg-secondary';
 ?>
 
-<section class="section py-4 bg-light border-bottom page-canopy"><?= wi_canopy() ?>
+<section class="section py-4 bg-light border-bottom">
   <div class="container">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div>
