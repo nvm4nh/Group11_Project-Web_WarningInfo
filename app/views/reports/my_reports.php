@@ -80,7 +80,7 @@
         </div>
       <?php else: ?>
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
+          <table class="table table-hover align-middle mb-0 table-stack">
             <thead class="table-light small text-muted text-uppercase">
               <tr>
                 <th class="ps-4" style="width: 14%;">Mã số</th>
@@ -94,35 +94,16 @@
             <tbody>
               <?php foreach ($data['reports'] as $r): ?>
                 <?php
-                  // Mức độ
-                  $sevClass = 'bg-secondary';
-                  $sevLabel = 'Trung bình';
-                  if ($r->priority === 'critical')     { $sevClass = 'bg-danger'; $sevLabel = 'Khẩn cấp'; }
-                  elseif ($r->priority === 'high')     { $sevClass = 'bg-warning text-dark'; $sevLabel = 'Nghiêm trọng'; }
-                  elseif ($r->priority === 'low')      { $sevClass = 'bg-info text-dark'; $sevLabel = 'Thấp'; }
-
-                  // Trạng thái
-                  $stBadge = 'bg-secondary';
-                  $stText  = 'Mới tiếp nhận';
-                  if ($r->status === 'verifying') {
-                    $stBadge = 'bg-info text-dark';
-                    $stText  = 'Đang xác minh';
-                  } elseif ($r->status === 'in_progress' || $r->status === 'assigned') {
-                    $stBadge = 'bg-primary';
-                    $stText  = 'Đang xử lý';
-                  } elseif ($r->status === 'resolved') {
-                    $stBadge = 'bg-success';
-                    $stText  = 'Đã giải quyết';
-                  } elseif ($r->status === 'rejected') {
-                    $stBadge = 'bg-dark';
-                    $stText  = 'Từ chối';
-                  }
+                  // Nhãn + màu mức độ / trạng thái dùng chung toàn hệ thống (trước đây trang này gọi "Cao" là "Nghiêm trọng",
+                  // "Nghiêm trọng" là "Khẩn cấp" và thiếu nhãn cho Đã tiếp nhận / Cần bổ sung / Đã đóng...)
+                  [$sevLabel, $sevClass] = ReportModel::priorityBadge($r->priority);
+                  [$stText, $stBadge]    = ReportModel::statusBadge($r->status);
                 ?>
                 <tr>
-                  <td class="ps-4">
+                  <td class="ps-4" data-label="Mã số">
                     <span class="badge bg-light text-dark border font-monospace"><?= e($r->report_code) ?></span>
                   </td>
-                  <td>
+                  <td data-label="Sự cố" class="stack-title">
                     <a href="<?= url('report/detail/' . $r->id) ?>" class="fw-bold text-decoration-none text-dark d-block">
                       <?= e($r->title) ?>
                     </a>
@@ -130,7 +111,7 @@
                       <?= e($r->category_name ?? 'Sự cố môi trường') ?>
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Địa điểm" class="stack-place">
                     <div class="small text-truncate" style="max-width: 240px;" title="<?= e($r->address) ?>">
                       <i class="bi bi-geo-alt text-danger me-1"></i><?= e($r->address ?: 'Chưa có địa chỉ') ?>
                     </div>
@@ -138,15 +119,15 @@
                       <i class="bi bi-clock me-1"></i><?= date('d/m/Y H:i', strtotime($r->incident_time)) ?>
                     </div>
                   </td>
-                  <td>
-                    <span class="badge <?= $sevClass ?>"><?= $sevLabel ?></span>
+                  <td data-label="Mức độ">
+                    <span class="badge <?= $sevClass ?>"><?= e($sevLabel) ?></span>
                   </td>
-                  <td>
-                    <span class="badge <?= $stBadge ?>"><?= $stText ?></span>
+                  <td data-label="Trạng thái">
+                    <span class="badge <?= $stBadge ?>"><?= e($stText) ?></span>
                   </td>
-                  <td class="text-end pe-4">
+                  <td class="text-end pe-4 stack-action">
                     <a href="<?= url('report/detail/' . $r->id) ?>" class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
-                      <i class="bi bi-arrow-right"></i>
+                      <span class="d-md-none me-1">Xem chi tiết</span><i class="bi bi-arrow-right"></i>
                     </a>
                   </td>
                 </tr>

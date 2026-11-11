@@ -167,3 +167,26 @@ img { max-width: 100%; }
 @media (max-width: 991.98px) {
   .section { padding: 56px 0; }
 }
+
+/* ---------- Đồng bộ tương tác toàn hệ thống (TV4 – Milestone 4) ----------
+   1. Viền focus rõ ràng khi dùng phím Tab (Bootstrap chỉ có sẵn cho nút và ô nhập)
+   2. Thẻ nổi lên khi focus bằng bàn phím giống như khi rê chuột
+   3. Màn hình cảm ứng: không để thẻ "kẹt" trạng thái hover sau khi chạm
+   4. Người dùng bật "giảm chuyển động" trong hệ điều hành: tắt hiệu ứng di chuyển */
+:where(a, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid rgba(var(--wi-primary-rgb), .45);
+  outline-offset: 2px;
+}
+.alert-card:focus-within { transform: translateY(-4px); box-shadow: var(--wi-shadow); border-color: #d6e4e1; }
+.category-card:focus-visible { border-color: var(--wi-primary); transform: translateY(-3px); box-shadow: var(--wi-shadow); }
+.task-card:focus-within { box-shadow: 0 8px 22px rgba(15, 23, 42, .08); }
+
+@media (hover: none) {   /* "body" để thắng các luật :hover khai báo sau ở components.css / home.css */
+  body .alert-card:hover, body .category-card:hover, body .task-card:hover,
+  body .alert-card:hover .thumb img, body .gallery-item:hover img { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .alert-card, body .category-card, body .task-card, body .alert-card .thumb img, body .gallery-item img { transition: none; }
+  body .alert-card:hover, body .alert-card:focus-within, body .category-card:hover, body .category-card:focus-visible,
+  body .task-card:hover, body .alert-card:hover .thumb img, body .gallery-item:hover img { transform: none; }
+}

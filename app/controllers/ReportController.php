@@ -9,10 +9,14 @@ class ReportController extends Controller {
     }
 
     public function index() {
-        $category_id = $_GET['category_id'] ?? ($_GET['category'][0] ?? null);
-        $priority    = $_GET['priority'] ?? ($_GET['severity'][0] ?? null);
-        $status      = $_GET['status'] ?? null;
-        $keyword     = trim($_GET['q'] ?? '');
+        // Tham số lọc luôn đưa về 1 giá trị chuỗi bằng get_param() (link dạng ?status[]=... hay ?status[][]=...
+        // trước đây gây lỗi Fatal / Warning)
+        $category_id = (int)get_param('category_id', get_param('category')) ?: null;
+        $priority    = get_param('priority', get_param('severity'));
+        $status      = get_param('status');
+        $keyword     = get_param('q');
+        $priority    = in_array($priority, ReportModel::PRIORITIES, true) ? $priority : null;
+        $status      = in_array($status, ReportModel::STATUSES, true) ? $status : null;
 
         $filters = [
             'public_only' => true,
@@ -46,7 +50,7 @@ class ReportController extends Controller {
     const COMMENT_PAGE_SIZE  = 5;  // bình luận mỗi lần nạp ở trang chi tiết
 
     public function detail($id = null) {
-        if (!$id) redirect('report');
+        if (!$id || !ctype_digit((string)$id)) show_404('Đường dẫn sự cố không hợp lệ.');
 
         $report = $this->reportModel->getById($id);
         // Báo cáo không công khai: chỉ người gửi và cán bộ / quản trị viên được xem (các API đã chặn tương tự)
@@ -54,8 +58,8 @@ class ReportController extends Controller {
             || isOfficer()
             || (isLoggedIn() && (int)$report->user_id === (int)$_SESSION['user_id']));
         if (!$canView) {
-            setFlash('danger', 'Không tìm thấy sự cố này.');
-            redirect('report');
+            // Trang 404 thay vì quay về danh sách (TV4 – Milestone 4): đúng mã HTTP và người dùng biết lý do
+            show_404('Sự cố bạn tìm không tồn tại, đã bị gỡ hoặc chưa được công khai.');
         }
 
         // Bình luận công khai: trang đầu render sẵn, các trang sau nạp bằng AJAX (api_comments)
@@ -219,7 +223,11 @@ class ReportController extends Controller {
                 $errors['images'] = "Tải ảnh $label lên không thành công, vui lòng thử lại.";
                 return [];
             }
-            if ($file['size'] <= 0 || $file['size'] > self::UPLOAD_MAX_BYTES) {
+            if ($file['size'] <= 0) {   // TV4 – Milestone 4: file rỗng trước đây bị báo nhầm là "vượt quá 5MB"
+                $errors['images'] = "Tệp $label rỗng (0 byte), vui lòng chọn lại ảnh.";
+                return [];
+            }
+            if ($file['size'] > self::UPLOAD_MAX_BYTES) {
                 $errors['images'] = "Ảnh $label vượt quá 5MB.";
                 return [];
             }
@@ -281,11 +289,11 @@ class ReportController extends Controller {
         $this->jsonError(405, 'Chỉ hỗ trợ phương thức GET');
     }
 
-    $priority = trim((string)($_GET['priority'] ?? ''));
-    $status = trim((string)($_GET['status'] ?? ''));
-    $keyword = trim((string)($_GET['keyword'] ?? $_GET['q'] ?? ''));
-    $fromDate = trim((string)($_GET['from_date'] ?? ''));
-    $toDate = trim((string)($_GET['to_date'] ?? ''));
+    $priority = get_param('priority');
+    $status = get_param('status');
+    $keyword = get_param('keyword', get_param('q'));
+    $fromDate = get_param('from_date');
+    $toDate = get_param('to_date');
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = min(100, max(1, (int)($_GET['limit'] ?? 10)));
 
@@ -426,8 +434,8 @@ class ReportController extends Controller {
         // category_id chấp nhận: 3 | 1,2,3 | category_id[]=1&category_id[]=2
         $rawCats = $_GET['category_id'] ?? [];
         $catList = is_array($rawCats) ? $rawCats : explode(',', (string)$rawCats);
-        $priority = (string)($_GET['priority'] ?? '');
-        $state    = (string)($_GET['state'] ?? 'all');
+        $priority = get_param('priority');
+        $state    = get_param('state', 'all');
 
         $filters = [
             'category_ids' => array_values(array_filter(array_map('intval', $catList))),
@@ -589,7 +597,7 @@ public function api_add_comment()
     }
 
     $reportId = (int)($input['report_id'] ?? 0);
-    $content = trim((string)($input['content'] ?? ''));
+    $content = is_string($input['content'] ?? null) ? trim($input['content']) : '';   // JSON {"content": [...]} → coi như rỗng
 
     if ($reportId <= 0 || $content === '') {
         return $this->jsonError(422, 'Vui lòng nhập nội dung bình luận.');

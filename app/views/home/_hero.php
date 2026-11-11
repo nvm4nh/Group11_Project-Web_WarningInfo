@@ -1,4 +1,4 @@
-<?php /* Trang chủ – khối hero: tìm kiếm + khung "Đang diễn ra" – BẢN TĨNH (dữ liệu mẫu) */ ?>
+<?php /* Trang chủ – khối hero: tìm kiếm + khung "Đang diễn ra" (sự cố khẩn cấp lấy từ CSDL) */ ?>
 <!-- ========== HERO ========== -->
 <section class="hero">
   <div class="container">
@@ -13,15 +13,11 @@
             <input type="search" class="form-control" name="q" placeholder="Nhập từ khoá: cá chết, khói bụi, rác thải..." aria-label="Từ khoá">
           </div>
           <span class="divider"></span>
-          <select class="form-select w-auto flex-shrink-0" name="category[]" aria-label="Danh mục">
+          <select class="form-select w-auto flex-shrink-0" name="category_id" aria-label="Danh mục">
             <option value="">Tất cả danh mục</option>
-            <option value="1">Ô nhiễm rác thải</option>
-            <option value="2">Ô nhiễm nguồn nước</option>
-            <option value="3">Ô nhiễm không khí</option>
-            <option value="4">Ngập úng</option>
-            <option value="5">Cháy rừng</option>
-            <option value="6">Tiếng ồn</option>
-            <option value="7">Sự cố hoá chất</option>
+            <?php foreach (($data['categories'] ?? []) as $c): ?>
+              <option value="<?= (int)$c->id ?>"><?= e($c->name) ?></option>
+            <?php endforeach; ?>
           </select>
           <button class="btn btn-primary" type="submit">Tìm kiếm</button>
         </form>
@@ -31,37 +27,44 @@
         </div>
       </div>
       <div class="col-lg-5">
+        <?php
+          // Khung "Đang diễn ra": sự cố mức Cao / Nghiêm trọng chưa xử lý xong (dữ liệu thật – Milestone 4)
+          $urgent    = $data['urgentReports'] ?? [];
+          $recent24h = (int)($data['recent24h'] ?? 0);
+        ?>
         <div class="hero-panel">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="live">Đang diễn ra</span>
-            <a href="<?= url('report?severity%5B0%5D=critical&severity%5B1%5D=high&status%5B0%5D=pending&status%5B1%5D=processing') ?>" class="small fw-semibold">Xem tất cả</a>
+            <a href="<?= url('report/map') ?>" class="small fw-semibold">Xem trên bản đồ</a>
           </div>
+          <?php if (empty($urgent)): ?>
             <div class="mini-alert">
-              <span class="icon-circle cat-forest"><i class="bi bi-tree"></i></span>
+              <span class="icon-circle" style="background:#dcfce7;color:#16a34a"><i class="bi bi-shield-check"></i></span>
               <div>
-                <h6><a href="<?= url('report/detail/1841') ?>">Cháy rừng thông lan rộng, khói bao phủ khu dân cư lân cận</a></h6>
-                <div class="d-flex align-items-center gap-2 small text-muted-2"><span class="badge-severity sev-critical"><i class="bi bi-exclamation-octagon-fill"></i> Nghiêm trọng</span> <span>3 giờ trước</span></div>
+                <h6 class="mb-1">Hiện không có sự cố khẩn cấp nào</h6>
+                <div class="small text-muted-2">Các sự cố mức Cao / Nghiêm trọng đang xử lý sẽ hiện ở đây.</div>
               </div>
             </div>
-            <div class="mini-alert">
-              <span class="icon-circle cat-air"><i class="bi bi-cloud-haze2"></i></span>
-              <div>
-                <h6><a href="<?= url('report/detail/1839') ?>">Khói đen dày đặc từ ống khói nhà máy vào ban đêm</a></h6>
-                <div class="d-flex align-items-center gap-2 small text-muted-2"><span class="badge-severity sev-critical"><i class="bi bi-exclamation-octagon-fill"></i> Nghiêm trọng</span> <span>5 giờ trước</span></div>
+          <?php else: ?>
+            <?php foreach ($urgent as $u): ?>
+              <?php [$icon, $catCls] = categoryVisual($u->category_id); [$sevText, $sevCls, $sevIcon] = severityVisual($u->priority); ?>
+              <div class="mini-alert">
+                <span class="icon-circle <?= $catCls ?>"><i class="bi <?= $icon ?>"></i></span>
+                <div>
+                  <h6><a href="<?= url('report/detail/' . (int)$u->id) ?>"><?= e($u->title) ?></a></h6>
+                  <div class="d-flex flex-wrap align-items-center gap-2 small text-muted-2">
+                    <span class="badge-severity <?= $sevCls ?>"><i class="bi <?= $sevIcon ?>"></i> <?= e($sevText) ?></span>
+                    <span><?= e(timeAgo($u->age_seconds, $u->created_at)) ?></span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="mini-alert">
-              <span class="icon-circle cat-chem"><i class="bi bi-exclamation-octagon"></i></span>
-              <div>
-                <h6><a href="<?= url('report/detail/1836') ?>">Rò rỉ hoá chất từ xe bồn sau va chạm trên quốc lộ</a></h6>
-                <div class="d-flex align-items-center gap-2 small text-muted-2"><span class="badge-severity sev-critical"><i class="bi bi-exclamation-octagon-fill"></i> Nghiêm trọng</span> <span>Hôm qua</span></div>
-              </div>
-            </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
           <div class="aqi-chip mt-3" style="background:var(--wi-primary-soft);border-color:#b7dcd6">
-            <div class="aqi-value text-primary">37</div>
+            <div class="aqi-value text-primary"><?= $recent24h ?></div>
             <div class="small">
               <b class="d-block">Báo cáo mới trong 24 giờ</b>
-              <span class="text-muted-2">Cảm ơn cộng đồng đã chung tay</span>
+              <span class="text-muted-2"><?= $recent24h > 0 ? 'Cảm ơn cộng đồng đã chung tay' : 'Thấy sự cố? Hãy là người báo đầu tiên' ?></span>
             </div>
             <i class="bi bi-people ms-auto fs-4 text-primary"></i>
           </div>

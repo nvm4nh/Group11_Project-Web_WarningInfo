@@ -1,0 +1,9 @@
+# WarningInfo – chỉ cho công cụ tìm kiếm đọc các trang công khai (TV4 – Milestone 4)
+# Các trang cá nhân / quản trị còn có thẻ <meta name="robots" content="noindex">
+User-agent: *
+Disallow: /admin
+Disallow: /officer
+Disallow: /notification
+Disallow: /auth/profile
+Disallow: /report/my_reports
+Disallow: /report/api_

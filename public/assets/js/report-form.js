@@ -4,6 +4,7 @@
    2. Nút lấy toạ độ GPS tự động (navigator.geolocation)
    3. Kiểm tra dữ liệu trước khi gửi (Bootstrap validation)
    Ràng buộc khớp phần upload của TV3: tối đa 3 ảnh, mỗi ảnh ≤ 5MB, JPG/PNG/WEBP
+   (Milestone 4: con số thật lấy từ data-max-* do PHP tính theo php.ini của máy chủ – hosting có thể thấp hơn)
    ========================================================= */
 (function () {
   'use strict';
@@ -20,13 +21,18 @@
 
   if (input && zone && grid) {
     const MAX_FILES = parseInt(input.dataset.maxFiles, 10) || 3;
-    const MAX_MB = parseInt(input.dataset.maxSize, 10) || 5;
+    const MAX_BYTES = parseInt(input.dataset.maxBytes, 10) || (parseFloat(input.dataset.maxSize) || 5) * 1048576;
+    const MAX_TOTAL = parseInt(input.dataset.maxTotal, 10) || MAX_FILES * MAX_BYTES;
     const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
     // DataTransfer giúp cộng dồn ảnh qua nhiều lần chọn và xoá từng ảnh
     const canKeep = typeof DataTransfer !== 'undefined';
     let store = canKeep ? new DataTransfer() : null;
 
     const formatSize = (bytes) => (bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.round(bytes / 1024) + ' KB');
+    const mbLabel = (bytes) => String(Math.round(bytes / 104857.6) / 10).replace('.', ',') + 'MB';   // 5242880 → "5MB"
+    const LIMIT = mbLabel(MAX_BYTES);
+    const TOTAL = mbLabel(MAX_TOTAL);
+    const sumSize = (files) => files.reduce((s, f) => s + f.size, 0);
 
     const showError = (msg) => {
       zone.classList.toggle('is-invalid', !!msg);
@@ -70,8 +76,9 @@
         if (picked.length > MAX_FILES) msg = `Chỉ được chọn tối đa ${MAX_FILES} ảnh.`;
         picked.forEach((f) => {
           if (!ALLOWED.includes(f.type)) msg = `"${f.name}" không đúng định dạng (JPG, PNG, WEBP).`;
-          else if (f.size > MAX_MB * 1048576) msg = `"${f.name}" lớn hơn ${MAX_MB}MB.`;
+          else if (f.size > MAX_BYTES) msg = `"${f.name}" lớn hơn ${LIMIT}.`;
         });
+        if (!msg && sumSize(picked) > MAX_TOTAL) msg = `Tổng dung lượng ảnh vượt quá ${TOTAL}, hãy bớt ảnh hoặc chọn ảnh nhỏ hơn.`;
         if (msg) input.value = '';
         showError(msg);
         render();
@@ -80,7 +87,8 @@
       picked.forEach((f) => {
         if (store.files.length >= MAX_FILES) { msg = `Chỉ được gửi tối đa ${MAX_FILES} ảnh.`; return; }
         if (!ALLOWED.includes(f.type)) { msg = `"${f.name}" không đúng định dạng (chỉ nhận JPG, PNG, WEBP).`; return; }
-        if (f.size > MAX_MB * 1048576) { msg = `"${f.name}" nặng ${formatSize(f.size)}, vượt quá ${MAX_MB}MB.`; return; }
+        if (f.size > MAX_BYTES) { msg = `"${f.name}" nặng ${formatSize(f.size)}, vượt quá ${LIMIT}.`; return; }
+        if (sumSize(Array.from(store.files)) + f.size > MAX_TOTAL) { msg = `Tổng dung lượng ảnh vượt quá ${TOTAL} (giới hạn của máy chủ) – hãy chọn ảnh nhỏ hơn.`; return; }
         const dup = Array.from(store.files).some((x) => x.name === f.name && x.size === f.size);
         if (!dup) store.items.add(f);
       });
