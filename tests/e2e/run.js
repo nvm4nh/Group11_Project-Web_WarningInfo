@@ -29,7 +29,8 @@ const assert = (c, m) => { if (!c) throw new Error(m); };
 // Truy vấn CSDL để đối chiếu kết quả (cần mysql CLI; đổi lệnh bằng biến MYSQL_CMD, vd: "C:/xampp/mysql/bin/mysql.exe -uroot")
 const MYSQL = process.env.MYSQL_CMD || 'mysql -uroot';
 const DBNAME = process.env.DB_NAME || 'warninginfo_db';
-const sql = (q) => execSync(`${MYSQL} -N --default-character-set=utf8mb4 ${DBNAME} -e ${JSON.stringify(q)}`).toString().trim();
+// Câu lệnh đưa qua stdin (không qua tham số -e): trên Windows, tham số dòng lệnh có dấu tiếng Việt bị đổi bảng mã nên so khớp sai
+const sql = (q) => execSync(`${MYSQL} -N --default-character-set=utf8mb4 ${DBNAME}`, { input: q }).toString().trim();
 
 let browser, guest, page, ctxs = {}, consoleErrors = [], shotN = 0, cur;
 let lastPage;

@@ -1,7 +1,7 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
 <link href="<?= asset('css/report-form.css') ?>" rel="stylesheet">
 
-<section class="section py-4 bg-light border-bottom">
+<section class="section py-4 bg-light border-bottom page-canopy"><?= wi_canopy() ?>
   <div class="container" style="max-width: 800px;">
     <h1 class="h3 fw-bold mb-1"><i class="bi bi-megaphone-fill text-warning me-2"></i>Gửi Báo Cáo Sự Cố Môi Trường</h1>
     <p class="text-muted mb-0">Hãy cung cấp thông tin chính xác để cơ quan chức năng và cộng đồng kịp thời nắm bắt và xử lý.</p>

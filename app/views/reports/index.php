@@ -1,6 +1,6 @@
 <?php require APPROOT . '/app/views/layouts/header.php'; ?>
 
-<section class="section py-4 bg-light border-bottom">
+<section class="section py-4 bg-light border-bottom page-canopy"><?= wi_canopy() ?>
   <div class="container">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
       <div>
