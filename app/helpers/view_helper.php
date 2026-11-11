@@ -29,6 +29,31 @@ function queryUrl($path, array $params = []) {
     return url($path) . ($qs ? '?' . $qs : '');
 }
 
+// Lấy 1 tham số trên URL dưới dạng CHUỖI: get_param('status'), get_param('keyword', get_param('q')).
+// Người dùng có thể gửi ?status[]=x hoặc ?status[][]=x (mảng) – khi đó lấy giá trị đầu tiên,
+// không để PHP báo "Array to string conversion" (TV4 – Milestone 4).
+function get_param($key, $default = '') {
+    $value = $_GET[$key] ?? $default;
+    while (is_array($value)) {
+        $value = reset($value);
+    }
+    return is_scalar($value) ? trim((string)$value) : '';
+}
+
+// Mọi ô nhập trong các form của hệ thống đều gửi 1 giá trị, nhưng request giả mạo có thể gửi title[]=x
+// → trim() / strlen() nhận mảng gây lỗi 500 hoặc Warning. public/index.php gọi hàm này 1 lần để đưa mọi ô về chuỗi.
+// Sau này có form gửi mảng thật (vd checkbox ids[]) thì thêm tên ô vào $keepArrays.
+function normalize_post_input(array $keepArrays = []) {
+    foreach ($_POST as $key => $value) {
+        if (is_array($value) && !in_array($key, $keepArrays, true)) {
+            while (is_array($value)) {
+                $value = reset($value);
+            }
+            $_POST[$key] = is_scalar($value) ? (string)$value : '';
+        }
+    }
+}
+
 function redirect($path) {
     header('Location: ' . url($path));
     exit;
@@ -45,4 +70,148 @@ function timeAgo($seconds, $datetime = null) {
     if ($s < 172800)    return 'Hôm qua';
     if ($s < 7 * 86400) return floor($s / 86400) . ' ngày trước';
     return $datetime ? date('d/m/Y', strtotime($datetime)) : floor($s / 86400) . ' ngày trước';
+}
+
+/* ---------- Biểu tượng / màu theo danh mục & mức độ (Milestone 4 – trang chủ) ---------- */
+
+// categoryVisual(2) => ['bi-droplet-half', 'cat-water', 'water.svg']; danh mục admin tự thêm dùng kiểu "khác"
+function categoryVisual($categoryId) {
+    $map = [
+        1 => ['bi-trash3',              'cat-waste',  'waste.svg'],
+        2 => ['bi-droplet-half',        'cat-water',  'water.svg'],
+        3 => ['bi-cloud-haze2',         'cat-air',    'air.svg'],
+        4 => ['bi-cloud-lightning-rain','cat-flood',  'flood.svg'],
+        5 => ['bi-tree',                'cat-forest', 'forest.svg'],
+        6 => ['bi-volume-up',           'cat-noise',  'noise.svg'],
+        7 => ['bi-exclamation-octagon', 'cat-chem',   'chem.svg'],
+    ];
+    return $map[(int)$categoryId] ?? ['bi-exclamation-circle', 'cat-other', 'other.svg'];
+}
+
+// severityVisual('high') => ['Cao', 'sev-high', 'bi-exclamation-triangle-fill'] (huy hiệu .badge-severity ở trang chủ)
+function severityVisual($priority) {
+    $map = [
+        'critical' => ['Nghiêm trọng', 'sev-critical', 'bi-exclamation-octagon-fill'],
+        'high'     => ['Cao',          'sev-high',     'bi-exclamation-triangle-fill'],
+        'medium'   => ['Trung bình',   'sev-medium',   'bi-exclamation-circle-fill'],
+        'low'      => ['Thấp',         'sev-low',      'bi-info-circle-fill'],
+    ];
+    return $map[$priority] ?? $map['medium'];
+}
+
+// Đường dẫn ảnh đã upload (file_path trong CSDL có thể có hoặc không có "public/" ở đầu)
+function uploadUrl($path) {
+    $path = trim((string)$path);
+    if ($path === '') return '';
+    return preg_match('#^https?://#i', $path) ? $path : url(preg_replace('#^/?(public/)?#', '', $path));
+}
+
+/* ---------- Giới hạn upload theo cấu hình máy chủ (TV4 – Milestone 4: kiểm tra trên Hosting) ---------- */
+
+// "2M" => 2097152, "512K" => 524288, "1G" => 1073741824 (giá trị trong php.ini)
+function ini_bytes($value) {
+    $value = trim((string)$value);
+    if ($value === '') return 0;
+    $units = ['k' => 1024, 'm' => 1048576, 'g' => 1073741824];
+    return (int)((float)$value * ($units[strtolower(substr($value, -1))] ?? 1));
+}
+
+/**
+ * Giới hạn upload THỰC TẾ = mức nhỏ hơn giữa quy định của ứng dụng và php.ini của máy chủ.
+ * XAMPP để upload_max_filesize = 40M, nhưng nhiều hosting mặc định chỉ 2M / post_max_size 8M:
+ * form phải báo đúng con số đó để người dân không bị mất công nhập lại khi gửi.
+ */
+function upload_limits($maxFiles, $maxBytes) {
+    $perFile = ini_bytes(ini_get('upload_max_filesize'));
+    $post    = ini_bytes(ini_get('post_max_size'));
+    $count   = (int)ini_get('max_file_uploads');
+    $perFile = $perFile > 0 ? min($maxBytes, $perFile) : $maxBytes;
+    $files   = $count > 0 ? min($maxFiles, $count) : $maxFiles;
+    $total   = $files * $perFile;
+    if ($post > 0) $total = min($total, max($perFile, $post - 262144));   // chừa ~256KB cho phần chữ của form
+    $mb = function ($b) { return rtrim(rtrim(number_format($b / 1048576, 1, ',', ''), '0'), ',') . 'MB'; };
+    return ['files' => $files, 'file_bytes' => $perFile, 'total_bytes' => $total,
+            'file_label' => $mb($perFile), 'total_label' => $mb($total)];
+}
+
+/* ---------- SEO: thẻ meta, OpenGraph, Twitter Card (TV4 – Milestone 4) ---------- */
+
+// Cắt đoạn văn còn tối đa $max ký tự, không cắt giữa chữ: seo_excerpt('Nước kênh ...', 160)
+function seo_excerpt($text, $max = 160) {
+    $text = trim(preg_replace('/\s+/u', ' ', strip_tags((string)$text)));
+    if (mb_strlen($text) <= $max) return $text;
+    $cut = mb_substr($text, 0, $max - 1);
+    $space = mb_strrpos($cut, ' ');
+    return rtrim($space > $max * 0.6 ? mb_substr($cut, 0, $space) : $cut, " ,.;:–-") . '…';
+}
+
+/**
+ * Thông tin SEO của trang đang mở – header.php dùng để in <title>, meta description, canonical,
+ * robots, OpenGraph (Facebook / Zalo / Messenger hiện ảnh xem trước) và Twitter Card.
+ * Controller có thể ghi đè bằng $data['description'], $data['og_image'], $data['noindex'].
+ */
+function seo_meta(array $data = []) {
+    $site  = defined('SITENAME') ? SITENAME : 'WarningInfo';
+    $parts = array_values(array_filter(explode('/', request_path()), 'strlen'));
+    $route = strtolower(($parts[0] ?? 'home') . '/' . ($parts[1] ?? 'index'));   // "report/detail", "home/index"...
+
+    $intro = 'Người dân gửi phản ánh ô nhiễm, rác thải, ngập úng kèm ảnh và vị trí GPS; theo dõi tiến độ xử lý của cán bộ môi trường tại TP.HCM.';
+    $descriptions = [
+        'home/index'    => $intro,
+        'report/index'  => 'Danh sách cảnh báo môi trường do cộng đồng gửi: lọc theo danh mục, mức độ nghiêm trọng và trạng thái xử lý.',
+        'report/map'    => 'Bản đồ sự cố môi trường: xem vị trí các điểm rác thải, ngập úng, ô nhiễm không khí, tiếng ồn quanh bạn.',
+        'report/create' => 'Gửi báo cáo sự cố môi trường trong vài bước: chụp ảnh, ghim vị trí GPS và mô tả ngắn – không bắt buộc đăng nhập.',
+        'report/store'  => 'Gửi báo cáo sự cố môi trường trong vài bước: chụp ảnh, ghim vị trí GPS và mô tả ngắn – không bắt buộc đăng nhập.',
+        'auth/login'    => 'Đăng nhập WarningInfo để theo dõi các báo cáo đã gửi và nhận thông báo khi sự cố được xử lý.',
+        'auth/register' => 'Tạo tài khoản WarningInfo miễn phí để gửi, theo dõi báo cáo và nhận thông báo cập nhật từ cán bộ xử lý.',
+    ];
+
+    $title  = trim((string)($data['title'] ?? ''));
+    $status = http_response_code();
+    $isHome = $route === 'home/index' && !(is_int($status) && $status >= 400);   // trang lỗi giữ tiêu đề riêng
+    $slogan = $site . ' – Báo cáo & cảnh báo môi trường từ cộng đồng';
+    $seo = [
+        'title'       => $isHome ? $slogan : ($title !== '' ? $title . ' | ' : '') . $site,
+        'og_title'    => $isHome ? $slogan : ($title !== '' ? $title : $site),
+        'description' => $descriptions[$route] ?? $intro,
+        'type'        => 'website',
+        'image'       => asset('img/og-image.jpg'),
+        'image_size'  => [1200, 630],
+        'image_alt'   => $site . ' – Thấy vấn đề môi trường? Báo ngay để cùng xử lý.',
+        'canonical'   => url($isHome ? '' : implode('/', $parts)),
+        'published'   => null,
+        'robots'      => 'index, follow',
+    ];
+
+    // Trang chi tiết sự cố: mô tả + ảnh minh chứng đầu tiên của chính báo cáo
+    $r = $data['report'] ?? null;
+    if ($route === 'report/detail' && is_object($r)) {
+        $place = trim(($r->category_name ?? '') . (!empty($r->address) ? ' · ' . $r->address : ''), ' ·');
+        $seo['description'] = seo_excerpt(($place !== '' ? $place . ' – ' : '') . ($r->description ?? ''));
+        $seo['type']        = 'article';
+        $seo['canonical']   = url('report/detail/' . (int)$r->id);
+        $seo['published']   = !empty($r->created_at) ? date('c', strtotime($r->created_at)) : null;
+        foreach (($r->images ?? []) as $img) {
+            $img = (object)$img;
+            if (strpos((string)($img->mime_type ?? 'image/'), 'image/') === 0 && trim((string)($img->file_path ?? '')) !== '') {
+                $seo['image']      = uploadUrl($img->file_path);
+                $seo['image_size'] = null;                       // ảnh người dân gửi: không biết trước kích thước
+                $seo['image_alt']  = 'Ảnh hiện trường: ' . $r->title;
+                break;
+            }
+        }
+        if (empty($r->is_public)) $data['noindex'] = true;    // báo cáo chưa công khai: chỉ người gửi / cán bộ xem
+    }
+
+    if (!empty($data['description'])) $seo['description'] = seo_excerpt($data['description']);
+    if (!empty($data['og_image']))    { $seo['image'] = $data['og_image']; $seo['image_size'] = null; }
+
+    // Không cho công cụ tìm kiếm lập chỉ mục: trang quản trị / cán bộ / cá nhân và mọi trang lỗi (404, 403, 500)
+    $private = in_array(strtolower($parts[0] ?? ''), ['admin', 'officer', 'notification'], true)
+        || in_array($route, ['auth/profile', 'report/my_reports'], true);
+    if ($private || !empty($data['noindex']) || (is_int($status) && $status >= 400)) {
+        $seo['robots']    = 'noindex, nofollow';
+        $seo['canonical'] = null;
+    }
+    return $seo;
 }

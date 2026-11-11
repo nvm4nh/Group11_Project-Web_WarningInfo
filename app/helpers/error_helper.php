@@ -1,0 +1,97 @@
+<?php
+/**
+ * Trang lỗi 404 / 500 (TV4 – Milestone 4)
+ *
+ *   show_404('Lời nhắn tuỳ chọn')  – dùng trong controller khi không tìm thấy dữ liệu (vd sự cố không tồn tại)
+ *   show_500($maLoi, $exception)   – được gọi tự động khi có lỗi chưa xử lý (xem register_error_pages())
+ *
+ * Chi tiết kỹ thuật của lỗi 500 chỉ hiện khi app_debug() = true (mặc định: khi mở web ngay trên máy chạy XAMPP).
+ * Trên hosting chỉ hiện mã lỗi; nội dung đầy đủ được ghi vào error log của PHP.
+ */
+
+/** Có hiện chi tiết lỗi không: theo APP_DEBUG trong config, nếu không khai báo thì chỉ bật khi truy cập từ chính máy chủ */
+function app_debug() {
+    if (defined('APP_DEBUG')) return (bool)APP_DEBUG;
+    return in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true);
+}
+
+/** Request AJAX / API (trả JSON thay vì trang HTML) */
+function wants_json_response() {
+    $uri = $_GET['url'] ?? '';
+    return stripos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false
+        || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest'
+        || preg_match('#(^|/)api_#', $uri);
+}
+
+/** Xoá mọi nội dung đã in ra dở dang (để trang lỗi không bị lẫn với nửa trang cũ) */
+function discard_output() {
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+}
+
+/** Hiện trang 404 rồi dừng */
+function show_404($message = null) {
+    discard_output();
+    http_response_code(404);
+    if (wants_json_response()) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['status' => 'error', 'message' => $message ?: 'Không tìm thấy tài nguyên yêu cầu.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    $data = [
+        'title'   => 'Không tìm thấy trang',
+        'message' => $message ?: 'Đường dẫn có thể đã bị đổi, bị gõ nhầm hoặc nội dung đã được gỡ khỏi hệ thống.',
+        'path'    => '/' . trim((string)($_GET['url'] ?? ''), '/'),
+    ];
+    require APPROOT . '/app/views/errors/404.php';
+    exit;
+}
+
+/** Hiện trang 500 rồi dừng (trang độc lập, không dùng header/footer để chắc chắn hiển thị được) */
+function show_500($ref, $error = null) {
+    discard_output();
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+    if (wants_json_response()) {
+        if (!headers_sent()) header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['status' => 'error', 'message' => 'Hệ thống đang gặp sự cố, vui lòng thử lại sau.', 'ref' => $ref], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    $data = [
+        'title'  => 'Hệ thống đang gặp sự cố',
+        'ref'    => $ref,
+        'detail' => (app_debug() && $error) ? $error : null,   // ['type','message','file','line']
+    ];
+    require APPROOT . '/app/views/errors/500.php';
+    exit;
+}
+
+/** Ghi lỗi vào error log kèm mã tra cứu, trả về mã đó */
+function log_app_error($type, $message, $file, $line) {
+    $ref = 'E' . date('ymd-His') . '-' . strtoupper(bin2hex(random_bytes(2)));
+    error_log("[WarningInfo $ref] $type: $message in $file:$line");
+    return $ref;
+}
+
+/**
+ * Gọi 1 lần ở public/index.php: bắt mọi exception chưa xử lý và lỗi Fatal → trang 500.
+ * Bật output buffering để khi lỗi xảy ra giữa chừng thì xoá được phần trang đã in.
+ */
+function register_error_pages() {
+    ob_start();
+
+    set_exception_handler(function ($e) {
+        $ref = log_app_error(get_class($e), $e->getMessage(), $e->getFile(), $e->getLine());
+        show_500($ref, ['type' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]);
+    });
+
+    register_shutdown_function(function () {
+        $err = error_get_last();
+        if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+            $ref = log_app_error('Fatal error', $err['message'], $err['file'], $err['line']);
+            show_500($ref, ['type' => 'Fatal error', 'message' => $err['message'], 'file' => $err['file'], 'line' => $err['line']]);
+        }
+    });
+}

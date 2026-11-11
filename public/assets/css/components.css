@@ -112,3 +112,24 @@
 @media (prefers-reduced-motion: reduce) {
   .skeleton, .fade-in, .number-bounce { animation: none; }
 }
+
+/* ---------- Bảng xếp thành thẻ trên điện thoại: <table class="table table-stack"> + data-label ở từng ô (Milestone 4) ---------- */
+@media (max-width: 767.98px) {
+  .table-responsive > .table.table-stack { min-width: 0; }
+  .table-stack thead { display: none; }
+  .table-stack, .table-stack tbody, .table-stack tr, .table-stack td { display: block; width: 100% !important; }
+  .table-stack tr { display: flex; flex-direction: column; padding: 14px 16px; border-bottom: 1px solid var(--wi-border, #e5e7eb); }
+  .table-stack tr:last-child { border-bottom: 0; }
+  .table-stack td { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 4px 0 !important; border: 0; text-align: right; }
+  .table-stack td::before { content: attr(data-label); flex-shrink: 0; font-size: .78rem; font-weight: 600; color: #64748b; text-align: left; padding-top: 2px; }
+  .table-stack td > * { min-width: 0; }
+  .table-stack td.stack-title { display: block; order: -1; text-align: left; padding-bottom: 8px !important; }
+  .table-stack td.stack-title::before { display: none; }
+  .table-stack td.stack-place { display: block; text-align: left; }
+  .table-stack td.stack-place::before { display: block; margin-bottom: 2px; }
+  .table-stack td .text-truncate { max-width: 100% !important; white-space: normal; }
+  .table-stack td.stack-action { justify-content: flex-end; padding-top: 10px !important; }
+  .table-stack td.stack-action::before { display: none; }
+  .table-stack td.stack-action .btn { width: 100%; }
+  .table-stack.table-hover > tbody > tr:hover > * { --bs-table-bg-state: transparent; }
+}

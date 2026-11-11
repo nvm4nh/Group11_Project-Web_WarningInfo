@@ -88,6 +88,12 @@
     }
   }
 
+  // Bấm nút kính lúp trên thanh menu (→ /report#reportFilter): đặt sẵn con trỏ vào ô tìm kiếm
+  if (location.hash === '#reportFilter') {
+    const q = document.querySelector('#reportFilter input[name="q"]');
+    if (q) q.focus({ preventScroll: true });
+  }
+
   // Toast thông báo do máy chủ gửi (flash) tự ẩn sau 4 giây
   if (window.bootstrap) {
     $$('.toast.show[data-flash]').forEach((el) => setTimeout(() => bootstrap.Toast.getOrCreateInstance(el).hide(), 4000));

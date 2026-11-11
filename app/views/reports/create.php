@@ -99,18 +99,21 @@
           <div class="invalid-feedback client-feedback">Vui lòng mô tả sự cố (ít nhất 10 ký tự).</div>
         </div>
 
-        <!-- Ảnh minh chứng (TV4): xem trước ảnh trước khi gửi. Phần lưu file do TV3 xử lý ở ReportController::store() -->
+        <!-- Ảnh minh chứng (TV4): xem trước ảnh trước khi gửi. Phần lưu file do TV3 xử lý ở ReportController::store()
+             Giới hạn lấy theo php.ini của máy chủ đang chạy (hosting có thể thấp hơn 5MB) – upload_limits() -->
+        <?php $lim = upload_limits(ReportController::UPLOAD_MAX_FILES, ReportController::UPLOAD_MAX_BYTES); ?>
         <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="form-label fw-semibold mb-0" for="reportImages">Ảnh minh chứng</label>
-            <small class="text-muted" id="imageCount">0/3 ảnh</small>
+            <small class="text-muted" id="imageCount">0/<?= (int)$lim['files'] ?> ảnh</small>
           </div>
           <div class="upload-zone <?= !empty($data['errors']['images']) ? 'is-invalid' : '' ?>" id="uploadZone">
             <input type="file" name="images[]" id="reportImages" accept="image/jpeg,image/png,image/webp" multiple
-                   data-max-files="3" data-max-size="5" aria-describedby="uploadHelp">
+                   data-max-files="<?= (int)$lim['files'] ?>" data-max-bytes="<?= (int)$lim['file_bytes'] ?>"
+                   data-max-total="<?= (int)$lim['total_bytes'] ?>" aria-describedby="uploadHelp">
             <i class="bi bi-cloud-arrow-up"></i>
             <p class="mb-1 fw-semibold">Kéo thả ảnh vào đây hoặc <span class="text-primary">chọn từ máy / chụp ảnh</span></p>
-            <small class="text-muted" id="uploadHelp">Tối đa 3 ảnh · JPG, PNG, WEBP · mỗi ảnh không quá 5MB</small>
+            <small class="text-muted" id="uploadHelp">Tối đa <?= (int)$lim['files'] ?> ảnh · JPG, PNG, WEBP · mỗi ảnh không quá <?= e($lim['file_label']) ?><?= $lim['total_bytes'] < $lim['files'] * $lim['file_bytes'] ? ' · tổng không quá ' . e($lim['total_label']) : '' ?></small>
           </div>
           <div class="text-danger small mt-1 <?= empty($data['errors']['images']) ? 'd-none' : '' ?>" id="uploadError"><?= e($data['errors']['images'] ?? '') ?></div>
           <div class="preview-grid" id="previewGrid"></div>
