@@ -1,0 +1,14 @@
+{
+  "name": "warninginfo-e2e",
+  "private": true,
+  "description": "Kiểm thử end-to-end và truy cập (WCAG) cho WarningInfo",
+  "scripts": {
+    "test": "node run.js",
+    "test:watch": "HEADED=1 SLOW=400 node run.js",
+    "a11y": "node a11y.js"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.2",
+    "playwright": "^1.48.0"
+  }
+}
