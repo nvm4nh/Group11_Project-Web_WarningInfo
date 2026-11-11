@@ -679,12 +679,20 @@ public function api_xml_feed()
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('report');
         requireLogin();
 
-        $content = trim($_POST['content'] ?? '');
+        // Cùng quy tắc với api_add_comment: chỉ bình luận vào sự cố có thật và đang công khai
+        // (trước đây id không tồn tại gây lỗi 500, còn sự cố đã ẩn vẫn nhận bình luận)
+        $report = $this->reportModel->getById((int)$id);
+        if (!$report || !$report->is_public) {
+            setFlash('danger', 'Không tìm thấy sự cố.');
+            redirect('report');
+        }
+
+        $content = is_string($_POST['content'] ?? null) ? trim($_POST['content']) : '';
         if ($content !== '' && mb_strlen($content) <= 5000) {
             $this->reportModel->addComment($id, $_SESSION['user_id'], $content, 0);
             setFlash('success', 'Đã gửi phản hồi thành công.');
         }
-        redirect('report/detail/' . $id);
+        redirect('report/detail/' . (int)$report->id);
     }
 
     public function my_reports() {

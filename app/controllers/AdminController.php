@@ -230,12 +230,38 @@ class AdminController extends Controller {
         ]);
     }
 
+    const ROLES            = ['user', 'officer', 'admin'];
+    const ACCOUNT_STATUSES = ['active', 'inactive', 'locked'];
+
     public function updateUser($id = null) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$id) redirect('admin/users');
-        $role = $_POST['role'] ?? 'user';
-        if (!in_array($role, ['user','officer','admin'], true)) $role = 'user';
-        $this->userModel->updateRole($id, $role);
-        setFlash('success', 'Cập nhật người dùng thành công');
+
+        $user = $this->userModel->findById((int)$id);
+        if (!$user) {
+            setFlash('danger', 'Không tìm thấy người dùng.');
+            redirect('admin/users');
+        }
+        $role   = is_string($_POST['role'] ?? null) ? $_POST['role'] : $user->role;
+        $status = is_string($_POST['account_status'] ?? null) ? $_POST['account_status'] : $user->account_status;
+        if (!in_array($role, self::ROLES, true) || !in_array($status, self::ACCOUNT_STATUSES, true)) {
+            setFlash('danger', 'Vai trò hoặc trạng thái không hợp lệ.');
+            redirect('admin/users');
+        }
+
+        // Không tự hạ quyền / tự khoá mình (tránh mất quyền quản trị giữa chừng)
+        if ((int)$user->id === (int)($_SESSION['user_id'] ?? 0) && ($role !== 'admin' || $status !== 'active')) {
+            setFlash('danger', 'Không thể tự hạ quyền hoặc tự khoá tài khoản của chính mình.');
+            redirect('admin/users');
+        }
+        // Luôn còn ít nhất 1 quản trị viên đang hoạt động
+        $wasActiveAdmin = $user->role === 'admin' && $user->account_status === 'active';
+        if ($wasActiveAdmin && ($role !== 'admin' || $status !== 'active') && $this->userModel->countActiveAdmins() <= 1) {
+            setFlash('danger', 'Hệ thống phải còn ít nhất một quản trị viên đang hoạt động.');
+            redirect('admin/users');
+        }
+
+        $this->userModel->updateRoleAndStatus($user->id, $role, $status);
+        setFlash('success', 'Đã cập nhật tài khoản ' . $user->email . '.');
         redirect('admin/users');
     }
 

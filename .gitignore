@@ -10,3 +10,6 @@ public/uploads/reports/*
 
 # Tài liệu cá nhân
 HANDOVER.md
+
+# Cấu hình riêng của hosting (mật khẩu CSDL thật) – xem config/config.local.example.php
+config/config.local.php

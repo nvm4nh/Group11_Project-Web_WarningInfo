@@ -35,7 +35,7 @@ class UserModel {
     }
 
     public function getAll() {
-        $this->db->query('SELECT id, full_name, email, role, created_at
+        $this->db->query('SELECT id, full_name, email, role, account_status, created_at
                           FROM users ORDER BY created_at DESC');
         return $this->db->resultSet();
     }
@@ -54,6 +54,21 @@ class UserModel {
         $this->db->bind(':role', $role);
         $this->db->bind(':id',   $id);
         return $this->db->execute();
+    }
+
+    /** Đổi vai trò + trạng thái tài khoản (active / inactive / locked) – dùng ở trang Quản lý người dùng */
+    public function updateRoleAndStatus($id, $role, $status) {
+        $this->db->query('UPDATE users SET role = :role, account_status = :status WHERE id = :id');
+        $this->db->bind(':role',   $role);
+        $this->db->bind(':status', $status);
+        $this->db->bind(':id',     (int)$id);
+        return $this->db->execute();
+    }
+
+    /** Số quản trị viên đang hoạt động (không cho hạ quyền / khoá quản trị viên cuối cùng) */
+    public function countActiveAdmins() {
+        $this->db->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin' AND account_status = 'active'");
+        return (int)$this->db->single()->total;
     }
 
     public function updateProfile($id, $fullName, $phone = '') {
@@ -76,4 +91,4 @@ class UserModel {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
-}
+}

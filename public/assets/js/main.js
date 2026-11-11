@@ -114,8 +114,9 @@
     const el = document.createElement('div');
     el.className = `toast align-items-center text-bg-${type} border-0`;
     el.setAttribute('role', 'alert');
-    el.innerHTML = `<div class="d-flex"><div class="toast-body"><i class="bi bi-${icons[type] || 'info-circle-fill'} me-2"></i>${message}</div>` +
+    el.innerHTML = `<div class="d-flex"><div class="toast-body"><i class="bi bi-${icons[type] || 'info-circle-fill'} me-2"></i><span></span></div>` +
       '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Đóng"></button></div>';
+    el.querySelector('.toast-body span').textContent = String(message ?? '');   // nội dung từ máy chủ → in dạng chữ, không chạy HTML
     wrap.appendChild(el);
     if (window.bootstrap) {
       const t = new bootstrap.Toast(el, { delay: 3000 });

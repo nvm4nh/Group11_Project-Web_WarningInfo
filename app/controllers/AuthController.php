@@ -21,7 +21,11 @@ class AuthController extends Controller {
 
             if (empty($errors)) {
                 $user = $this->userModel->findByEmail($email);
-                if ($user && password_verify($password, $user->password)) {
+                $valid = $user && password_verify($password, $user->password);
+                if ($valid && $user->account_status !== 'active') {
+                    // Đúng mật khẩu nhưng tài khoản bị khoá / vô hiệu hoá: báo rõ lý do, không cho đăng nhập
+                    $errors['general'] = accountStatusMessage($user->account_status);
+                } elseif ($valid) {
                     // Đổi mã phiên sau khi đăng nhập (chống chiếm phiên – session fixation)
                     session_regenerate_id(true);
                     $_SESSION['user_id']   = $user->id;

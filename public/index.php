@@ -1,6 +1,10 @@
 <?php
-session_start();
 require_once '../config/config.php';
+// Cookie phiên an toàn (Milestone 4): JS không đọc được (HttpOnly), không gửi kèm request từ trang lạ (SameSite),
+// chỉ gửi qua HTTPS khi web chạy HTTPS (Secure)
+session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax', 'secure' => wi_is_https()]);
+ini_set('session.use_strict_mode', '1');
+session_start();
 require_once '../core/App.php';
 require_once '../core/Controller.php';
 require_once '../core/Database.php';

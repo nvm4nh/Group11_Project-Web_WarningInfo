@@ -1,5 +1,16 @@
-   <IfModule mod_rewrite.c>
-     RewriteEngine on
-     RewriteRule ^$ public/ [L]
-     RewriteRule (.*) public/$1 [L]
-   </IfModule>
+# WarningInfo – thư mục gốc dự án (dùng khi upload cả dự án vào public_html hoặc htdocs)
+# Mọi request được chuyển vào public/, nên mã nguồn (app/, config/, core/, database/...) không truy cập được qua URL.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+  RewriteRule ^$ public/ [L]
+  RewriteRule (.*) public/$1 [L]
+</IfModule>
+
+# Lớp bảo vệ dự phòng khi hosting tắt mod_rewrite: chặn file cấu hình, CSDL, tài liệu, file ẩn (.git, .env...)
+<IfModule !mod_rewrite.c>
+  <FilesMatch "(?i)(^\.|\.(sql|md|log|ini|sh|bak|example\.php|docx?|lock)$|^composer\.json$)">
+    Require all denied
+  </FilesMatch>
+</IfModule>

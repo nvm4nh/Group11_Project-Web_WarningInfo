@@ -11,24 +11,40 @@
       <div class="alert alert-<?= e($f['type']) ?>"><?= e($f['message']) ?></div>
     <?php endif; ?>
 
+    <?php
+      $roleLabels   = ['user' => 'Người dân', 'officer' => 'Cán bộ', 'admin' => 'Quản trị viên'];
+      $statusLabels = ['active' => 'Hoạt động', 'inactive' => 'Vô hiệu hoá', 'locked' => 'Đã khoá'];
+      $statusBadges = ['active' => 'success', 'inactive' => 'secondary', 'locked' => 'danger'];
+    ?>
     <div class="table-responsive">
       <table class="table table-hover align-middle">
         <thead>
-          <tr><th>#</th><th>Họ tên</th><th>Email</th><th>Vai trò</th><th></th></tr>
+          <tr><th>#</th><th>Họ tên</th><th>Email</th><th>Trạng thái</th><th>Vai trò &amp; trạng thái</th><th></th></tr>
         </thead>
         <tbody>
-        <?php foreach ($data['users'] as $u): ?>
+        <?php foreach ($data['users'] as $u): $isMe = (int)$u->id === (int)($_SESSION['user_id'] ?? 0); ?>
           <tr>
             <td><?= (int)$u->id ?></td>
-            <td><?= e($u->full_name) ?></td>
+            <td><?= e($u->full_name) ?><?= $isMe ? ' <span class="badge text-bg-light">Bạn</span>' : '' ?></td>
             <td><?= e($u->email) ?></td>
-            <td colspan="2">
-              <form method="post" action="<?= url('admin/updateUser/' . $u->id) ?>" class="row g-2 align-items-center">
+            <td><span class="badge text-bg-<?= $statusBadges[$u->account_status] ?? 'secondary' ?>"><?= e($statusLabels[$u->account_status] ?? $u->account_status) ?></span></td>
+            <td>
+              <?php if ($isMe): ?>
+                <span class="text-muted small">Không thể tự đổi vai trò / khoá chính mình</span>
+              <?php else: ?>
+              <form method="post" action="<?= url('admin/updateUser/' . (int)$u->id) ?>" class="row g-2 align-items-center">
                 <?= csrf_field() ?>
                 <div class="col-auto">
-                  <select name="role" class="form-select form-select-sm">
-                    <?php foreach (['user','officer','admin'] as $r): ?>
-                      <option value="<?= $r ?>" <?= $u->role === $r ? 'selected' : '' ?>><?= $r ?></option>
+                  <select name="role" class="form-select form-select-sm" aria-label="Vai trò của <?= e($u->email) ?>">
+                    <?php foreach ($roleLabels as $r => $label): ?>
+                      <option value="<?= $r ?>" <?= $u->role === $r ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="col-auto">
+                  <select name="account_status" class="form-select form-select-sm" aria-label="Trạng thái tài khoản của <?= e($u->email) ?>">
+                    <?php foreach ($statusLabels as $st => $label): ?>
+                      <option value="<?= $st ?>" <?= $u->account_status === $st ? 'selected' : '' ?>><?= $label ?></option>
                     <?php endforeach; ?>
                   </select>
                 </div>
@@ -36,13 +52,16 @@
                   <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
                 </div>
               </form>
+              <?php endif; ?>
             </td>
             <td>
-              <form method="post" action="<?= url('admin/deleteUser/' . $u->id) ?>"
-                    onsubmit="return confirm('Xoá người dùng này?');">
+              <?php if (!$isMe): ?>
+              <form method="post" action="<?= url('admin/deleteUser/' . (int)$u->id) ?>"
+                    onsubmit="return confirm('Xoá người dùng này? Nên ưu tiên khoá tài khoản để giữ lại lịch sử báo cáo.');">
                 <?= csrf_field() ?>
-                <button class="btn btn-sm btn-danger">Xoá</button>
+                <button class="btn btn-sm btn-outline-danger">Xoá</button>
               </form>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>
