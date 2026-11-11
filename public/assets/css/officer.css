@@ -30,7 +30,7 @@
 .task-card:hover { box-shadow: 0 8px 22px rgba(15, 23, 42, .08); transform: translateY(-1px); }
 .task-card.prio-critical { border-left-color: var(--wi-critical, #dc2626); }
 .task-card.prio-high     { border-left-color: var(--wi-high, #ea580c); }
-.task-card.prio-medium   { border-left-color: var(--wi-medium, #d97706); }
+.task-card.prio-medium   { border-left-color: var(--wi-medium, #b45309); }
 .task-card.prio-low      { border-left-color: var(--wi-low, #16a34a); }
 
 .task-thumb {

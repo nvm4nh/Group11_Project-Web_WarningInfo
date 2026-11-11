@@ -10,15 +10,15 @@
   --wi-accent: #f59e0b;
   --wi-dark: #0b2b26;
   --wi-text: #1f2a37;
-  --wi-muted: #64748b;
+  --wi-muted: #5b6676;   /* đậm hơn #64748b để đạt tương phản WCAG AA 4.5:1 trên nền xám nhạt */
   --wi-border: #e5e7eb;
   --wi-bg: #f6f8f7;
   --wi-surface: #ffffff;
 
   /* Mức độ nghiêm trọng */
   --wi-critical: #dc2626;
-  --wi-high: #ea580c;
-  --wi-medium: #d97706;
+  --wi-high: #c2410c;    /* cam đậm: chữ trắng trên nhãn "Cao" đạt tương phản 5.2:1 (WCAG AA) */
+  --wi-medium: #b45309;  /* hổ phách đậm: chữ trắng đạt tương phản 5:1 (WCAG AA) */
   --wi-low: #16a34a;
 
   /* Trạng thái xử lý */

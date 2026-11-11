@@ -121,7 +121,7 @@
               <a href="<?= url('admin') ?>" class="btn btn-outline-secondary" title="Quản trị"><i class="bi bi-speedometer2"></i><span class="nav-btn-text"> Quản trị</span></a>
             <?php endif; ?>
             <div class="dropdown">
-              <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Tài khoản: <?= e($_SESSION['full_name'] ?? 'Tài khoản') ?>">
                 <i class="bi bi-person-circle"></i><span class="nav-btn-text nav-user-name"> <?= e($_SESSION['full_name'] ?? 'Tài khoản') ?></span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm">

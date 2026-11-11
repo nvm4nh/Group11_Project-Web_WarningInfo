@@ -79,7 +79,12 @@
 
 /* ---------- Lớp tiện ích còn thiếu (Milestone 2 – TV4) ---------- */
 /* View đang dùng bg-orange cho mức độ "Cao" nhưng Bootstrap không có sẵn → badge bị trong suốt */
-.bg-orange { background-color: var(--wi-high, #ea580c) !important; color: #fff !important; }
+.bg-orange { background-color: var(--wi-high, #c2410c) !important; color: #fff !important; }
+/* Truy cập (WCAG 2 AA – Milestone 4): link nằm trong đoạn văn / thông báo phải có gạch chân,
+   không chỉ phân biệt bằng màu; nút viền xám đủ tương phản trên nền trang */
+.alert a:not(.btn), .card-body p a:not(.btn), .small a[target="_blank"]:not(.btn) { text-decoration: underline; text-underline-offset: 2px; }
+.btn-outline-secondary { --bs-btn-color: #545b62; --bs-btn-border-color: #6c757d; }
+.text-muted, .bg-light .text-secondary, .text-secondary.bg-light { color: #5c636a !important; }   /* Bootstrap #6c757d chỉ đạt 4.4:1 trên nền .bg-light */
 .x-small { font-size: .75rem; }
 
 /* ---------- Hiệu ứng AJAX (Milestone 3 – TV5): ajax-filter.js, ajax-interaction.js ---------- */

@@ -19,8 +19,8 @@
         <?= csrf_field() ?>
         <!-- Tiêu đề -->
         <div class="mb-3">
-          <label class="form-label fw-semibold">Tiêu đề sự cố <span class="text-danger">*</span></label>
-          <input type="text" name="title" class="form-control <?= !empty($data['errors']['title']) ? 'is-invalid' : '' ?>"
+          <label class="form-label fw-semibold" for="reportTitle">Tiêu đề sự cố <span class="text-danger">*</span></label>
+          <input type="text" name="title" id="reportTitle" class="form-control <?= !empty($data['errors']['title']) ? 'is-invalid' : '' ?>"
                  placeholder="VD: Cá chết nổi trắng kênh, khói đen mù mịt từ xưởng..."
                  value="<?= e($data['old']['title'] ?? '') ?>" required minlength="5" maxlength="200">
           <?php if (!empty($data['errors']['title'])): ?>
@@ -32,8 +32,8 @@
         <div class="row g-3 mb-3">
           <!-- Danh mục -->
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Danh mục sự cố <span class="text-danger">*</span></label>
-            <select name="category_id" class="form-select <?= !empty($data['errors']['category_id']) ? 'is-invalid' : '' ?>" required>
+            <label class="form-label fw-semibold" for="reportCategory">Danh mục sự cố <span class="text-danger">*</span></label>
+            <select name="category_id" id="reportCategory" class="form-select <?= !empty($data['errors']['category_id']) ? 'is-invalid' : '' ?>" required>
               <option value="">-- Chọn danh mục --</option>
               <?php foreach ($data['categories'] as $c): ?>
                 <option value="<?= $c->id ?>" <?= ($data['old']['category_id'] ?? '') == $c->id ? 'selected' : '' ?>>
@@ -49,8 +49,8 @@
 
           <!-- Mức độ -->
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Mức độ khẩn cấp</label>
-            <select name="priority" class="form-select">
+            <label class="form-label fw-semibold" for="reportPriority">Mức độ khẩn cấp</label>
+            <select name="priority" id="reportPriority" class="form-select">
               <option value="medium" selected>Trung bình (Ảnh hưởng cục bộ)</option>
               <option value="low">Thấp (Nhẹ, chưa lan rộng)</option>
               <option value="high">Cao (Gây ô nhiễm nặng)</option>
@@ -90,8 +90,8 @@
 
         <!-- Mô tả -->
         <div class="mb-3">
-          <label class="form-label fw-semibold">Mô tả chi tiết <span class="text-danger">*</span></label>
-          <textarea name="description" rows="4" class="form-control <?= !empty($data['errors']['description']) ? 'is-invalid' : '' ?>"
+          <label class="form-label fw-semibold" for="reportDescription">Mô tả chi tiết <span class="text-danger">*</span></label>
+          <textarea name="description" id="reportDescription" rows="4" class="form-control <?= !empty($data['errors']['description']) ? 'is-invalid' : '' ?>"
                     placeholder="Mô tả nguyên nhân, hiện trạng màu sắc, mùi hôi, thời gian bắt đầu xảy ra..." required minlength="10"><?= e($data['old']['description'] ?? '') ?></textarea>
           <?php if (!empty($data['errors']['description'])): ?>
             <div class="invalid-feedback"><?= e($data['errors']['description']) ?></div>
@@ -123,18 +123,18 @@
         <h6 class="fw-bold mt-4 pt-3 border-top mb-3 text-secondary">Thông tin người báo cáo (bảo mật):</h6>
         <div class="row g-3 mb-4">
           <div class="col-md-4">
-            <label class="form-label small">Họ và tên</label>
-            <input type="text" name="contact_name" class="form-control" 
+            <label class="form-label small" for="contactName">Họ và tên</label>
+            <input type="text" name="contact_name" id="contactName" class="form-control" 
                    value="<?= e($data['old']['contact_name'] ?? ($_SESSION['full_name'] ?? '')) ?>">
           </div>
           <div class="col-md-4">
-            <label class="form-label small">Số điện thoại</label>
-            <input type="text" name="contact_phone" class="form-control" 
+            <label class="form-label small" for="contactPhone">Số điện thoại</label>
+            <input type="tel" name="contact_phone" id="contactPhone" class="form-control" 
                    value="<?= e($data['old']['contact_phone'] ?? '') ?>">
           </div>
           <div class="col-md-4">
-            <label class="form-label small">Email</label>
-            <input type="email" name="contact_email" class="form-control" 
+            <label class="form-label small" for="contactEmail">Email</label>
+            <input type="email" name="contact_email" id="contactEmail" class="form-control" 
                    value="<?= e($data['old']['contact_email'] ?? ($_SESSION['email'] ?? '')) ?>">
           </div>
         </div>

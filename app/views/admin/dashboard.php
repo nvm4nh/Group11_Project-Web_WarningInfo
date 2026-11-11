@@ -46,7 +46,7 @@
           <div class="card-body">
             <h6 class="card-subtitle text-muted mb-1">Người dùng & Cán bộ</h6>
             <p class="display-6 fw-bold mb-2"><?= (int)$data['totalUsers'] ?></p>
-            <a href="<?= url('admin/users') ?>" class="btn btn-sm btn-outline-info">Quản lý tài khoản</a>
+            <a href="<?= url('admin/users') ?>" class="btn btn-sm btn-outline-primary">Quản lý tài khoản</a>
           </div>
         </div>
       </div>
