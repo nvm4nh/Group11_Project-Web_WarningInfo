@@ -14,7 +14,6 @@
   text-wrap: balance; text-shadow: 0 2px 26px rgba(3, 26, 17, .5);
 }
 .hero .lead { color: #d9ecd5; max-width: 34rem; text-shadow: 0 1px 12px rgba(3, 26, 17, .45); }
-.hero .btn-outline-light { --bs-btn-hover-color: #0b3d29; backdrop-filter: blur(4px); background-color: rgba(255, 255, 255, .06); }
 
 .hero-search {
   background: #fff; border-radius: 18px; padding: 8px; box-shadow: 0 18px 44px rgba(3, 26, 17, .32);
@@ -76,10 +75,6 @@
 .category-card h6 { margin: 0; font-size: 1rem; }
 .category-card .count { font-size: .82rem; color: var(--wi-muted); }
 
-/* 3 bước: số thứ tự là "nụ" nằm trên dây leo (forest.css – .step-bud) */
-.step-card { padding: 44px 24px 28px; height: 100%; position: relative; text-align: center; }
-.step-card .icon-circle { width: 58px; height: 58px; font-size: 1.5rem; background: var(--wi-primary-soft); color: var(--wi-primary); border-radius: 50% 14% 50% 14%; }
-.step-card h5 { margin: 16px 0 8px; }
 
 /* Dải kêu gọi cuối trang: hàng cây dưới chân + mặt trời */
 .cta-band {
@@ -109,8 +104,6 @@
   .cta-band { padding: 28px 22px 74px; }
   .cta-sun { right: -60px; }
   .hero-search .divider { display: none; }
-  .step-card { text-align: left; padding: 40px 22px 24px; }
-  .step-card .step-bud { left: 44px; }
 }
 
 @media (max-width: 575.98px) {

@@ -49,6 +49,7 @@
   <link href="<?= asset('css/components.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/home.css') ?>" rel="stylesheet">
   <link href="<?= asset('css/forest.css') ?>" rel="stylesheet">
+  <link href="<?= asset('css/motion.css') ?>" rel="stylesheet">
   <?php if (!empty($data['use_map'])): /* Bản đồ Leaflet.js – TV1 (Milestone 3) */ ?>
   <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
   <link href="<?= asset('css/map.css') ?>" rel="stylesheet">

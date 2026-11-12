@@ -1,0 +1,7 @@
+{
+  // Extension "PHP Server" (brapifra.phpserver): Ctrl+Shift+P → "PHP Server: Serve project"
+  // → mở http://localhost:3000. Router làm thay .htaccess để các đường dẫn /report, /auth/login... chạy được.
+  "phpserver.relativePath": "public",
+  "phpserver.router": "public/router.php",
+  "phpserver.port": 3000
+}

@@ -129,7 +129,9 @@ if (!function_exists('wi_rng')) {
 
     /** Hai cành lá rủ ở góc phải dải đầu trang (.page-canopy / .page-header) của các trang trong */
     function wi_canopy() {
-        return wi_sprig_svg('canopy-sprig canopy-sprig-b sway', 'frond') . wi_sprig_svg('canopy-sprig canopy-sprig-a sway');
+        // canvas: nền mặt nước WebGL (wi-water.js) – tự chọn bảng màu sáng / tối theo khối chứa nó
+        return '<canvas class="wi-water" data-water="auto" data-sun="0.86,0.2" aria-hidden="true"></canvas>'
+             . wi_sprig_svg('canopy-sprig canopy-sprig-b sway', 'frond') . wi_sprig_svg('canopy-sprig canopy-sprig-a sway');
     }
 
     /** Lá mọc so le dọc theo một đường cong Bézier bậc 3 (dùng để dựng symbol cành lá) */
@@ -175,5 +177,19 @@ if (!function_exists('wi_rng')) {
       <path d="M6 190C90 150 210 80 352 14" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
       <?= wi_leaves_on_curve([6, 190, 90, 150, 210, 80, 352, 14], 22, 'wi-blade', 96, 34, .18, 58, 29) ?>
     </symbol>
+    <!-- Bộ lọc cho nút (motion.css): gooey = giọt dính nhau, kim loại lỏng = gợn chảy, kính lỏng = khúc xạ nền -->
+    <filter id="wi-goo" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo"/>
+      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+    </filter>
+    <filter id="wi-metal" x="-10%" y="-30%" width="120%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018 0.06" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="wi-glass" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="1" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
   </defs>
 </svg>

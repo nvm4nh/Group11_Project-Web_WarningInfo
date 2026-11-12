@@ -4,6 +4,7 @@
 <section class="hero forest-hero" data-forest-hero>
   <div class="fh-scene" aria-hidden="true">
     <div class="fh-sky"></div>
+    <canvas class="wi-water fh-water" data-water="dark" data-sun="0.72,0.22"></canvas>
     <div class="fh-sun"></div>
     <div class="fh-layer" data-depth=".03">
       <svg class="fh-band fh-city" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"><?= wi_skyline(77, 1440, 320, 150) ?></svg>

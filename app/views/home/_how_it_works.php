@@ -1,14 +1,11 @@
-<?php /* Trang chủ – cách hoạt động (3 bước nối bằng một dây leo mọc dần khi cuộn) + kêu gọi gửi báo cáo */
+<?php /* Trang chủ – cách hoạt động: 3 bước là các thẻ dính chồng lên nhau khi cuộn (wi-motion.js – [data-stack]) + kêu gọi gửi báo cáo */
 $steps = [
-  ['bi-camera',         'Gửi báo cáo',           'Chụp ảnh, ghim vị trí và mô tả ngắn gọn vấn đề bạn gặp phải.'],
-  ['bi-patch-check',    'Xác minh & cảnh báo',   'Quản trị viên và cộng đồng cùng xác nhận. Báo cáo được gắn mức độ để cảnh báo khu vực.'],
-  ['bi-building-check', 'Theo dõi xử lý',        'Báo cáo được chuyển đến cơ quan chức năng. Bạn theo dõi trạng thái xử lý ngay trên trang.'],
-];
-// Lá trên dây leo: [x, y, góc xoay, cỡ, ngưỡng tiến độ (0–1) để lá bung ra]
-$vineLeaves = [
-  [70, 48, -62, 40, .05], [128, 78, 58, 34, .1], [262, 34, -48, 42, .21], [318, 34, 42, 34, .26],
-  [455, 88, 64, 40, .37], [520, 92, 118, 32, .43], [668, 30, -56, 42, .55], [724, 36, 40, 34, .6],
-  [858, 90, 62, 40, .71], [926, 90, 122, 32, .77], [1068, 34, -52, 42, .88], [1130, 30, 36, 36, .94],
+  ['bi-camera',         'Gửi báo cáo',         'Chụp ảnh, ghim vị trí và mô tả ngắn gọn vấn đề bạn gặp phải.',
+   ['Ảnh minh chứng', 'Vị trí GPS', 'Không bắt buộc đăng nhập']],
+  ['bi-patch-check',    'Xác minh & cảnh báo', 'Quản trị viên và cộng đồng cùng xác nhận. Báo cáo được gắn mức độ để cảnh báo khu vực.',
+   ['Mức độ nghiêm trọng', 'Cộng đồng xác nhận', 'Hiện trên bản đồ']],
+  ['bi-building-check', 'Theo dõi xử lý',      'Báo cáo được chuyển đến cơ quan chức năng. Bạn theo dõi trạng thái xử lý ngay trên trang.',
+   ['Cán bộ thụ lý', 'Thông báo tức thì', 'Lịch sử xử lý']],
 ];
 ?>
 <!-- ========== CÁCH HOẠT ĐỘNG ========== -->
@@ -18,33 +15,33 @@ $vineLeaves = [
       <h2 class="section-title">Cách WarningInfo hoạt động</h2>
       <p class="section-desc mx-auto">Mỗi báo cáo của bạn đều được xác minh và chuyển đến đúng nơi có thể xử lý.</p>
     </div>
-    <!-- data-scrub: forest.js ghi tiến độ cuộn (0 → 1) vào biến --p; dây leo và lá dựa vào --p để mọc -->
-    <div class="vine-wrap" data-scrub>
-      <svg class="vine" viewBox="0 0 1200 120" aria-hidden="true" focusable="false">
-        <path class="vine-stem" pathLength="1" d="M-10 78C90 30 150 100 200 60S330 14 400 62 520 108 600 60 730 14 800 62 920 108 1000 60 1130 20 1210 66"/>
-        <?php foreach ($vineLeaves as [$x, $y, $rot, $size, $at]): ?>
-          <g transform="translate(<?= $x ?> <?= $y ?>) rotate(<?= $rot ?>)"><g class="vine-leaf" style="--at:<?= $at ?>"><use href="#wi-leaf" width="<?= $size ?>" height="<?= round($size * .48, 1) ?>" y="<?= -round($size * .24, 1) ?>"/></g></g>
-        <?php endforeach; ?>
-      </svg>
-      <div class="row g-4">
-        <?php foreach ($steps as $i => [$icon, $title, $text]): ?>
-          <div class="col-md-4">
-            <div class="card-surface step-card" style="--at:<?= [.17, .5, .83][$i] ?>">
-              <span class="step-bud" aria-hidden="true"><?= $i + 1 ?></span>
-              <span class="icon-circle"><i class="bi <?= $icon ?>"></i></span>
-              <h5><span class="visually-hidden">Bước <?= $i + 1 ?>: </span><?= e($title) ?></h5>
-              <p class="text-muted-2 mb-0"><?= e($text) ?></p>
+    <ol class="stack-steps" data-stack>
+      <?php foreach ($steps as $i => [$icon, $title, $text, $tags]): ?>
+        <li class="stack-step" style="--i:<?= $i ?>">
+          <article class="stack-card">
+            <div class="stack-copy">
+              <span class="stack-no" aria-hidden="true"><?= $i + 1 ?></span>
+              <h3><span class="visually-hidden">Bước <?= $i + 1 ?>: </span><?= e($title) ?></h3>
+              <p><?= e($text) ?></p>
+              <ul class="stack-tags">
+                <?php foreach ($tags as $tag): ?><li><?= e($tag) ?></li><?php endforeach; ?>
+              </ul>
             </div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
+            <div class="stack-art" aria-hidden="true">
+              <?= wi_sprig_svg('stack-sprig', $i === 1 ? 'frond' : 'sprig') ?>
+              <span class="stack-icon"><i class="bi <?= $icon ?>"></i></span>
+            </div>
+          </article>
+        </li>
+      <?php endforeach; ?>
+    </ol>
   </div>
 </section>
 <!-- ========== CTA ========== -->
 <section class="pb-5">
   <div class="container">
     <div class="cta-band">
+      <canvas class="wi-water" data-water="dark" data-sun="0.86,0.1" aria-hidden="true"></canvas>
       <span class="cta-sun" aria-hidden="true"></span>
       <svg class="cta-trees" viewBox="0 0 1200 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
         <g class="ct-far"><?= wi_treeline(203, 1200, 150, ['count' => 26, 'min' => 44, 'max' => 92, 'palms' => .18, 'fill' => 4]) ?></g>
