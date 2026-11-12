@@ -1,4 +1,4 @@
-<?php /* Trang chủ – 6 cảnh báo mới nhất từ CSDL, lọc theo mức độ bằng ?severity=... */ ?>
+<?php /* Trang chủ – 6 cảnh báo mới nhất từ CSDL (băng chuyền 3D), lọc theo mức độ bằng ?severity=... */ ?>
 <!-- ========== CẢNH BÁO MỚI NHẤT ==========
      Hiện tại lọc bằng link ?severity=...  TV5 có thể đổi sang AJAX (data-severity) -->
 <section class="section section-paper" id="latest">
@@ -16,49 +16,55 @@
         <?php endforeach; ?>
       </ul>
     </div>
-    <div class="row g-4" id="latestAlerts">
-      <?php if (empty($data['latestReports'])): ?>
-        <div class="col-12">
-          <div class="card-surface text-center py-5 text-muted">
-            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-            Chưa có cảnh báo nào ở mức độ này.
+    <?php $latest = array_values($data['latestReports'] ?? []); ?>
+    <?php if (empty($latest)): ?>
+      <div class="card-surface text-center py-5 text-muted" id="latestAlerts">
+        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+        Chưa có cảnh báo nào ở mức độ này.
+      </div>
+    <?php else: ?>
+    <!-- Băng chuyền 3D (coverflow – wi-motion.js). Không có JS: dải cuộn ngang bình thường, vẫn vuốt / cuộn được -->
+    <div class="wi-coverflow" data-coverflow role="region" aria-roledescription="carousel" aria-label="Cảnh báo mới nhất">
+      <button type="button" class="cf-nav cf-prev" aria-label="Cảnh báo trước"><i class="bi bi-chevron-left"></i></button>
+      <div class="cf-track" id="latestAlerts" tabindex="0" aria-label="Dùng phím mũi tên trái / phải để chuyển cảnh báo">
+        <?php foreach ($latest as $i => $r): ?>
+          <?php
+            [$icon, , $placeholder]       = categoryVisual($r->category_id);
+            [$sevText, $sevCls, $sevIcon] = severityVisual($r->priority);
+            [$stText, $stCls]             = ReportModel::statusBadge($r->status);
+            $thumb = !empty($r->thumbnail) ? uploadUrl($r->thumbnail) : asset('img/placeholder/' . $placeholder);
+            $desc  = (string)$r->description;
+          ?>
+          <div class="cf-slide" role="group" aria-roledescription="slide" aria-label="<?= $i + 1 ?> / <?= count($latest) ?>">
+            <article class="alert-card" data-id="<?= (int)$r->id ?>">
+              <div class="thumb">
+                <img src="<?= e($thumb) ?>" alt="<?= e($r->title) ?>" loading="lazy" draggable="false">
+                <span class="badge-severity <?= $sevCls ?>"><i class="bi <?= $sevIcon ?>"></i> <?= e($sevText) ?></span>
+              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                  <span class="category"><i class="bi <?= $icon ?>"></i> <?= e($r->category_name ?? 'Khác') ?></span>
+                  <span class="badge <?= $stCls ?>"><?= e($stText) ?></span>
+                </div>
+                <h3 class="title"><a href="<?= url('report/detail/' . (int)$r->id) ?>"><?= e($r->title) ?></a></h3>
+                <p class="excerpt"><?= e(mb_substr($desc, 0, 140)) ?><?= mb_strlen($desc) > 140 ? '…' : '' ?></p>
+                <div class="meta"><span><i class="bi bi-geo-alt"></i><?= e($r->address ?: 'Chưa cập nhật địa chỉ') ?></span></div>
+                <div class="card-foot">
+                  <span><i class="bi bi-clock me-1"></i><?= e(timeAgo($r->age_seconds ?? 0, $r->created_at)) ?></span>
+                  <span class="stats">
+                    <span title="Lượt xác nhận"><i class="bi bi-hand-thumbs-up"></i> <?= (int)$r->upvote_count ?></span>
+                    <span title="Bình luận"><i class="bi bi-chat-dots"></i> <?= (int)$r->comment_count ?></span>
+                  </span>
+                </div>
+              </div>
+            </article>
           </div>
-        </div>
-      <?php endif; ?>
-      <?php foreach (array_values($data['latestReports'] ?? []) as $i => $r): ?>
-        <?php
-          [$icon, , $placeholder]       = categoryVisual($r->category_id);
-          [$sevText, $sevCls, $sevIcon] = severityVisual($r->priority);
-          [$stText, $stCls]             = ReportModel::statusBadge($r->status);
-          $thumb = !empty($r->thumbnail) ? uploadUrl($r->thumbnail) : asset('img/placeholder/' . $placeholder);
-          $desc  = (string)$r->description;
-        ?>
-        <div class="col-md-6 col-lg-4 reveal" style="--i:<?= $i % 3 ?>">
-          <article class="alert-card" data-id="<?= (int)$r->id ?>">
-            <div class="thumb">
-              <img src="<?= e($thumb) ?>" alt="<?= e($r->title) ?>" loading="lazy">
-              <span class="badge-severity <?= $sevCls ?>"><i class="bi <?= $sevIcon ?>"></i> <?= e($sevText) ?></span>
-            </div>
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center gap-2">
-                <span class="category"><i class="bi <?= $icon ?>"></i> <?= e($r->category_name ?? 'Khác') ?></span>
-                <span class="badge <?= $stCls ?>"><?= e($stText) ?></span>
-              </div>
-              <h3 class="title"><a href="<?= url('report/detail/' . (int)$r->id) ?>"><?= e($r->title) ?></a></h3>
-              <p class="excerpt"><?= e(mb_substr($desc, 0, 140)) ?><?= mb_strlen($desc) > 140 ? '…' : '' ?></p>
-              <div class="meta"><span><i class="bi bi-geo-alt"></i><?= e($r->address ?: 'Chưa cập nhật địa chỉ') ?></span></div>
-              <div class="card-foot">
-                <span><i class="bi bi-clock me-1"></i><?= e(timeAgo($r->age_seconds ?? 0, $r->created_at)) ?></span>
-                <span class="stats">
-                  <span title="Lượt xác nhận"><i class="bi bi-hand-thumbs-up"></i> <?= (int)$r->upvote_count ?></span>
-                  <span title="Bình luận"><i class="bi bi-chat-dots"></i> <?= (int)$r->comment_count ?></span>
-                </span>
-              </div>
-            </div>
-          </article>
-        </div>
-      <?php endforeach; ?>
+        <?php endforeach; ?>
+      </div>
+      <button type="button" class="cf-nav cf-next" aria-label="Cảnh báo sau"><i class="bi bi-chevron-right"></i></button>
+      <div class="cf-dots"></div>
     </div>
+    <?php endif; ?>
     <div class="text-center mt-5">
       <a href="<?= url('report') ?>" class="btn btn-primary btn-lg px-4">Xem tất cả cảnh báo <i class="bi bi-arrow-right ms-1"></i></a>
     </div>

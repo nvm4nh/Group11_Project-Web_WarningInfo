@@ -120,8 +120,8 @@
 .wi-js .forest-hero:not(.is-ready) .fh-copy > *, .wi-js .forest-hero:not(.is-ready) .fh-side { opacity: 0; transform: translateY(22px); }
 
 /* ---------- 5. Cành lá trang trí ở mép các khối ---------- */
-.section-categories, .section-paper, .how-section { position: relative; overflow: hidden; }
-.section-categories > .container, .section-paper > .container, .how-section > .container { position: relative; z-index: 1; }
+.section-categories, .section-paper { position: relative; overflow: hidden; }
+.section-categories > .container, .section-paper > .container { position: relative; z-index: 1; }
 .section-paper { background: rgba(255, 255, 255, .78); border-top: 1px solid var(--wi-border); border-bottom: 1px solid var(--wi-border); }
 .sec-sprig { position: absolute; z-index: 0; color: rgba(27, 107, 69, .15); --leaf-2: rgba(111, 191, 115, .22); --wi-vein: transparent; }
 .sec-sprig-right { left: calc(100% - 30px); bottom: 100%; margin-bottom: -50px; width: clamp(230px, 30vw, 440px); --rot: 172deg; }
@@ -129,23 +129,6 @@
 
 /* ---------- 6. Hiện dần khi cuộn: các thẻ trong cùng hàng lệch nhịp nhau ---------- */
 .reveal { transition-delay: calc(var(--i, 0) * 70ms); }
-
-/* ---------- 7. Dây leo nối 3 bước "Cách hoạt động" ----------
-   --p (0 → 1) là tiến độ cuộn qua khối, do forest.js ghi vào .vine-wrap. Không có JS thì --p = 1 (mọc sẵn). */
-.vine-wrap { position: relative; padding-top: 30px; --p: 1; }
-.wi-js .vine-wrap { --p: 0; }
-.vine { position: absolute; left: -12px; top: 30px; width: calc(100% + 24px); transform: translateY(-50%); overflow: visible; pointer-events: none; }
-.vine-stem { fill: none; stroke: #2c7a4b; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--p)); }
-.vine-leaf { color: #4c9c5f; --wi-vein: rgba(255, 255, 255, .4); scale: clamp(0, calc((var(--p) - var(--at)) * 9), 1); }
-.step-card { --on: clamp(0, calc((var(--p) - var(--at)) * 10), 1); }
-.step-bud {
-  position: absolute; left: 50%; top: 0; translate: -50% -50%; z-index: 1;
-  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
-  font-family: var(--wi-font-display); font-weight: 600; font-size: 1.25rem; line-height: 1;
-  color: var(--wi-primary); background: #fff; border: 2px solid #2c7a4b;
-  scale: calc(.72 + var(--on) * .28);
-  box-shadow: 0 0 0 calc(var(--on) * 9px) rgba(155, 214, 122, .38);
-}
 
 /* ---------- 8. Dải đầu trang của các trang trong (thay cho nền xám phẳng) ---------- */
 .page-canopy {
@@ -212,8 +195,6 @@
   .fh-sun { width: 760px; height: 760px; margin: -380px 0 0 -380px; }
 }
 @media (max-width: 767.98px) {
-  .vine { display: none; }
-  .step-card { --on: 1; }
   .sec-sprig { opacity: .7; }
   .canopy-sprig-b { display: none; }
   .wi-ambient-leaf.a1 { top: 90px; }
@@ -223,7 +204,6 @@
 @media (prefers-reduced-motion: reduce) {
   .sway, .fh-rays { animation: none; }
   .wi-fx { display: none; }
-  .wi-js .vine-wrap { --p: 1; }
   .wi-js .footer-trees g { transform: none; transition: none; }
   .wi-js .forest-hero .fh-band, .wi-js .forest-hero .fh-front,
   .wi-js .forest-hero .fh-copy > *, .wi-js .forest-hero .fh-side { transition: none; transform: none !important; opacity: 1 !important; scale: 1 !important; }

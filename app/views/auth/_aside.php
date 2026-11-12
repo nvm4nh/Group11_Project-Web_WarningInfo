@@ -2,6 +2,7 @@
          Nền là một góc rừng thu nhỏ: mặt trời, hàng cây và cành lá (SVG – layouts/_forest.php). */ ?>
 <div class="col-lg-5 d-none d-lg-flex">
   <div class="auth-aside">
+    <canvas class="wi-water" data-water="dark" data-sun="0.88,0.84" aria-hidden="true"></canvas>
     <span class="auth-sun" aria-hidden="true"></span>
     <?= wi_sprig_svg('auth-sprig sway') ?>
     <svg class="auth-trees" viewBox="0 0 520 170" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
