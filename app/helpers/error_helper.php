@@ -9,15 +9,33 @@
  * Trên hosting chỉ hiện mã lỗi; nội dung đầy đủ được ghi vào error log của PHP.
  */
 
-/** Có hiện chi tiết lỗi không: theo APP_DEBUG trong config, nếu không khai báo thì chỉ bật khi truy cập từ chính máy chủ */
+/**
+ * Có hiện chi tiết lỗi không. Ưu tiên APP_DEBUG trong config (hosting: config.local.php đặt false).
+ * Nếu không khai báo thì CHỈ bật khi mở web ngay trên máy chạy XAMPP – phải thoả đủ 3 điều kiện, vì trên hosting
+ * có proxy phía trước (Nginx, LiteSpeed, Cloudflare...) thì REMOTE_ADDR của mọi người cũng có thể là 127.0.0.1:
+ *   1) URLROOT và tên miền đang mở đều là localhost / 127.0.0.1 / *.test / *.local
+ *   2) kết nối đến từ chính máy (REMOTE_ADDR 127.0.0.1 hoặc ::1)
+ *   3) request không đi qua proxy (không có X-Forwarded-For, X-Real-IP, Forwarded, Via, CF-Connecting-IP)
+ */
 function app_debug() {
     if (defined('APP_DEBUG')) return (bool)APP_DEBUG;
-    return in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true);
+
+    $isLocalHost = function ($host) {
+        $host = strtolower(trim(preg_replace('/:\d+$/', '', (string)$host), '[]'));
+        return in_array($host, ['localhost', '127.0.0.1', '::1'], true) || (bool)preg_match('/\.(test|local|localhost)$/', $host);
+    };
+    if (!defined('URLROOT') || !$isLocalHost(parse_url(URLROOT, PHP_URL_HOST))) return false;
+    if (!$isLocalHost($_SERVER['HTTP_HOST'] ?? '')) return false;
+    if (!in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) return false;
+    foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_FORWARDED', 'HTTP_VIA', 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_HOST'] as $h) {
+        if (!empty($_SERVER[$h])) return false;
+    }
+    return true;
 }
 
 /** Request AJAX / API (trả JSON thay vì trang HTML) */
 function wants_json_response() {
-    $uri = $_GET['url'] ?? '';
+    $uri = is_string($_GET['url'] ?? null) ? $_GET['url'] : '';   // ?url[]=... (mảng) → coi như rỗng, không lỗi
     return stripos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false
         || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest'
         || preg_match('#(^|/)api_#', $uri);
@@ -42,7 +60,7 @@ function show_404($message = null) {
     $data = [
         'title'   => 'Không tìm thấy trang',
         'message' => $message ?: 'Đường dẫn có thể đã bị đổi, bị gõ nhầm hoặc nội dung đã được gỡ khỏi hệ thống.',
-        'path'    => '/' . trim((string)($_GET['url'] ?? ''), '/'),
+        'path'    => '/' . trim(is_string($_GET['url'] ?? null) ? $_GET['url'] : '', '/'),
     ];
     require APPROOT . '/app/views/errors/404.php';
     exit;
@@ -84,7 +102,17 @@ function register_error_pages() {
 
     set_exception_handler(function ($e) {
         $ref = log_app_error(get_class($e), $e->getMessage(), $e->getFile(), $e->getLine());
-        show_500($ref, ['type' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]);
+        try {
+            show_500($ref, ['type' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]);
+        } catch (Throwable $inner) {
+            // Chính trang 500 cũng lỗi → ghi log và in bản tối giản, không bao giờ để lộ "Uncaught ..." ra màn hình
+            log_app_error(get_class($inner), $inner->getMessage(), $inner->getFile(), $inner->getLine());
+            discard_output();
+            if (!headers_sent()) http_response_code(500);
+            echo '<!doctype html><meta charset="utf-8"><title>Lỗi hệ thống</title><p>Hệ thống đang gặp sự cố, vui lòng thử lại sau. Mã tra cứu: '
+                . htmlspecialchars($ref, ENT_QUOTES, 'UTF-8') . '</p>';
+            exit;
+        }
     });
 
     register_shutdown_function(function () {
