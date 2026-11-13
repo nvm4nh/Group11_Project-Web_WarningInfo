@@ -1,7 +1,9 @@
 # Thư mục chứa ảnh người dân tải lên — CHỈ phục vụ ảnh tĩnh, KHÔNG BAO GIỜ chạy mã.
 # TV4 – Milestone 4: rà soát lại để an toàn trên Hosting (Apache + PHP-FPM, LiteSpeed, cPanel),
 # không chỉ trên XAMPP. Kết quả kiểm tra: docs/KIEM_TRA_AN_TOAN_UPLOAD.md
-Options -Indexes -ExecCGI
+# Không dùng "-ExecCGI": hosting dùng chung (InfinityFree) chỉ cho phép một số Options trong .htaccess,
+# khai báo ngoài danh sách làm cả thư mục trả lỗi 500. Việc chặn chạy script đã do mục 1–4 bên dưới đảm nhiệm.
+Options -Indexes
 
 # 1) DANH SÁCH TRẮNG: mặc định chặn tất cả, chỉ mở cho file ảnh có ĐÚNG MỘT dấu chấm
 #    (vd: 3f9c…e1.jpg). Tên kiểu "anh.php.jpg", ".htaccess", ".user.ini" đều bị chặn.
