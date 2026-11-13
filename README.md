@@ -114,7 +114,7 @@ Nhóm trưởng giao việc qua trang phân công trên Google Docs; nội dung 
 
 ### 4.3. GitHub Issues Milestone 3
 
-> **Milestone trên GitHub:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
+> **Milestone trên GitHub:** [Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 
 | Issue # | Tiêu đề công việc | Người phụ trách | Nhánh Git | Trạng thái |
 |:---:|:---|:---:|:---:|:---:|

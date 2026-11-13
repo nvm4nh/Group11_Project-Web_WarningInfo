@@ -46,7 +46,7 @@
 
 ### 📌 Issue #22: [TV3] Xây dựng bộ WebService RESTful API (JSON/XML) cho sự cố và tương tác
 * **Assignee:** Lê Tố Nguyệt Minh (TV3) - [@LeMinh7706](https://github.com/LeMinh7706)
-* **Milestone:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
+* **Milestone:** [Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 * **Branch:** `feature/tv3-webservice-rest-api`
 * **Labels:** `backend`, `webservice`, `enhancement`
 * **Mục tiêu:** Cung cấp các endpoint phục vụ Client gọi AJAX bất đồng bộ và trao đổi dữ liệu với hệ thống ngoài.
@@ -60,7 +60,7 @@
 
 ### 📌 Issue #23: [TV5] Tích hợp AJAX toàn diện vào giao diện Public (Lọc không reload, Upvote, Bình luận)
 * **Assignee:** Nguyễn Thế Luân (TV5) - [@luannguyen35262020117](https://github.com/luannguyen35262020117)
-* **Milestone:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
+* **Milestone:** [Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 * **Branch:** `feature/tv5-ajax-core-and-docs`
 * **Labels:** `frontend`, `ajax`, `high-priority`
 * **Mục tiêu:** Ứng dụng AJAX để mang lại trải nghiệm tương tác liền mạch, mượt mà và không gián đoạn giao diện.
@@ -74,7 +74,7 @@
 
 ### 📌 Issue #24: [TV1 & TV4] Tích hợp Bản đồ số Leaflet.js hiển thị điểm ghim sự cố theo tọa độ GPS
 * **Assignee:** Khiếu Hoàng Nam Anh (TV1) & Lê Trọng Hiếu (TV4)
-* **Milestone:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
+* **Milestone:** [Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 * **Branch:** `feature/tv1-system-leaflet-map`
 * **Pull Request:** [PR #21 (Merged)](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/pull/21)
 * **Labels:** `frontend`, `map`, `feature`
@@ -90,7 +90,7 @@
 
 ### 📌 Issue #25: [TV2] Xây dựng Biểu đồ thống kê Admin Dashboard (Chart.js) & Xuất dữ liệu báo cáo CSV
 * **Assignee:** Trần Yến Phượng (TV2) - [@phuongtran31241022663](https://github.com/phuongtran31241022663)
-* **Milestone:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
+* **Milestone:** [Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 * **Branch:** `feature/tv2-admin-statistics-export`
 * **Pull Request:** [PR #18](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/pull/18)
 * **Labels:** `admin`, `backend`, `enhancement`
@@ -105,7 +105,7 @@
 
 ### 📌 Issue #26: [TV4] Cơ chế bảo mật phòng chống CSRF Token, Hộp thông báo và Bàn làm việc cán bộ xử lý
 * **Assignee:** Lê Trọng Hiếu (TV4) - [@hieuhamhoc313-alt](https://github.com/hieuhamhoc313-alt)
-* **Milestone:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
+* **Milestone:** [Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 * **Branch:** `feature/tv4-csrf-notify-officer`
 * **Pull Request:** [PR #19 (Merged)](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/pull/19)
 * **Labels:** `security`, `frontend`, `backend`
@@ -119,7 +119,7 @@
 
 ### 📌 Issue #27: [TV5 & TV1] Soạn thảo Chương 5 Báo cáo Đồ án UEH & Kiểm thử hệ thống (QA Testing)
 * **Assignee:** Nguyễn Thế Luân (TV5) & Khiếu Hoàng Nam Anh (TV1)
-* **Milestone:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
+* **Milestone:** [Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 * **Branch:** `feature/tv5-ajax-core-and-docs`
 * **Labels:** `documentation`, `ueh-report`
 * **Mục tiêu:** Hoàn thiện tài liệu học thuật theo đúng mẫu quy định của UEH và bảo đảm chất lượng phần mềm.
@@ -137,7 +137,7 @@
 
 1. **Khởi tạo Milestone:**
    - Đã tạo Milestone mới trên GitHub Repository:  
-     **Milestone 3: Advanced Features, AJAX, WebService & Interactive Map (Tuần 6 – 8)**
+     **Milestone 3: Tích hợp nâng cao, AJAX, WebService & Bản đồ tương tác (Tuần 6 – 8)**
 2. **Quy tắc tạo nhánh:**
    - Luôn cập nhật mã nguồn mới nhất từ nhánh `develop` trước khi tạo nhánh chức năng:
      ```bash
