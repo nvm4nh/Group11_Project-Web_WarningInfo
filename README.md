@@ -95,12 +95,12 @@ Nhóm trưởng giao việc qua trang phân công trên Google Docs; nội dung 
 
 ### 4.1. Tổng hợp tiến độ các Milestone
 
-| Milestone | Nội dung chính | Kế hoạch phân công | Trạng thái |
+| Milestone | Nội dung chính | Kế hoạch phân công & Issues | Trạng thái |
 |:---|:---|:---|:---|
-| **Milestone 1** (Tuần 1 – 2) | Khởi tạo repo, Kanban, khung MVC; thiết kế CSDL 10 bảng; dữ liệu mẫu; wireframe; Use Case & SRS | [KE_HOACH_PHAN_CONG_MILESTONE_1.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_1.md) | ✅ Hoàn thành |
-| **Milestone 2** (Tuần 3 – 5) | MVP: upload ảnh minh chứng, GPS, duyệt sự cố, lịch sử trạng thái, thông báo tự động, hồ sơ & báo cáo của tôi | [KE_HOACH_PHAN_CONG_MILESTONE_2.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_2.md) | ✅ Hoàn thành |
-| **Milestone 3** (Tuần 6 – 8) | WebService JSON/XML, AJAX lọc – upvote – bình luận, bản đồ Leaflet, Chart.js & xuất CSV, CSRF, bàn làm việc cán bộ | [KE_HOACH_PHAN_CONG_MILESTONE_3.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_3.md) | ✅ Hoàn thành |
-| **Milestone 4** (Tuần 9 – 10) | Triển khai hosting, trang lỗi 404/500, Việt hóa API, kiểm thử UAT, báo cáo đồ án, slide & video demo | [KE_HOACH_PHAN_CONG_MILESTONE_4.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_4.md) | ✅ Đã triển khai hosting, kiểm thử 42/42 ca đạt |
+| **Milestone 1** (Tuần 1 – 2) | Khởi tạo repo, Kanban, khung MVC; thiết kế CSDL 10 bảng; dữ liệu mẫu; wireframe; Use Case & SRS | [KE_HOACH_PHAN_CONG_MILESTONE_1.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_1.md)<br>[Issues #53 – #57](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/1?closed=1) | ✅ Hoàn thành |
+| **Milestone 2** (Tuần 3 – 5) | MVP: upload ảnh minh chứng, GPS, duyệt sự cố, lịch sử trạng thái, thông báo tự động, hồ sơ & báo cáo của tôi | [KE_HOACH_PHAN_CONG_MILESTONE_2.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_2.md)<br>[Issues #58 – #62](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/2?closed=1) | ✅ Hoàn thành |
+| **Milestone 3** (Tuần 6 – 8) | WebService JSON/XML, AJAX lọc – upvote – bình luận, bản đồ Leaflet, Chart.js & xuất CSV, CSRF, bàn làm việc cán bộ | [KE_HOACH_PHAN_CONG_MILESTONE_3.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_3.md)<br>[Issues #22 – #27](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3?closed=1) | ✅ Hoàn thành |
+| **Milestone 4** (Tuần 9 – 10) | Triển khai hosting, trang lỗi 404/500, Việt hóa API, kiểm thử UAT, báo cáo đồ án, slide & video demo | [KE_HOACH_PHAN_CONG_MILESTONE_4.md](docs/KE_HOACH_PHAN_CONG_MILESTONE_4.md)<br>[Issues #36 – #40](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/4?closed=1) | ✅ Đã triển khai hosting, kiểm thử 42/42 ca đạt |
 
 ### 4.2. Phân công thành viên theo từng Milestone
 

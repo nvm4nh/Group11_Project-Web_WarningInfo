@@ -10,6 +10,8 @@
 # KẾ HOẠCH ĐIỀU CHỈNH TIẾN ĐỘ & PHÂN CÔNG NHIỆM VỤ CHI TIẾT
 ## MILESTONE 2: HOÀN THIỆN MVP & CỐT LÕI NGHIỆP VỤ (TUẦN 3 – TUẦN 5)
 
+> **GitHub Issues:** [#58 – #62](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/2?closed=1) trong Milestone 2.
+
 ---
 
 ## I. ĐÁNH GIÁ TỔNG QUAN HIỆN TRẠNG (CODEBASE AUDIT)

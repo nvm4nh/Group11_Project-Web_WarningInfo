@@ -11,6 +11,8 @@
 # KẾ HOẠCH TRIỂN KHAI & PHÂN CÔNG NHIỆM VỤ GITHUB
 ## MILESTONE 1: KHẢO SÁT, THIẾT KẾ CSDL & KHỞI TẠO KHUNG MVC (TUẦN 1 – TUẦN 2)
 
+> **GitHub Issues:** [#53 – #57](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/1?closed=1) trong Milestone 1.
+
 ---
 
 ## I. BẢNG PHÂN CÔNG NHIỆM VỤ TỔNG QUAN
