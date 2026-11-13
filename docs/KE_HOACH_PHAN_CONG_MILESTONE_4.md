@@ -50,7 +50,7 @@
 
 ## III. DANH SÁCH CHI TIẾT CÁC GITHUB ISSUES CHO MILESTONE 4
 
-### 📌 Issue #28: [TV1] Triển khai hệ thống lên Web Hosting thực tế & Đóng gói Release v1.0.0
+### 📌 Issue #36: [TV1] Triển khai hệ thống lên Web Hosting thực tế & Đóng gói Release v1.0.0
 * **Assignee:** Khiếu Hoàng Nam Anh (TV1) - [@nvm4nh](https://github.com/nvm4nh)
 * **Milestone:** Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)
 * **Branch:** `feature/tv1-deployment-release`
@@ -65,7 +65,7 @@
 
 ---
 
-### 📌 Issue #29: [TV4] Xây dựng trang xử lý lỗi 404/500 và tinh chỉnh UI/UX hoàn thiện
+### 📌 Issue #37: [TV4] Xây dựng trang xử lý lỗi 404/500 và tinh chỉnh UI/UX hoàn thiện
 * **Assignee:** Lê Trọng Hiếu (TV4) - [@hieuhamhoc313-alt](https://github.com/hieuhamhoc313-alt)
 * **Milestone:** Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)
 * **Branch:** `feature/tv4-ui-polish-404-page`
@@ -79,7 +79,7 @@
 
 ---
 
-### 📌 Issue #30: [TV3 & TV2] Tối ưu hóa phân quyền Backend & Việt hóa WebService API
+### 📌 Issue #38: [TV3 & TV2] Tối ưu hóa phân quyền Backend & Việt hóa WebService API
 * **Assignee:** Lê Tố Nguyệt Minh (TV3) & Trần Yến Phụng (TV2)
 * **Milestone:** Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)
 * **Branch:** `feature/tv3-api-polish-demo-video`
@@ -92,7 +92,7 @@
 
 ---
 
-### 📌 Issue #31: [TV5 & TV1] Hoàn thiện toàn bộ cuốn Báo cáo Đồ án UEH và nghiệm thu UAT
+### 📌 Issue #39: [TV5 & TV1] Hoàn thiện toàn bộ cuốn Báo cáo Đồ án UEH và nghiệm thu UAT
 * **Assignee:** Nguyễn Thế Luân (TV5) & Khiếu Hoàng Nam Anh (TV1)
 * **Milestone:** Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)
 * **Branch:** `feature/tv5-final-report-uat`
@@ -112,11 +112,11 @@
 
 ---
 
-### 📌 Issue #32: [TV2 & TV3] Xây dựng Slide Thuyết trình & Sản xuất Video Demo hoàn chỉnh
+### 📌 Issue #40: [TV2 & TV3] Xây dựng Slide Thuyết trình & Sản xuất Video Demo hoàn chỉnh
 * **Assignee:** Trần Yến Phụng (TV2) & Lê Tố Nguyệt Minh (TV3)
 * **Milestone:** Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)
 * **Branch:** `feature/tv2-security-presentation`
-* **Labels:** `presentation`, `video-demo`
+* **Labels:** `presentation`, `video-demo`, `admin`
 * **Mục tiêu:** Chuẩn bị tư liệu truyền thông và phương tiện thuyết trình bảo vệ đồ án trước Hội đồng / Giảng viên.
 * **Danh sách công việc:**
   - [ ] Thiết kế Slide thuyết trình bảo vệ đồ án (khoảng 20 – 25 slides):
@@ -126,7 +126,7 @@
     - Demo các tính năng nổi bật.
     - Kết quả đạt được & Bài học kinh nghiệm.
   - [ ] Quay và biên tập Video Clip Demo hoàn chỉnh (thời lượng 5 – 7 phút):
-    - Kịch bản xuyên suốt: Người dân chụp ảnh gửi sự cố $\rightarrow$ Xem vị trí trên Bản đồ tương tác $\rightarrow$ Quản trị viên duyệt và phân công có hạn chót $\rightarrow$ Cán bộ hiện trường nhận việc và cập nhật tiến độ $\rightarrow$ Người dân nhận thông báo tức thì, thả Upvote và bình luận tương tác.
+    - Kịch bản xuyên suốt: Người dân chụp ảnh gửi sự cố có GPS → Xem vị trí trên Bản đồ tương tác → Quản trị viên duyệt và phân công có hạn chót → Cán bộ hiện trường nhận việc và cập nhật tiến độ → Người dân nhận thông báo tức thì, thả Upvote và bình luận tương tác.
     - Thuyết minh tiếng Việt rõ ràng, chèn phụ đề và nhạc nền phù hợp.
     - Xuất video Full HD 1080p và upload lên YouTube / Google Drive chia sẻ công khai.
 
@@ -167,3 +167,14 @@ flowchart TD
 4. **Hồ sơ minh bạch:** Quản lý dự án chuyên nghiệp trên GitHub (Issues, Pull Requests, Milestones rõ ràng theo từng thành viên).
 5. **Chất lượng Báo cáo & Thuyết trình:** Văn phong học thuật chuẩn mực, bố cục rõ ràng, slide trực quan và video thuyết minh thuyết phục.
 
+---
+
+## VI. KẾT QUẢ THỰC HIỆN (CẬP NHẬT 13/11/2026)
+
+| Issue | Nội dung | Kết quả |
+|:---:|:---|:---|
+| #36 | Triển khai Hosting & Release | Website chạy tại https://warninginfo.infinityfree.io/ với `config/config.local.php` tách khỏi Git. Chưa tạo tag Release `v1.0.0`. |
+| #37 | Trang lỗi 404/500, SEO, favicon | Hợp nhất qua PR #46 và PR #49 (`fix/tv4-error-page-hardening`). |
+| #38 | Phân quyền & Việt hóa API | Việt hóa thông báo API qua PR #41; chuyển hướng khi không đủ quyền qua PR #42. |
+| #39 | Báo cáo đồ án & UAT | Kiểm thử 42/42 ca trên hosting, xem [docs/test-report/test-report.md](test-report/test-report.md). |
+| #40 | Slide & Video Demo | Theo dõi trên Issue #40. |
