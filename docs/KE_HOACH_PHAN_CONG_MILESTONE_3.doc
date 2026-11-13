@@ -63,7 +63,7 @@ li { margin-bottom: 3pt; }
     </tr>
     <tr style='background:#F8F9FA;'>
       <td style='text-align:center;'>2</td>
-      <td><b>Trần Yến Phụng</b><br><small style='color:#666;'>TV2</small></td>
+      <td><b>Trần Yến Phượng</b><br><small style='color:#666;'>TV2</small></td>
       <td>Backend Admin & Workflow</td>
       <td><span class='badge'>feature/tv2-admin-statistics-export</span></td>
       <td>• API Thống kê Chart.js<br>• Phân công cán bộ xử lý<br>• Xuất báo cáo CSV UTF-8</td>
@@ -144,7 +144,7 @@ li { margin-bottom: 3pt; }
 
 <h2>📌 Issue #4: [TV2] Xây dựng Biểu đồ thống kê Admin Dashboard (Chart.js) & Xuất dữ liệu báo cáo</h2>
 <div class='meta-box'>
-  <b>Assignee:</b> Trần Yến Phụng (TV2) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv2-admin-statistics-export</span><br>
+  <b>Assignee:</b> Trần Yến Phượng (TV2) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv2-admin-statistics-export</span><br>
   <b>Labels:</b> <code>admin</code>, <code>chart</code>, <code>export</code>, <code>backend</code>
 </div>
 <p><i>Mô tả:</i> Nâng cấp Admin Dashboard thành trung tâm chỉ huy với các biểu đồ trực quan hóa dữ liệu và công cụ xuất file báo cáo.</p>

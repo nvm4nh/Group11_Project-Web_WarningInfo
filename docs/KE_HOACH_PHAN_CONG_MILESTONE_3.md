@@ -35,7 +35,7 @@
 | STT | Thành viên | Vai trò chính | Nhánh Git | Module phụ trách | Thời hạn | Sản phẩm bàn giao | Trạng thái |
 |:---:|:---|:---|:---|:---|:---:|:---|:---:|
 | **1** | **Khiếu Hoàng Nam Anh** (TV1) | **Team Lead & System Architect** | `feature/tv1-system-leaflet-map` | • Kiến trúc Bản đồ số Leaflet.js<br>• API GeoJSON bản đồ<br>• Quản trị GitHub & Code Review | Tuần 8 | • Map component tích hợp Leaflet.js<br>• Endpoint GeoJSON sự cố<br>• Quản trị Milestone 3 trên GitHub | 🟢 **Merged (#21)** |
-| **2** | **Trần Yến Phụng** (TV2) | **Backend Admin & Workflow** | `feature/tv2-admin-statistics-export` | • API thống kê Chart.js<br>• Phân công cán bộ xử lý<br>• Chức năng Xuất báo cáo (CSV) | Tuần 8 | • Endpoint /admin/api_statistics<br>• Biểu đồ Chart.js trong Admin<br>• Nút Export CSV chuẩn UTF-8 | 🟡 Reviewing (#18) |
+| **2** | **Trần Yến Phượng** (TV2) | **Backend Admin & Workflow** | `feature/tv2-admin-statistics-export` | • API thống kê Chart.js<br>• Phân công cán bộ xử lý<br>• Chức năng Xuất báo cáo (CSV) | Tuần 8 | • Endpoint /admin/api_statistics<br>• Biểu đồ Chart.js trong Admin<br>• Nút Export CSV chuẩn UTF-8 | 🟡 Reviewing (#18) |
 | **3** | **Lê Tố Nguyệt Minh** (TV3) | **Backend Features & WebService API** | `feature/tv3-webservice-rest-api` | • WebService RESTful API chuẩn<br>• API Lọc sự cố & Tương tác<br>• Hỗ trợ định dạng kép JSON/XML | Tuần 8 | • Bộ controller API đầy đủ<br>• Tài liệu đặc tả API chuẩn REST<br>• WebService XML Feed | 🟡 In Progress |
 | **4** | **Lê Trọng Hiếu** (TV4) | **Frontend UI/UX & Security** | `feature/tv4-ui-map-and-filters`<br>`feature/tv4-csrf-notify-officer` | • Giao diện Bản đồ tương tác<br>• Bảo mật CSRF Token<br>• Hộp thông báo & Bàn làm việc cán bộ | Tuần 8 | • Màn hình bản đồ (/report/map)<br>• Token CSRF trong mọi Form POST<br>• Giao diện /officer và /notification | 🟢 **Merged (#19)** |
 | **5** | **Nguyễn Thế Luân** (TV5) | **Frontend AJAX Integration & QA** | `feature/tv5-ajax-core-and-docs` | • Lập trình kịch bản AJAX Client<br>• Tương tác Upvote & Bình luận<br>• Soạn Chương 5 Báo cáo UEH | Tuần 8 | • public/assets/js/ajax-filter.js<br>• public/assets/js/ajax-interaction.js<br>• Bản thảo Chương 5 Báo cáo | 🟡 In Progress |
@@ -89,7 +89,7 @@
 ---
 
 ### 📌 Issue #25: [TV2] Xây dựng Biểu đồ thống kê Admin Dashboard (Chart.js) & Xuất dữ liệu báo cáo CSV
-* **Assignee:** Trần Yến Phụng (TV2) - [@phuongtran31241022663](https://github.com/phuongtran31241022663)
+* **Assignee:** Trần Yến Phượng (TV2) - [@phuongtran31241022663](https://github.com/phuongtran31241022663)
 * **Milestone:** [Milestone 3: Advanced Features, AJAX, WebService & Interactive Map](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/milestone/3)
 * **Branch:** `feature/tv2-admin-statistics-export`
 * **Pull Request:** [PR #18](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/pull/18)

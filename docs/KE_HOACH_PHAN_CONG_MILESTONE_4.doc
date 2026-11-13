@@ -72,7 +72,7 @@ li { margin-bottom: 3pt; }
     </tr>
     <tr style='background:#F8F9FA;'>
       <td style='text-align:center;'>2</td>
-      <td><b>Trần Yến Phụng</b><br><small style='color:#666;'>TV2</small></td>
+      <td><b>Trần Yến Phượng</b><br><small style='color:#666;'>TV2</small></td>
       <td>Backend Polishing & Presentation</td>
       <td><span class='badge'>feature/tv2-security-presentation</span></td>
       <td>• Tinh chỉnh requireAdmin() và Middleware<br>• Bộ Slide thuyết trình bảo vệ đồ án (PowerPoint/Canva)<br>• Rà soát các bộ lọc và biểu đồ Chart.js</td>
@@ -134,7 +134,7 @@ li { margin-bottom: 3pt; }
 
 <h2>📌 Issue #38: [TV3 & TV2] Tối ưu hóa phân quyền Backend và Việt hóa WebService API</h2>
 <div class='meta-box'>
-  <b>Assignee:</b> Lê Tố Nguyệt Minh (TV3) & Trần Yến Phụng (TV2) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv3-api-polish-demo-video</span><br>
+  <b>Assignee:</b> Lê Tố Nguyệt Minh (TV3) & Trần Yến Phượng (TV2) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv3-api-polish-demo-video</span><br>
   <b>Labels:</b> <code>backend</code>, <code>security</code>, <code>webservice</code> &nbsp;|&nbsp; <b>Milestone:</b> Milestone 4
 </div>
 <p><i>Mục tiêu:</i> Hoàn thiện tính toàn vẹn nghiệp vụ Backend và tính thân thiện của API.</p>
@@ -170,7 +170,7 @@ li { margin-bottom: 3pt; }
 
 <h2>📌 Issue #40: [TV2 & TV3] Xây dựng Slide Thuyết trình và Sản xuất Video Demo hoàn chỉnh</h2>
 <div class='meta-box'>
-  <b>Assignee:</b> Trần Yến Phụng (TV2) & Lê Tố Nguyệt Minh (TV3) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv2-security-presentation</span><br>
+  <b>Assignee:</b> Trần Yến Phượng (TV2) & Lê Tố Nguyệt Minh (TV3) &nbsp;|&nbsp; <b>Nhánh:</b> <span class='badge'>feature/tv2-security-presentation</span><br>
   <b>Labels:</b> <code>presentation</code>, <code>video-demo</code>, <code>admin</code> &nbsp;|&nbsp; <b>Milestone:</b> Milestone 4
 </div>
 <p><i>Mục tiêu:</i> Chuẩn bị tư liệu truyền thông và phương tiện thuyết trình bảo vệ đồ án trước Hội đồng / Giảng viên.</p>

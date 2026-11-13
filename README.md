@@ -82,7 +82,7 @@ Group11_Project-Web_WarningInfo/
 | STT | Thành viên | Mã sinh viên | GitHub Account | Vai trò & Trách nhiệm chính |
 |:---:|:---|:---:|:---:|:---|
 | **TV1** | **Khiếu Hoàng Nam Anh** | *Nhóm trưởng* | [@nvm4nh](https://github.com/nvm4nh) | **Team Lead & System Architect**: Thiết kế kiến trúc MVC, quản trị GitHub/Issues/PRs, phát triển tích hợp Bản đồ số Leaflet.js, API GeoJSON, Review code và QA. |
-| **TV2** | **Trần Yến Phụng** | Thành viên | [@phuongtran31241022663](https://github.com/phuongtran31241022663) | **Backend Admin & Workflow**: Xây dựng API thống kê `/admin/api_statistics`, biểu đồ Chart.js, xuất báo cáo CSV UTF-8 và luồng phân công nhiệm vụ có hạn định. |
+| **TV2** | **Trần Yến Phượng** | Thành viên | [@phuongtran31241022663](https://github.com/phuongtran31241022663) | **Backend Admin & Workflow**: Xây dựng API thống kê `/admin/api_statistics`, biểu đồ Chart.js, xuất báo cáo CSV UTF-8 và luồng phân công nhiệm vụ có hạn định. |
 | **TV3** | **Lê Tố Nguyệt Minh** | Thành viên | [@LeMinh7706](https://github.com/LeMinh7706) | **Backend Features & WebService API**: Xây dựng hệ thống RESTful API cho danh sách sự cố, tương tác Upvote, bình luận động và chuẩn xuất dữ liệu XML Feed. |
 | **TV4** | **Lê Trọng Hiếu** | Thành viên | [@hieuhamhoc313-alt](https://github.com/hieuhamhoc313-alt) | **Frontend UI/UX & Security**: Thiết kế giao diện Bản đồ `/report/map`, Marker & Popup Leaflet, giao diện Bàn làm việc cán bộ, cơ chế bảo mật chống tấn công CSRF. |
 | **TV5** | **Nguyễn Thế Luân** | Thành viên | [@luannguyen35262020117](https://github.com/luannguyen35262020117) | **Frontend AJAX Integration & QA**: Phát triển script AJAX lọc sự cố không reload, tương tác Upvote/bình luận, đánh dấu thông báo và chủ trì soạn thảo Chương 5 Báo cáo UEH. |
@@ -107,7 +107,7 @@ Nhóm trưởng giao việc qua trang phân công trên Google Docs; nội dung 
 | Thành viên | Milestone 1 | Milestone 2 | Milestone 3 | Milestone 4 |
 |:---|:---|:---|:---|:---|
 | **TV1** Khiếu Hoàng Nam Anh | Repo, Kanban, khung MVC, hosting thử; CSDL (cùng TV2) | Hồ sơ cá nhân, Báo cáo của tôi, review PR<br>`feature/tv1-auth-profile` | Bản đồ Leaflet, API GeoJSON<br>`feature/tv1-system-leaflet-map` | Triển khai hosting, Release<br>`feature/tv1-deployment-release` |
-| **TV2** Trần Yến Phụng | Thiết kế CSDL & ERD (cùng TV1) | Duyệt sự cố, lịch sử trạng thái, thông báo, phân công<br>`feature/tv2-admin-workflow` | Chart.js, xuất CSV, phân công có hạn chót<br>`feature/tv2-admin-statistics-export` | Phân quyền admin, slide thuyết trình<br>`feature/tv2-security-presentation` |
+| **TV2** Trần Yến Phượng | Thiết kế CSDL & ERD (cùng TV1) | Duyệt sự cố, lịch sử trạng thái, thông báo, phân công<br>`feature/tv2-admin-workflow` | Chart.js, xuất CSV, phân công có hạn chót<br>`feature/tv2-admin-statistics-export` | Phân quyền admin, slide thuyết trình<br>`feature/tv2-security-presentation` |
 | **TV3** Lê Tố Nguyệt Minh | Rà soát ERD, dữ liệu mẫu, thử nghiệm JSON | Upload ảnh an toàn, `report_images`, API danh sách<br>`feature/tv3-upload-api` | WebService REST JSON/XML<br>`feature/tv3-webservice-rest-api` | Việt hóa API, video demo<br>`feature/tv3-api-polish-demo-video` |
 | **TV4** Lê Trọng Hiếu | Danh sách trang, wireframe, Bootstrap & bảng màu | Form gửi báo cáo (xem trước ảnh, GPS), gallery, responsive<br>`feature/tv4-ui-report-form` | Giao diện bản đồ, CSRF, hộp thông báo, bàn làm việc cán bộ<br>`feature/tv4-csrf-notify-officer` | Trang lỗi 404/500, SEO, favicon<br>`feature/tv4-ui-polish-404-page` |
 | **TV5** Nguyễn Thế Luân | Khung báo cáo Word, Use Case, SRS, Chương 2 | Modal xem sự cố trong Admin, báo cáo Chương 1, 2, 4, QA<br>`feature/tv5-admin-docs` | AJAX lọc, upvote, bình luận, Chương 5<br>`feature/tv5-ajax-core-and-docs` | Báo cáo đồ án hoàn chỉnh, UAT<br>`feature/tv5-final-report-uat` |
@@ -121,7 +121,7 @@ Nhóm trưởng giao việc qua trang phân công trên Google Docs; nội dung 
 | **[#22](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/22)** | [TV3] Xây dựng bộ WebService RESTful API (JSON/XML) cho sự cố và tương tác | Lê Tố Nguyệt Minh | `feature/tv3-webservice-rest-api` | 🟢 Merged (#31) |
 | **[#23](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/23)** | [TV5] Tích hợp AJAX toàn diện vào giao diện Public (Lọc không reload, Upvote, Bình luận) | Nguyễn Thế Luân | `feature/tv5-ajax-core-and-docs` | 🟢 Merged (#34) |
 | **[#24](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/24)** | [TV1 & TV4] Tích hợp Bản đồ số Leaflet.js hiển thị điểm ghim GPS | Khiếu Hoàng Nam Anh & Lê Trọng Hiếu | `feature/tv1-system-leaflet-map` | 🟢 Merged (#21) |
-| **[#25](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/25)** | [TV2] Biểu đồ thống kê Admin Dashboard (Chart.js) & Xuất dữ liệu CSV | Trần Yến Phụng | `fix/tv2-admin-statistics-v2` | 🟢 Merged (#30) |
+| **[#25](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/25)** | [TV2] Biểu đồ thống kê Admin Dashboard (Chart.js) & Xuất dữ liệu CSV | Trần Yến Phượng | `fix/tv2-admin-statistics-v2` | 🟢 Merged (#30) |
 | **[#26](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/26)** | [TV4] Cơ chế bảo mật CSRF Token, Hộp thông báo và Bàn làm việc cán bộ | Lê Trọng Hiếu | `feature/tv4-csrf-notify-officer` | 🟢 Merged (#19) |
 | **[#27](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/27)** | [TV5 & TV1] Soạn thảo Chương 5 Báo cáo Đồ án UEH & Kiểm thử hệ thống (QA Testing) | Nguyễn Thế Luân & Khiếu Hoàng Nam Anh | `feature/tv5-ajax-core-and-docs` | 🟢 Merged (#34) |
 
@@ -131,9 +131,9 @@ Nhóm trưởng giao việc qua trang phân công trên Google Docs; nội dung 
 |:---:|:---|:---:|:---:|:---|
 | **[#36](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/36)** | [TV1] Triển khai hệ thống lên Web Hosting thực tế và Đóng gói Release v1.0.0 | Khiếu Hoàng Nam Anh | `feature/tv1-deployment-release` | Website chạy tại https://warninginfo.infinityfree.io/; chưa tạo Release `v1.0.0` |
 | **[#37](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/37)** | [TV4] Xây dựng trang xử lý lỗi 404/500 và tinh chỉnh UI/UX hoàn thiện | Lê Trọng Hiếu | `feature/tv4-ui-polish-404-page` | 🟢 Merged (#46, #49) |
-| **[#38](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/38)** | [TV3 & TV2] Tối ưu hóa phân quyền Backend và Việt hóa WebService API | Lê Tố Nguyệt Minh & Trần Yến Phụng | `feature/tv3-api-polish-demo-video` | 🟢 Merged (#41, #42) |
+| **[#38](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/38)** | [TV3 & TV2] Tối ưu hóa phân quyền Backend và Việt hóa WebService API | Lê Tố Nguyệt Minh & Trần Yến Phượng | `feature/tv3-api-polish-demo-video` | 🟢 Merged (#41, #42) |
 | **[#39](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/39)** | [TV5 & TV1] Hoàn thiện toàn bộ cuốn Báo cáo Đồ án UEH và nghiệm thu UAT | Nguyễn Thế Luân & Khiếu Hoàng Nam Anh | `feature/tv5-final-report-uat` | Kiểm thử 42/42 ca trên hosting ([test-report](docs/test-report/test-report.md)) |
-| **[#40](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/40)** | [TV2 & TV3] Xây dựng Slide Thuyết trình và Sản xuất Video Demo hoàn chỉnh | Trần Yến Phụng & Lê Tố Nguyệt Minh | `feature/tv2-security-presentation` | Theo dõi trên Issue |
+| **[#40](https://github.com/nvm4nh/Group11_Project-Web_WarningInfo/issues/40)** | [TV2 & TV3] Xây dựng Slide Thuyết trình và Sản xuất Video Demo hoàn chỉnh | Trần Yến Phượng & Lê Tố Nguyệt Minh | `feature/tv2-security-presentation` | Theo dõi trên Issue |
 
 ---
 

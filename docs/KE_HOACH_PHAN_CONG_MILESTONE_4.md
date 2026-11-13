@@ -41,7 +41,7 @@
 | STT | Thành viên | Vai trò chính | Nhánh Git | Module & Nhiệm vụ phụ trách | Thời hạn | Sản phẩm bàn giao |
 |:---:|:---|:---|:---|:---|:---:|:---|
 | **1** | **Khiếu Hoàng Nam Anh** (TV1) | **Team Lead & DevOps / Deployment** | `feature/tv1-deployment-release` | • Triển khai ứng dụng lên Web Hosting/VPS<br>• Cấu hình SSL, Database Production & .htaccess<br>• Đóng gói GitHub Release v1.0.0 & Quản trị nhóm | Tuần 10 | • URL Website hoạt động trực tiếp<br>• File cấu hình config.production.php<br>• Bản Release v1.0.0 trên GitHub |
-| **2** | **Trần Yến Phụng** (TV2) | **Backend Polishing & Presentation** | `feature/tv2-security-presentation` | • Tối ưu hóa bảo mật và kiểm tra quyền admin<br>• Thiết kế Slide thuyết trình bảo vệ đồ án<br>• Rà soát số liệu thống kê Dashboard | Tuần 10 | • Slide thuyết trình (.pptx / Canva)<br>• Cập nhật hàm requireAdmin() và Middleware |
+| **2** | **Trần Yến Phượng** (TV2) | **Backend Polishing & Presentation** | `feature/tv2-security-presentation` | • Tối ưu hóa bảo mật và kiểm tra quyền admin<br>• Thiết kế Slide thuyết trình bảo vệ đồ án<br>• Rà soát số liệu thống kê Dashboard | Tuần 10 | • Slide thuyết trình (.pptx / Canva)<br>• Cập nhật hàm requireAdmin() và Middleware |
 | **3** | **Lê Tố Nguyệt Minh** (TV3) | **API Localization & Video Demo** | `feature/tv3-api-polish-demo-video` | • Việt hóa 100% mã phản hồi WebService API<br>• Kịch bản & Quay dựng Video Demo đồ án<br>• Rà soát tài liệu đặc tả API Chương 5 | Tuần 10 | • Video Demo chất lượng cao (YouTube/Drive)<br>• Bộ mã nguồn API hoàn thiện thông điệp tiếng Việt |
 | **4** | **Lê Trọng Hiếu** (TV4) | **Frontend UX Polishing & Security QA** | `feature/tv4-ui-polish-404-page` | • Thiết kế trang lỗi 404 / 500 thân thiện<br>• Tinh chỉnh UI/UX responsive và favicon/SEO<br>• Kiểm tra an toàn upload tệp trên Hosting | Tuần 10 | • Giao diện app/views/errors/404.php<br>• Giao diện lỗi đồng bộ Bootstrap 5.3 |
 | **5** | **Nguyễn Thế Luân** (TV5) | **Báo cáo Đồ án UEH & Kiểm thử UAT** | `feature/tv5-final-report-uat` | • Ghép nối toàn bộ cuốn Báo cáo Đồ án UEH<br>• Thực hiện kịch bản kiểm thử UAT trên Hosting<br>• Tổng kết bảng đánh giá đóng góp thành viên | Tuần 10 | • Cuốn Báo cáo hoàn chỉnh (.docx & .pdf)<br>• Biên bản nghiệm thu kiểm thử UAT |
@@ -80,7 +80,7 @@
 ---
 
 ### 📌 Issue #38: [TV3 & TV2] Tối ưu hóa phân quyền Backend & Việt hóa WebService API
-* **Assignee:** Lê Tố Nguyệt Minh (TV3) & Trần Yến Phụng (TV2)
+* **Assignee:** Lê Tố Nguyệt Minh (TV3) & Trần Yến Phượng (TV2)
 * **Milestone:** Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)
 * **Branch:** `feature/tv3-api-polish-demo-video`
 * **Labels:** `backend`, `security`, `webservice`
@@ -113,7 +113,7 @@
 ---
 
 ### 📌 Issue #40: [TV2 & TV3] Xây dựng Slide Thuyết trình & Sản xuất Video Demo hoàn chỉnh
-* **Assignee:** Trần Yến Phụng (TV2) & Lê Tố Nguyệt Minh (TV3)
+* **Assignee:** Trần Yến Phượng (TV2) & Lê Tố Nguyệt Minh (TV3)
 * **Milestone:** Milestone 4: Kiểm thử toàn diện, Triển khai Hosting & Bảo vệ Đồ án (Tuần 9 – 10)
 * **Branch:** `feature/tv2-security-presentation`
 * **Labels:** `presentation`, `video-demo`, `admin`

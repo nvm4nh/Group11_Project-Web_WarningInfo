@@ -18,7 +18,7 @@
 | STT | Thành viên | Nhóm công việc | Sản phẩm bàn giao |
 |:---:|:---|:---|:---|
 | **1** | **Khiếu Hoàng Nam Anh** (TV1 – Team Lead) | Quản lý & khởi tạo môi trường | Repository, `.gitignore`, nhánh `develop`, rule bảo vệ `main`, Kanban Board, nhãn (labels), khung thư mục MVC, tài khoản hosting thử nghiệm |
-| **1 & 2** | **Khiếu Hoàng Nam Anh** (TV1) & **Trần Yến Phụng** (TV2) | Thiết kế cơ sở dữ liệu | Danh sách thực thể, sơ đồ ERD, script tạo bảng và khóa, tệp `database/database_init.sql` |
+| **1 & 2** | **Khiếu Hoàng Nam Anh** (TV1) & **Trần Yến Phượng** (TV2) | Thiết kế cơ sở dữ liệu | Danh sách thực thể, sơ đồ ERD, script tạo bảng và khóa, tệp `database/database_init.sql` |
 | **3** | **Lê Tố Nguyệt Minh** (TV3) | Chuẩn bị dữ liệu & nghiên cứu WebService | Rà soát ERD, dữ liệu mẫu trong `database_init.sql`, file PHP thử nghiệm trả JSON |
 | **4** | **Lê Trọng Hiếu** (TV4) | Thiết kế wireframe & UI nháp | Danh sách trang public, wireframe các trang chính, chốt Bootstrap 5, bảng màu và font |
 | **5** | **Nguyễn Thế Luân** (TV5) | Đặc tả hệ thống & báo cáo | File Word báo cáo theo mẫu, sơ đồ Use Case, đặc tả yêu cầu (SRS), bản thảo Chương 2, ảnh minh chứng GitHub |
